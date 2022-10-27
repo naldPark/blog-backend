@@ -53,12 +53,13 @@ public class AccountService {
 
         Account user = accountRepository.findByAccountId(loginInfo.getAccountId());
 
-        Boolean isPasswordMatched = user.getPassword().isMatched(loginInfo.getPassword());
-
         int statusCode;
         HashMap<String, Object> data = new HashMap<>();
 
-        if(!isPasswordMatched){
+        if(user==null){
+            statusCode = 401;
+            data.put("error", "incorrect password");
+        }else if(!user.getPassword().isMatched(loginInfo.getPassword())){
             statusCode = 401;
             data.put("error", "incorrect password");
         }else{
