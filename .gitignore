@@ -1,0 +1,23 @@
+# compiled output
+/out
+/target
+
+# IDEs and editors
+.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.iml
+eclipse-launch-profiles
+.vscode
+
+#System Files
+*~
+.DS_Store
+Thumbs.db
+
+
+Logs/nald.log
+src/main/resources/profiles/local/application-local.yml
