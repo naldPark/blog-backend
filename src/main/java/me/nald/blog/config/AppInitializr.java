@@ -1,0 +1,76 @@
+package me.nald.blog.config;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.data.persistence.entity.Password;
+import me.nald.blog.repository.AccountRepository;
+import me.nald.blog.service.AccountService;
+import me.nald.blog.util.Constants;
+import me.nald.blog.util.Util;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+
+import java.time.Duration;
+
+@Slf4j
+@RequiredArgsConstructor
+@Component
+public class AppInitializr {
+    private final AccountRepository accountRepository;
+
+    @Bean
+    public ApplicationRunner initAccount() {
+        return args -> {
+            if (accountRepository.findAll().isEmpty()) {
+                String initPw = Util.encryptSHA256(Constants.DEFAULT_ACCOUNT_PASSWORD);
+                Password password = Password.builder()
+                        .password(initPw)
+                        .build();
+
+                Account account = Account.createAccount(
+                        Constants.DEFAULT_ACCOUNT_ID,
+                        Constants.DEFAULT_ACCOUNT_NAME,
+                        Constants.DEFAULT_ACCOUNT_EMAIL,
+                        0,
+                        password,
+                        0
+                );
+                accountRepository.save(account);
+            }
+        };
+    }
+
+    @Bean
+    public ThreadPoolTaskExecutor executeServiceThreadPoolTaskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setCorePoolSize(20);
+        taskExecutor.setMaxPoolSize(150);
+        taskExecutor.setThreadNamePrefix("K8s-Executor-");
+        taskExecutor.setQueueCapacity(150);
+        taskExecutor.initialize();
+        return taskExecutor;
+    }
+
+    @Bean
+    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder
+                .setConnectTimeout(Duration.ofSeconds(10))
+                .setReadTimeout(Duration.ofSeconds(10))
+                .build();
+    }
+
+    @Bean
+    public RestTemplate restTemplateForStorageService(RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder
+                .setConnectTimeout(Duration.ofMinutes(30))
+                .setReadTimeout(Duration.ofMinutes(30))
+                .build();
+    }
+
+
+}

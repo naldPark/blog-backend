@@ -1,0 +1,48 @@
+nald:
+  token-expired-time: 2
+  private-key: ${PRIVATE_KEY}
+  default-account-id: ${DEFAULT_ACCOUNT_ID}
+  default-account-name: ${DEFAULT_ACCOUNT_NAME}
+  default-account-password: ${DEFAULT_ACCOUNT_PASSWORD}
+
+server:
+  port: 8000
+
+spring:
+  datasource:
+    url: ${DB_HOST}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher  #swagger
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: false # 콘솔에 sql문출력
+        format_sql: true # 콘솔에 출력되는 sql문을 더 예쁘고 보기쉽게 출력
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+          use-new-id-generator-mappings: false
+          default_batch_fetch_size: 1000
+docker:
+  endpoint: ${DOCKER_REPO_ENDPOINT}
+  username: ${DOCKER_REPO_USERNAME}
+  secret-password: ${DOCKER_REPO_SECRET_PASSWORD}
+  password: ${DOCKER_REPO_PASSWORD}
+  email: ${DOCKER_REPO_EMAIL}
+  repository-uri: ${DOCKER_REPO_URI}
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.security: error
+    org.springframework.web: error
+  config: classpath:logback-spring.xml
+
+
+
+
