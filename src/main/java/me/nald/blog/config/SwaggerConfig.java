@@ -33,7 +33,7 @@ public class SwaggerConfig  implements WebMvcConfigurer {
                 .useDefaultResponseMessages(false)
                 .groupName(API_VERSION)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("jpabook.jpashop.controller"))
+                .apis(RequestHandlerSelectors.basePackage("me.nald.blog.controller"))
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo())
