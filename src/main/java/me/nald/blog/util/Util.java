@@ -9,6 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,6 +23,9 @@ import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.*;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Component
 @AllArgsConstructor
@@ -27,6 +37,20 @@ public class Util {
     public void setBlogProperties(BlogProperties blogProperties) {
         this.blogProperties = blogProperties;
     }
+
+    public static String getUUID() {
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        while ( Character.isDigit(uuid.charAt(0)) ) {
+            uuid = UUID.randomUUID().toString().replace("-", "");
+        }
+        String[] splits = uuid.split("(?<=\\G.{" + 4 + "})");
+        return String.join("-", splits);
+    }
+
+    public static String getUUIDWithoutDash() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
 
     public static String getJWTToken(AccountDto.LoginInfo loginInfo) {
         String jwt = "";
