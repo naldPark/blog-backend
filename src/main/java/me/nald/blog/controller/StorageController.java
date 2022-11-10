@@ -98,6 +98,6 @@ public class StorageController {
 
     @GetMapping(path = "/video", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Resource video() throws FileNotFoundException, IOException {
-        return new ByteArrayResource(FileCopyUtils.copyToByteArray(new FileInputStream("/naldstorage/sample.mp4")));
+        return new ByteArrayResource(FileCopyUtils.copyToByteArray(new FileInputStream("/naldstorage/movie/HarryPotterAndTheSorcerersStone.mp4")));
     }
 }
