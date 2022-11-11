@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.file.Files;
@@ -61,43 +62,93 @@ public class StorageController {
         };
     }
 
-//    @WithoutJwtCallable
-//    @GetMapping(path = "/video")
-//    public ResponseEntity<StreamingResponseBody> video() {
-//        File file = new File("C:\\naldstorage\\sample.mp4");
-//        if (!file.isFile()) {
-//            return ResponseEntity.notFound().build();
-//        }
-//
-//        StreamingResponseBody streamingResponseBody = new StreamingResponseBody() {
-//            @Override
-//            public void writeTo(OutputStream outputStream) throws IOException {
-//                try {
-//                    final InputStream inputStream = new FileInputStream(file);
-//
-//                    byte[] bytes = new byte[1024];
-//                    int length;
-//                    while ((length = inputStream.read(bytes)) >= 0) {
-//                        outputStream.write(bytes, 0, length);
-//                    }
-//                    inputStream.close();
-//                    outputStream.flush();
-//
-//                } catch (final Exception e) {
-//                    log.error("Exception while reading and streaming data {} ", e);
-//                }
-//            }
-//        };
-//
-//        final HttpHeaders responseHeaders = new HttpHeaders();
-//        responseHeaders.add("Content-Type", "video/mp4");
-//        responseHeaders.add("Content-Length", Long.toString(file.length()));
-//
-//        return ResponseEntity.ok().headers(responseHeaders).body(streamingResponseBody);
+    @WithoutJwtCallable
+    @GetMapping(path = "/video1")
+    public ResponseEntity<StreamingResponseBody> video() {
+        File file = new File("C:\\naldstorage\\sample.mp4");
+        if (!file.isFile()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        StreamingResponseBody streamingResponseBody = new StreamingResponseBody() {
+            @Override
+            public void writeTo(OutputStream outputStream) throws IOException {
+                try {
+                    final InputStream inputStream = new FileInputStream(file);
+
+                    byte[] bytes = new byte[1024];
+                    int length;
+                    while ((length = inputStream.read(bytes)) >= 0) {
+                        outputStream.write(bytes, 0, length);
+                    }
+                    inputStream.close();
+                    outputStream.flush();
+
+                } catch (final Exception e) {
+                    log.error("Exception while reading and streaming data {} ", e);
+                }
+            }
+        };
+
+        final HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.add("Content-Type", "video/mp4");
+        responseHeaders.add("Content-Length", Long.toString(file.length()));
+
+        return ResponseEntity.ok().headers(responseHeaders).body(streamingResponseBody);
+    }
+
+//    @GetMapping(path = "/video", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+//    public Resource video() throws FileNotFoundException, IOException {
+//        return new ByteArrayResource(FileCopyUtils.copyToByteArray(new FileInputStream("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4")));
 //    }
 
-    @GetMapping(path = "/video", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public Resource video() throws FileNotFoundException, IOException {
-        return new ByteArrayResource(FileCopyUtils.copyToByteArray(new FileInputStream("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4")));
+    @WithoutJwtCallable
+    @GetMapping(value="/video")
+    public void viewMp4Stream (HttpServletRequest request , HttpServletResponse response)throws IOException {
+        File file = new File("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4");
+//        File file = new File("C:\\naldstorage\\sample.mp4");
+        RandomAccessFile randomFile = new RandomAccessFile(file, "r");
+        long rangeStart = 0; //요청 범위의 시작 위치
+        long rangeEnd = 0; //요청 범위의 끝 위치
+        boolean isPart=false; //부분 요청일 경우 true, 전체 요청의 경우 false
+        try{ //동영상 파일 크기
+            long movieSize = randomFile.length(); //스트림 요청 범위, request의 헤더에서 range를 읽는다.
+            String range = request.getHeader("range");
+            if(range!=null) {
+                if (range.endsWith("-")) {
+                    range = range + (movieSize - 1);
+                }
+                int idxm = range.trim().indexOf("-");
+                rangeStart = Long.parseLong(range.substring(6, idxm));
+                rangeEnd = Long.parseLong(range.substring(idxm + 1));
+                if (rangeStart > 0) {
+                    isPart = true;
+                }
+            }
+            else {
+                rangeStart =0;
+                rangeEnd = movieSize -1;
+            }
+            long partSize = rangeEnd - rangeStart + 1;
+            response.reset();
+            response.setStatus(isPart ? 206 : 200);
+            response.setContentType("video/mp4");
+            response.setHeader("Content-Range", "bytes "+rangeStart+"-"+rangeEnd+"/"+movieSize);
+            response.setHeader("Accept-Ranges", "bytes");
+            response.setHeader("Content-Length", ""+partSize);
+            OutputStream out = response.getOutputStream();
+            randomFile.seek(rangeStart);
+            int bufferSize = 8*1024;
+            byte[] buf = new byte[bufferSize];
+            do{
+                int block = partSize > bufferSize ? bufferSize : (int)partSize;
+                int len = randomFile.read(buf, 0, block);
+                out.write(buf, 0, len);
+                partSize -= block;
+            }while(partSize > 0);
+        }catch(IOException e){
+        }finally{
+            randomFile.close();
+        }
     }
 }
