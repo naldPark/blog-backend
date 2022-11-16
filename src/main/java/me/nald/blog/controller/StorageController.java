@@ -10,6 +10,7 @@ import me.nald.blog.service.StorageService;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.*;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @AllArgsConstructor
 @RestController
@@ -103,10 +105,10 @@ public class StorageController {
 //    }
 
     @WithoutJwtCallable
-    @GetMapping(value="/video")
+    @GetMapping(value="/video2")
     public void viewMp4Stream (HttpServletRequest request , HttpServletResponse response)throws IOException {
-        File file = new File("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4");
-//        File file = new File("C:\\naldstorage\\sample.mp4");
+//        File file = new File("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4");
+        File file = new File("C:\\naldstorage\\sample.mp4");
         RandomAccessFile randomFile = new RandomAccessFile(file, "r");
         long rangeStart = 0; //요청 범위의 시작 위치
         long rangeEnd = 0; //요청 범위의 끝 위치
@@ -150,5 +152,38 @@ public class StorageController {
         }finally{
             randomFile.close();
         }
+    }
+
+    @RequestMapping(value = "/video", method = RequestMethod.GET)
+    public ResponseEntity<ResourceRegion> videoRegion(@RequestHeader HttpHeaders headers) throws Exception {
+        String path = "C:\\naldstorage\\sample.mp4";
+        Resource resource = new FileSystemResource(path);
+
+        long chunkSize = 1024 * 1024;
+        long contentLength = resource.contentLength();
+
+        ResourceRegion region;
+
+        try {
+            HttpRange httpRange = headers.getRange().stream().findFirst().get();
+            long start = httpRange.getRangeStart(contentLength);
+            long end = httpRange.getRangeEnd(contentLength);
+            long rangeLength = Long.min(chunkSize, end -start + 1);
+
+            log.info("start === {} , end == {}", start, end);
+
+            region = new ResourceRegion(resource, start, rangeLength);
+        } catch (Exception e) {
+            long rangeLength = Long.min(chunkSize, contentLength);
+            region = new ResourceRegion(resource, 0, rangeLength);
+        }
+
+        return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES))
+                .contentType(MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM))
+                .header("Accept-Ranges", "bytes")
+                .eTag(path)
+                .body(region);
+
     }
 }
