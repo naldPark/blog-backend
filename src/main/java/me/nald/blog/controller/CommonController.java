@@ -25,7 +25,7 @@ public class CommonController {
 
 
     @WithoutJwtCallable
-    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/sendMail", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Callable<Object> checkUser(HttpServletRequest request) {
         HttpSession httpSession = request.getSession();
         return () -> commonService.sendMail();
