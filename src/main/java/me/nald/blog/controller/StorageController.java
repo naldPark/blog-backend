@@ -64,8 +64,6 @@ public class StorageController {
         };
     }
 
-    @WithoutJwtCallable
-    @GetMapping(path = "/video1")
     public ResponseEntity<StreamingResponseBody> video() {
         File file = new File("C:\\naldstorage\\sample.mp4");
         if (!file.isFile()) {
@@ -99,10 +97,10 @@ public class StorageController {
         return ResponseEntity.ok().headers(responseHeaders).body(streamingResponseBody);
     }
 
-//    @GetMapping(path = "/video", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-//    public Resource video() throws FileNotFoundException, IOException {
-//        return new ByteArrayResource(FileCopyUtils.copyToByteArray(new FileInputStream("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4")));
-//    }
+    @GetMapping(path = "/video", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public Resource videod() throws FileNotFoundException, IOException {
+        return new ByteArrayResource(FileCopyUtils.copyToByteArray(new FileInputStream("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4")));
+    }
 
     @WithoutJwtCallable
     @GetMapping(value="/video2")
@@ -154,7 +152,7 @@ public class StorageController {
         }
     }
 
-    @RequestMapping(value = "/video", method = RequestMethod.GET)
+    @RequestMapping(value = "/video3", method = RequestMethod.GET)
     public ResponseEntity<ResourceRegion> videoRegion(@RequestHeader HttpHeaders headers) throws Exception {
         String path = "C:\\naldstorage\\sample.mp4";
         Resource resource = new FileSystemResource(path);
