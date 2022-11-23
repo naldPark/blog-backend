@@ -4,6 +4,10 @@ nald:
   default-account-id: ${DEFAULT_ACCOUNT_ID}
   default-account-name: ${DEFAULT_ACCOUNT_NAME}
   default-account-password: ${DEFAULT_ACCOUNT_PASSWORD}
+  contact-host: ${CONTACT_HOST}
+  contact-email: ${CONTACT_EMAIL}
+  contact-user: ${CONTACT_USER}
+  contact-password: ${CONTACT_PASSWORD}
 
 server:
   port: 8000

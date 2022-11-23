@@ -16,5 +16,9 @@ public class BlogProperties {
     private String defaultAccountId;
     private String defaultAccountName;
     private String defaultAccountPassword;
+    private String contactHost;
+    private String contactEmail;
+    private String contactUser;
+    private String contactPassword;
 
 }

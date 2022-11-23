@@ -3,6 +3,7 @@ package me.nald.blog.controller;
 import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountDto;
+import me.nald.blog.data.model.ContactRequest;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.service.AccountService;
 import me.nald.blog.service.CommonService;
@@ -26,9 +27,8 @@ public class CommonController {
 
     @WithoutJwtCallable
     @PostMapping(value = "/sendMail", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Callable<Object> checkUser(HttpServletRequest request) {
-        HttpSession httpSession = request.getSession();
-        return () -> commonService.sendMail();
+    public Callable<Object> checkUser(@RequestBody ContactRequest contactRequest) {
+        return () -> commonService.sendMail(contactRequest);
     }
 
 }
