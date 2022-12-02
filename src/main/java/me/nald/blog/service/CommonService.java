@@ -1,7 +1,5 @@
 package me.nald.blog.service;
 
-
-import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
 import lombok.RequiredArgsConstructor;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.model.ContactRequest;
