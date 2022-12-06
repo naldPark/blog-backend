@@ -64,47 +64,16 @@ public class StorageController {
         };
     }
 
-    public ResponseEntity<StreamingResponseBody> video() {
-        File file = new File("C:\\naldstorage\\sample.mp4");
-        if (!file.isFile()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        StreamingResponseBody streamingResponseBody = new StreamingResponseBody() {
-            @Override
-            public void writeTo(OutputStream outputStream) throws IOException {
-                try {
-                    final InputStream inputStream = new FileInputStream(file);
-
-                    byte[] bytes = new byte[1024];
-                    int length;
-                    while ((length = inputStream.read(bytes)) >= 0) {
-                        outputStream.write(bytes, 0, length);
-                    }
-                    inputStream.close();
-                    outputStream.flush();
-
-                } catch (final Exception e) {
-                    log.error("Exception while reading and streaming data {} ", e);
-                }
-            }
-        };
-
-        final HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.add("Content-Type", "video/mp4");
-        responseHeaders.add("Content-Length", Long.toString(file.length()));
-
-        return ResponseEntity.ok().headers(responseHeaders).body(streamingResponseBody);
-    }
 
     @GetMapping(path = "/video", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public Resource videod() throws FileNotFoundException, IOException {
-        return new ByteArrayResource(FileCopyUtils.copyToByteArray(new FileInputStream("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4")));
+        return new ByteArrayResource(FileCopyUtils.copyToByteArray(new FileInputStream("C:\\naldstorage\\sample.mp4")));
     }
 
     @WithoutJwtCallable
     @GetMapping(value="/video2")
     public void viewMp4Stream (HttpServletRequest request , HttpServletResponse response)throws IOException {
+        System.out.println("어섭쇼video2");
 //        File file = new File("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4");
         File file = new File("C:\\naldstorage\\sample.mp4");
         RandomAccessFile randomFile = new RandomAccessFile(file, "r");
@@ -154,6 +123,7 @@ public class StorageController {
 
     @RequestMapping(value = "/video3", method = RequestMethod.GET)
     public ResponseEntity<ResourceRegion> videoRegion(@RequestHeader HttpHeaders headers) throws Exception {
+        System.out.println("어섭쇼video3");
         String path = "C:\\naldstorage\\sample.mp4";
         Resource resource = new FileSystemResource(path);
 
