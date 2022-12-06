@@ -1,5 +1,8 @@
 package me.nald.blog.util;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 import me.nald.blog.config.BlogProperties;
@@ -40,7 +43,7 @@ public class Util {
 
     public static String getUUID() {
         String uuid = UUID.randomUUID().toString().replace("-", "");
-        while ( Character.isDigit(uuid.charAt(0)) ) {
+        while (Character.isDigit(uuid.charAt(0))) {
             uuid = UUID.randomUUID().toString().replace("-", "");
         }
         String[] splits = uuid.split("(?<=\\G.{" + 4 + "})");
@@ -114,7 +117,20 @@ public class Util {
         return sha;
     }
 
+    public static HashMap stringToHashMap(String data) {
+        return new Gson().fromJson(data.toString(), HashMap.class);
+    }
 
+    public static List<HashMap<String, Object>> stringListToHashMapList(List<String> list) {
+
+        List<HashMap<String, Object>> mapList = new ArrayList<>();
+        JsonParser parser = new JsonParser();
+        list.stream().forEach(f -> {
+            mapList.add(new Gson().fromJson(parser.parse(f).getAsJsonObject().toString(), HashMap.class));
+                }
+        );
+        return mapList;
+    }
 
 
 }

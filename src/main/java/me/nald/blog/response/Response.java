@@ -31,10 +31,10 @@ public class Response {
     @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class CommonRes {
         private int statusCode;
-        private HashMap<String, Object> data;
+        private Object data;
 
         @Builder
-        private CommonRes(int statusCode, HashMap<String, Object> data) {
+        private CommonRes(int statusCode, Object data) {
             this.statusCode = statusCode;
             this.data = data;
         }
