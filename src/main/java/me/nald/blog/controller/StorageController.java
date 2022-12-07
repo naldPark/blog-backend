@@ -82,6 +82,7 @@ public class StorageController {
         boolean isPart=false; //부분 요청일 경우 true, 전체 요청의 경우 false
         try{ //동영상 파일 크기
             long movieSize = randomFile.length(); //스트림 요청 범위, request의 헤더에서 range를 읽는다.
+
             String range = request.getHeader("range");
             if(range!=null) {
                 if (range.endsWith("-")) {
@@ -105,6 +106,7 @@ public class StorageController {
             response.setHeader("Content-Range", "bytes "+rangeStart+"-"+rangeEnd+"/"+movieSize);
             response.setHeader("Accept-Ranges", "bytes");
             response.setHeader("Content-Length", ""+partSize);
+            response.setHeader("totalsize", ""+movieSize);
             OutputStream out = response.getOutputStream();
             randomFile.seek(rangeStart);
             int bufferSize = 8*1024;
