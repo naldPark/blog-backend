@@ -7,6 +7,7 @@ import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.service.AccountService;
 import me.nald.blog.service.StorageService;
+import me.nald.blog.util.Constants;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -22,7 +23,9 @@ import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -72,10 +75,12 @@ public class StorageController {
 
     @WithoutJwtCallable
     @GetMapping(value="/video2")
-    public void viewMp4Stream (HttpServletRequest request , HttpServletResponse response)throws IOException {
+    public void viewMp4Stream (HttpServletRequest request , HttpServletResponse response, int videoId)throws IOException {
         System.out.println("어섭쇼video2");
-//        File file = new File("/nfs/movie/HarryPotterAndTheSorcerersStone.mp4");
-        File file = new File("C:\\naldstorage\\sample.mp4");
+        Map<Integer, String> videoPath = new HashMap<>();
+        videoPath.put(1, "sample.mp4");
+        videoPath.put(2, "HarryPotterAndTheSorcerersStone.mp4");
+        File file = new File(Constants.STORAGE_FILE_PATH+videoPath.get(videoId));
         RandomAccessFile randomFile = new RandomAccessFile(file, "r");
         long rangeStart = 0; //요청 범위의 시작 위치
         long rangeEnd = 0; //요청 범위의 끝 위치
@@ -126,7 +131,7 @@ public class StorageController {
     @RequestMapping(value = "/video3", method = RequestMethod.GET)
     public ResponseEntity<ResourceRegion> videoRegion(@RequestHeader HttpHeaders headers) throws Exception {
         System.out.println("어섭쇼video3");
-        String path = "C:\\naldstorage\\sample.mp4";
+        String path = Constants.STORAGE_FILE_PATH+"sample.mp4";
         Resource resource = new FileSystemResource(path);
 
         long chunkSize = 1024 * 1024;
