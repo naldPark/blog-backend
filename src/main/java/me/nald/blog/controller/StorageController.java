@@ -75,11 +75,12 @@ public class StorageController {
 
     @WithoutJwtCallable
     @GetMapping(value="/video2")
-    public void viewMp4Stream (HttpServletRequest request , HttpServletResponse response, @PathVariable long videoId)throws IOException {
+    public void viewMp4Stream (HttpServletRequest request , HttpServletResponse response, int videoId)throws IOException {
         System.out.println("어섭쇼video2");
-        Map<Long, String> videoPath = new HashMap<>();
-        videoPath.put(1L, "sample.mp4");
-        videoPath.put(2L, "HarryPotterAndTheSorcerersStone.mp4");
+        Map<Integer, String> videoPath = new HashMap<>();
+        videoPath.put(1, "sample.mp4");
+        videoPath.put(2, "HarryPotterAndTheSorcerersStone.mp4");
+
         File file = new File(Constants.STORAGE_FILE_PATH+videoPath.get(videoId));
         RandomAccessFile randomFile = new RandomAccessFile(file, "r");
         long rangeStart = 0; //요청 범위의 시작 위치
@@ -96,6 +97,9 @@ public class StorageController {
                 int idxm = range.trim().indexOf("-");
                 rangeStart = Long.parseLong(range.substring(6, idxm));
                 rangeEnd = Long.parseLong(range.substring(idxm + 1));
+                if(rangeEnd >= movieSize){
+                    rangeEnd = movieSize -1;
+                }
                 if (rangeStart > 0) {
                     isPart = true;
                 }
