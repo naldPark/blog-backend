@@ -74,7 +74,7 @@ public class StorageController {
     }
 
     @WithoutJwtCallable
-    @GetMapping(value="/video2")
+    @GetMapping(value="/streamingVideo")
     public void viewMp4Stream (HttpServletRequest request , HttpServletResponse response, int videoId)throws IOException {
         System.out.println("어섭쇼video2");
         Map<Integer, String> videoPath = new HashMap<>();
