@@ -25,8 +25,6 @@ public class AccountController {
 
     @GetMapping("/test")
     public Callable<Object> list() {
-        List<Account> members = accountService.findMembers();
-
         return () ->  accountService.findMembers();
     }
 

@@ -10,19 +10,23 @@ import java.util.HashMap;
 @ToString
 public class Response {
 
-    private HttpStatus status;
+    private Status status;
     private int statusCode;
 
     public Response() {
-        status = HttpStatus.OK;
+        status = Status.OK;
         statusCode = HttpStatus.OK.value();
     }
 
-    public Response(HttpStatus status) {
-        this.status = status;
-        this.statusCode = status.value();
+    public Response status(Status status) {
+        setStatus(status);
+        return this;
     }
 
+    public Response statusCode(int statusCode) {
+        setStatusCode(statusCode);
+        return this;
+    }
     public static Response of() {
         return new Response();
     }
@@ -39,4 +43,15 @@ public class Response {
             this.data = data;
         }
     }
+
+    public enum Status {
+        OK,
+        FAIL,
+        INTERNAL_SERVER_ERROR;
+
+        public boolean isOk() {
+            return OK.equals(this) ? true : false;
+        }
+    }
+
 }

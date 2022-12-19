@@ -13,6 +13,7 @@ public class BlogProperties {
 
     private long tokenExpiredTime;
     private String privateKey;
+    private String publicKey;
     private String defaultAccountId;
     private String defaultAccountName;
     private String defaultAccountPassword;

@@ -12,6 +12,9 @@ public class Constants {
     public static final String DEFAULT_ACCOUNT_NAME = blogProperties.getDefaultAccountPassword();
     public static final String DEFAULT_ACCOUNT_EMAIL = "noreply@nald.me";
     public static final String STORAGE_FILE_PATH = "/nfs/movie/";
+    public static final String ANONYMOUS_YN = "isAnonymous";
+    public static final String USER_ID = "user_id";
+    public static final String AUTHORITIES = "authorities";
 
 
 }

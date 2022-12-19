@@ -30,6 +30,9 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
+    public Account findMemberByAccountId(String accountId) {
+        return accountRepository.findByAccountId(accountId);
+    }
 
     public CommonResponse getUserList() {
 
@@ -64,7 +67,7 @@ public class AccountService {
             data.put("error", "incorrect password");
         }else{
             statusCode = 200;
-            data.put("access_token", Util.getJWTToken(loginInfo));
+            data.put("access_token", Util.getJWTToken(user));
             data.put("message", "succeeded");
             data.put("accountId", user.getAccountId());
             data.put("accountName", user.getAccountName());

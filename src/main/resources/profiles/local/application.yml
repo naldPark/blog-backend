@@ -1,6 +1,7 @@
 nald:
   token-expired-time: 2
   private-key: ${PRIVATE_KEY}
+  public-key: ${PUBLIC_KEY}
   default-account-id: ${DEFAULT_ACCOUNT_ID}
   default-account-name: ${DEFAULT_ACCOUNT_NAME}
   default-account-password: ${DEFAULT_ACCOUNT_PASSWORD}

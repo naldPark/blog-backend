@@ -100,6 +100,7 @@ public class CommonService {
                 "{ color: 'white', backgroundColor: '#339933', name: 'node-js', src: 'node-js.svg' }",
                 "{ color: 'white', backgroundColor: '#73398D', name: 'amcharts', src: 'amchart.svg' }",
                 "{ color: 'white', backgroundColor: '#6DB33F', name: 'springBoot', src: 'springboot.svg' }",
+                "{ color: 'black', backgroundColor: '#F2F4F9', name: 'tomcat', src: 'tomcat.svg' }",
                 "{ color: 'green', backgroundColor: '#F2F4F9', name: 'JPA', src: 'jpa.svg' }",
                 "{ color: 'white', backgroundColor: '#000000', name: 'mybatis', src: 'mybatis.svg' }",
                 "{ color: 'orange', backgroundColor: '#000000', name: 'prometheus', src: 'prometheus.svg' }",

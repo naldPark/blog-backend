@@ -1,40 +1,47 @@
 package me.nald.blog.util;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.AccountDto;
-import me.nald.blog.exception.ErrorSpec;
+import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.exception.Errors;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import javax.servlet.http.HttpServletRequest;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.stream.Collectors;
+
+import static me.nald.blog.exception.ErrorSpec.AccessDeniedException;
+import static me.nald.blog.exception.ErrorSpec.PermissionDenied;
+import static me.nald.blog.util.Constants.*;
 
 @Component
 @AllArgsConstructor
 public class Util {
 
     private static BlogProperties blogProperties;
+
+    private static final Logger log = LoggerFactory.getLogger(Util.class);
 
     @Autowired
     public void setBlogProperties(BlogProperties blogProperties) {
@@ -55,7 +62,7 @@ public class Util {
     }
 
 
-    public static String getJWTToken(AccountDto.LoginInfo loginInfo) {
+    public static String getJWTToken(Account user) {
         String jwt = "";
         String privateKey = blogProperties.getPrivateKey();
 
@@ -73,10 +80,10 @@ public class Util {
             Map<String, Object> payloads = new HashMap<>();
 
             payloads.put("exp", exp);
-            payloads.put("account_id", loginInfo.getAccountName());
-            payloads.put("authorities", loginInfo.getAuthority());
+            payloads.put("user_name", user.getAccountName());
+            payloads.put("authorities", user.getAuthority());
             payloads.put("jti", UUID.randomUUID().toString());
-            payloads.put("client_id", loginInfo.getAccountId());
+            payloads.put("user_id", user.getAccountId());
 
             jwt = Jwts.builder()
                     .setHeader(headers)
@@ -126,11 +133,65 @@ public class Util {
         List<HashMap<String, Object>> mapList = new ArrayList<>();
         JsonParser parser = new JsonParser();
         list.stream().forEach(f -> {
-            mapList.add(new Gson().fromJson(parser.parse(f).getAsJsonObject().toString(), HashMap.class));
+                    mapList.add(new Gson().fromJson(parser.parse(f).getAsJsonObject().toString(), HashMap.class));
                 }
         );
         return mapList;
     }
 
+    public static String extractUserIdFromJwt(HttpServletRequest request) {
+        System.out.println("zzzz");
+        try {
+            String jwtToken = request.getHeader("Authorization");
+            String tokenStr = jwtToken.substring("Bearer ".length());
+            String[] tmp = tokenStr.split("\\.");
+            String base64EncodedBody = tmp[1];
+            org.apache.commons.codec.binary.Base64 base64Url = new org.apache.commons.codec.binary.Base64(true);
+            JSONObject body = new JSONObject(new String(base64Url.decode(base64EncodedBody)));
+            if (body.getLong("exp") * 1000 > System.currentTimeMillis()) {
+                String userId = body.getString(USER_ID);
+                if (!Util.verifyToken(tokenStr, userId, blogProperties.getPublicKey())) {
+                    throw Errors.of(AccessDeniedException, "Invalid token");
+                }
+                request.setAttribute(AUTHORITIES, body.getInt(AUTHORITIES));
+                request.setAttribute(USER_ID, body.getString(USER_ID));
+                return userId;
+            } else {
+                throw Errors.of(AccessDeniedException, "Expired token");
+            }
+        } catch (Exception e) {
+            throw Errors.of(PermissionDenied, "Token parsing error");
+        }
+    }
+
+    static RSAPublicKey rsaPublicKey;
+
+    public static boolean verifyToken(String token, String userId, String key) {
+        boolean result = true;
+        try {
+            if (rsaPublicKey == null) {
+                rsaPublicKey = publicKeyFromString(key);
+            }
+            Algorithm algorithm = Algorithm.RSA256(rsaPublicKey, null);
+            JWTVerifier verifier = JWT.require(algorithm).withClaim("user_id", userId).build();
+            verifier.verify(token);
+        } catch (Exception e) {
+            log.error("verifyToken Error id: {}, token: {}", userId, token, e);
+            result = false;
+        }
+        return result;
+    }
+
+    public static RSAPublicKey publicKeyFromString(String key) {
+        try {
+            byte[] pubKeyBytes = java.util.Base64.getDecoder().decode(key);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(pubKeyBytes);
+            return (RSAPublicKey) keyFactory.generatePublic(publicKeySpec);
+        } catch (Exception e) {
+            log.error("Error loading public key", e);
+        }
+        return null;
+    }
 
 }
