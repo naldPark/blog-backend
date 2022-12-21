@@ -140,7 +140,6 @@ public class Util {
     }
 
     public static String extractUserIdFromJwt(HttpServletRequest request) {
-        System.out.println("zzzz");
         try {
             String jwtToken = request.getHeader("Authorization");
             String tokenStr = jwtToken.substring("Bearer ".length());
