@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static java.util.Arrays.asList;
@@ -40,5 +41,12 @@ public class AccountController {
         HttpSession httpSession = request.getSession();
         return () -> accountService.getLogin(loginInfo);
     }
+
+
+    @PutMapping(value = "/editUser")
+    public Callable<Object> editUser(HttpServletRequest request, @RequestBody final AccountDto.LoginInfo loginInfo) {
+        return () -> accountService.editUser(loginInfo);
+    }
+
 
 }

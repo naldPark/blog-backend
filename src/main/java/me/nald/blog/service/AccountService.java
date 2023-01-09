@@ -4,6 +4,8 @@ package me.nald.blog.service;
 import lombok.RequiredArgsConstructor;
 import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.data.persistence.entity.Password;
+import me.nald.blog.data.vo.YN;
 import me.nald.blog.exception.ErrorException;
 import me.nald.blog.exception.ErrorSpec;
 import me.nald.blog.repository.AccountRepository;
@@ -80,6 +82,32 @@ public class AccountService {
 
         return result;
     }
+
+    @Transactional
+    public Response.CommonRes editUser(AccountDto.LoginInfo loginInfo) {
+        int statusCode = 200;
+        HashMap<String, Object> data = new HashMap<>();
+
+        Optional.ofNullable(loginInfo.getAccountId()).orElseThrow(() -> ErrorException.of(ErrorSpec.InvalidParameterValue));
+        Optional.ofNullable(loginInfo.getPassword()).orElseThrow(() -> ErrorException.of(ErrorSpec.InvalidParameterValue));
+        Account user = accountRepository.findByAccountId(loginInfo.getAccountId());
+
+
+        Password password = Password.builder()
+                .password(loginInfo.getPassword())
+                .build();
+
+        user.setPassword(password);
+        accountRepository.save(user);
+
+        Response.CommonRes result = Response.CommonRes.builder()
+                .statusCode(statusCode)
+                .data(data)
+                .build();
+
+        return result;
+    }
+
 
 }
 
