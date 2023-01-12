@@ -1,6 +1,6 @@
 FROM nald.me:5001/docker/settings/openjdk:8-alpine
 
-ARG JAR_FILEr
+ARG JAR_FILE
 ENV TARGET_JAR_FILE ${JAR_FILE}
 ADD ./target/${TARGET_JAR_FILE} /${TARGET_JAR_FILE}
 

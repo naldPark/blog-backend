@@ -9,6 +9,8 @@ nald:
   contact-email: ${CONTACT_EMAIL}
   contact-user: ${CONTACT_USER}
   contact-password: ${CONTACT_PASSWORD}
+  common-path: /nfs
+  ffmpeg-path: /user/bin
 
 server:
   port: 8000

@@ -21,5 +21,7 @@ public class BlogProperties {
     private String contactEmail;
     private String contactUser;
     private String contactPassword;
+    private String commonPath;
+    private String ffmpegPath;
 
 }

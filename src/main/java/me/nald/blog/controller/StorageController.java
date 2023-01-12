@@ -157,44 +157,8 @@ public class StorageController {
     }
 
     @WithoutJwtCallable
-    @GetMapping("/test")
-    public void test() {
-
-        FFmpeg ffmpeg = null;
-        FFprobe ffprobe = null;
-        try {
-            String osName = System.getProperty("os.name");
-            System.out.println("osname은 " + osName);
-            if (osName.toLowerCase().contains("unix") || osName.toLowerCase().contains("linux")) {
-                ffmpeg = new FFmpeg("/usr/bin/ffmpeg");
-                ffprobe = new FFprobe("/usr/bin/ffprobe");
-            } else {
-//                (osName.toLowerCase().contains("win"))
-                ffmpeg = new FFmpeg("mpeg/ffmpeg");
-                ffprobe = new FFprobe("mpeg/ffprobe");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        FFmpegBuilder builder = new FFmpegBuilder()
-                .overrideOutputFiles(true)
-                .setInput("mpeg/s3ample.mp4")
-                .addOutput("C:\\naldstorage\\1111s3ample.m3u8")
-                .setVideoWidth(640)  //해상도(너비)
-                .setVideoHeight(480) //해상도(높이)
-                .addExtraArgs("-profile:v", "baseline")
-                .addExtraArgs("-level", "3.0")
-                .addExtraArgs("-start_number", "0")
-                .addExtraArgs("-hls_time", "10")
-                .addExtraArgs("-hls_list_size", "0")
-                .addExtraArgs("-f", "hls")
-                .done();
-
-        FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
-        executor.createJob(builder).run();
-
+    @GetMapping("/videoHls/{fileName}")
+    public void videoHls(@PathVariable String fileName) {
+        storageService.videoHls(fileName);
     }
-
-
 }
