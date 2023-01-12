@@ -19,5 +19,5 @@ eclipse-launch-profiles
 Thumbs.db
 
 
-Logs/nald.log
+Logs/
 src/main/resources/profiles/local/application-local.yml

@@ -8,7 +8,13 @@ import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.service.AccountService;
 import me.nald.blog.service.StorageService;
 import me.nald.blog.util.Constants;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourceRegion;
@@ -32,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/storage")
-@Slf4j
 public class StorageController {
 
 
@@ -61,108 +66,135 @@ public class StorageController {
                 headers.setContentType(mediaType);
                 headers.setContentDisposition(ContentDisposition.builder("attachment").filename(resource.getFilename()).build());
                 return ResponseEntity.ok().headers(headers).body(resource);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             }
         };
     }
 
 
-    @GetMapping(path = "/video", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public Resource videod() throws FileNotFoundException, IOException {
-        return new ByteArrayResource(FileCopyUtils.copyToByteArray(new FileInputStream("C:\\naldstorage\\sample.mp4")));
-    }
-
     @WithoutJwtCallable
-    @GetMapping(value="/streamingVideo")
-    public void viewMp4Stream (HttpServletRequest request , HttpServletResponse response, int videoId)throws IOException {
+    @GetMapping(value = "/streamingVideo")
+    public void viewMp4Stream(HttpServletRequest request, HttpServletResponse response, int videoId) throws IOException {
         System.out.println("어섭쇼video2");
         Map<Integer, String> videoPath = new HashMap<>();
         videoPath.put(1, "sample.mp4");
         videoPath.put(2, "HarryPotterAndTheSorcerersStone.mp4");
 
-        File file = new File(Constants.STORAGE_FILE_PATH+videoPath.get(videoId));
+        File file = new File(Constants.STORAGE_FILE_PATH + videoPath.get(videoId));
         RandomAccessFile randomFile = new RandomAccessFile(file, "r");
         long rangeStart = 0; //요청 범위의 시작 위치
         long rangeEnd = 0; //요청 범위의 끝 위치
-        boolean isPart=false; //부분 요청일 경우 true, 전체 요청의 경우 false
-        try{ //동영상 파일 크기
+        boolean isPart = false; //부분 요청일 경우 true, 전체 요청의 경우 false
+        try { //동영상 파일 크기
             long movieSize = randomFile.length(); //스트림 요청 범위, request의 헤더에서 range를 읽는다.
 
             String range = request.getHeader("range");
-            if(range!=null) {
+            if (range != null) {
                 if (range.endsWith("-")) {
                     range = range + (movieSize - 1);
                 }
                 int idxm = range.trim().indexOf("-");
                 rangeStart = Long.parseLong(range.substring(6, idxm));
                 rangeEnd = Long.parseLong(range.substring(idxm + 1));
-                if(rangeEnd >= movieSize){
-                    rangeEnd = movieSize -1;
+                if (rangeEnd >= movieSize) {
+                    rangeEnd = movieSize - 1;
                 }
                 if (rangeStart > 0) {
                     isPart = true;
                 }
-            }
-            else {
-                rangeStart =0;
-                rangeEnd = movieSize -1;
+            } else {
+                rangeStart = 0;
+                rangeEnd = movieSize - 1;
             }
             long partSize = rangeEnd - rangeStart + 1;
             response.reset();
             response.setStatus(isPart ? 206 : 200);
             response.setContentType("video/mp4");
-            response.setHeader("Content-Range", "bytes "+rangeStart+"-"+rangeEnd+"/"+movieSize);
+            response.setHeader("Content-Range", "bytes " + rangeStart + "-" + rangeEnd + "/" + movieSize);
             response.setHeader("Accept-Ranges", "bytes");
-            response.setHeader("Content-Length", ""+partSize);
-            response.setHeader("totalsize", ""+movieSize);
+            response.setHeader("Content-Length", "" + partSize);
+            response.setHeader("totalsize", "" + movieSize);
             OutputStream out = response.getOutputStream();
             randomFile.seek(rangeStart);
-            int bufferSize = 8*1024;
+            int bufferSize = 8 * 1024;
             byte[] buf = new byte[bufferSize];
-            do{
-                int block = partSize > bufferSize ? bufferSize : (int)partSize;
+            do {
+                int block = partSize > bufferSize ? bufferSize : (int) partSize;
                 int len = randomFile.read(buf, 0, block);
                 out.write(buf, 0, len);
                 partSize -= block;
-            }while(partSize > 0);
-        }catch(IOException e){
-        }finally{
+            } while (partSize > 0);
+        } catch (IOException e) {
+        } finally {
             randomFile.close();
         }
     }
 
-    @RequestMapping(value = "/video3", method = RequestMethod.GET)
-    public ResponseEntity<ResourceRegion> videoRegion(@RequestHeader HttpHeaders headers) throws Exception {
-        System.out.println("어섭쇼video3");
-        String path = Constants.STORAGE_FILE_PATH+"sample.mp4";
-        Resource resource = new FileSystemResource(path);
+    @WithoutJwtCallable
+    @GetMapping("/hls/{fileName}/{fileName}.m3u8")
+    public ResponseEntity<Resource> videoHlsM3U8(@PathVariable String fileName) {
+        String upload_dir = "C:\\naldstorage/";
+        String fileFullPath = upload_dir + fileName + "/" + fileName + ".m3u8";
+        Resource resource = new FileSystemResource(fileFullPath);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".m3u8");
+        headers.setContentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"));
+        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
+    }
 
-        long chunkSize = 1024 * 1024;
-        long contentLength = resource.contentLength();
 
-        ResourceRegion region;
+    @WithoutJwtCallable
+    @GetMapping("/hls/{fileName}/{tsName}.ts")
+    public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
+        String upload_dir = "C:\\naldstorage/";
+        String fileFullPath = upload_dir + fileName + "/" + tsName + ".ts";
+        Resource resource = new FileSystemResource(fileFullPath);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + tsName + ".ts");
+        headers.setContentType(MediaType.parseMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
+        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
+    }
 
+    @WithoutJwtCallable
+    @GetMapping("/test")
+    public void test() {
+
+        FFmpeg ffmpeg = null;
+        FFprobe ffprobe = null;
         try {
-            HttpRange httpRange = headers.getRange().stream().findFirst().get();
-            long start = httpRange.getRangeStart(contentLength);
-            long end = httpRange.getRangeEnd(contentLength);
-            long rangeLength = Long.min(chunkSize, end -start + 1);
-
-            log.info("start === {} , end == {}", start, end);
-
-            region = new ResourceRegion(resource, start, rangeLength);
-        } catch (Exception e) {
-            long rangeLength = Long.min(chunkSize, contentLength);
-            region = new ResourceRegion(resource, 0, rangeLength);
+            String osName = System.getProperty("os.name");
+            System.out.println("osname은 " + osName);
+            if (osName.toLowerCase().contains("unix") || osName.toLowerCase().contains("linux")) {
+                ffmpeg = new FFmpeg("/usr/bin/ffmpeg");
+                ffprobe = new FFprobe("/usr/bin/ffprobe");
+            } else {
+//                (osName.toLowerCase().contains("win"))
+                ffmpeg = new FFmpeg("mpeg/ffmpeg");
+                ffprobe = new FFprobe("mpeg/ffprobe");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                .cacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES))
-                .contentType(MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM))
-                .header("Accept-Ranges", "bytes")
-                .eTag(path)
-                .body(region);
+        FFmpegBuilder builder = new FFmpegBuilder()
+                .overrideOutputFiles(true)
+                .setInput("mpeg/s3ample.mp4")
+                .addOutput("C:\\naldstorage\\1111s3ample.m3u8")
+                .setVideoWidth(640)  //해상도(너비)
+                .setVideoHeight(480) //해상도(높이)
+                .addExtraArgs("-profile:v", "baseline")
+                .addExtraArgs("-level", "3.0")
+                .addExtraArgs("-start_number", "0")
+                .addExtraArgs("-hls_time", "10")
+                .addExtraArgs("-hls_list_size", "0")
+                .addExtraArgs("-f", "hls")
+                .done();
+
+        FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
+        executor.createJob(builder).run();
 
     }
+
+
 }

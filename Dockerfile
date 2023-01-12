@@ -1,6 +1,6 @@
 FROM nald.me:5001/docker/settings/openjdk:8-alpine
 
-ARG JAR_FILE
+ARG JAR_FILEr
 ENV TARGET_JAR_FILE ${JAR_FILE}
 ADD ./target/${TARGET_JAR_FILE} /${TARGET_JAR_FILE}
 
@@ -10,7 +10,10 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 
 RUN apk add openssh && \
-    apk add curl
+    apk add zip && \
+    apk add curl && \
+    apk add ffmpeg && \
+    apk add nano
 
 RUN mkdir -p /root/.ssh
 RUN chmod 700 /root/.ssh

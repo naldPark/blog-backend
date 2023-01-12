@@ -13,6 +13,7 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -28,10 +29,15 @@ import static me.nald.blog.util.Constants.*;
 @Aspect
 @Order
 @Slf4j
-@AllArgsConstructor
 public class AuthAdvice {
 
-    private final AccountService accountService;
+    @Autowired
+    private AccountService accountService;
+
+    @Autowired
+    public void setAuthService(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
 
     @Before("Pointcuts.allController()")
@@ -48,20 +54,17 @@ public class AuthAdvice {
 
         if (Objects.nonNull(withoutJwtCallable)) {
             request.setAttribute(ANONYMOUS_YN, YN.Y.name());
-            return;
+        } else {
+            String userId = Util.extractUserIdFromJwt(request);
+            System.out.println("유저아이디" + userId);
+            Account user = accountService.findMemberByAccountId(userId);
+            if (user != null) {
+                request.setAttribute(USER_ID, user.getAccountId());
+                request.setAttribute(AUTHORITIES, user.getAuthority());
+            } else {
+                throw Errors.of(ErrorSpec.AccessDeniedException);
+            }
         }
-
-        String userId = Util.extractUserIdFromJwt(request);
-        System.out.println("유저아이디"+ userId);
-        Account user = accountService.findMemberByAccountId(userId);
-        if (user != null) {
-            request.setAttribute(USER_ID, user.getAccountId());
-            request.setAttribute(AUTHORITIES, user.getAuthority());
-        }else{
-           throw Errors.of(ErrorSpec.AccessDeniedException);
-        }
-
-
     }
 
 }
