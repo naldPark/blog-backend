@@ -1,6 +1,5 @@
 package me.nald.blog.service;
 
-
 import lombok.RequiredArgsConstructor;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.util.FileUtils;
@@ -34,7 +33,7 @@ public class StorageService {
     }
 
 
-    public Path postWorkspaceDownloads() throws IOException {
+    public Path postWorkspaceDownloads() {
         Path zipFilePath = Paths.get("/naldstorage").resolve("sample." + "mp4");
 
         return zipFilePath;
@@ -50,14 +49,14 @@ public class StorageService {
         String HlsPath = movieDir + "/hls/" + fileName + "/";
 
         try {
-//            String osName = System.getProperty("os.name");
+            String osName = System.getProperty("os.name");
 //            if (osName.toLowerCase().contains("unix") || osName.toLowerCase().contains("linux")) {
-            File folder = new File(HlsPath);
-            if (!folder.exists()) {
-                folder.mkdir(); //폴더 생성합니다.
-            }
-            ffmpeg = new FFmpeg(blogProperties.getFfmpegPath() + "/ffmpeg");
-            ffprobe = new FFprobe(blogProperties.getFfmpegPath() + "/ffprobe");
+                File folder = new File(HlsPath);
+                if (!folder.exists()) {
+                    folder.mkdir(); //폴더 생성합니다.
+                }
+                ffmpeg = new FFmpeg(blogProperties.getFfmpegPath() + "/ffmpeg");
+                ffprobe = new FFprobe(blogProperties.getFfmpegPath() + "/ffprobe");
 //            } else {
 //                ffmpeg = new FFmpeg("mpeg/ffmpeg");
 //                ffprobe = new FFprobe("mpeg/ffprobe");
@@ -66,20 +65,26 @@ public class StorageService {
             e.printStackTrace();
         }
 
-
         FFmpegBuilder builder = new FFmpegBuilder()
                 .overrideOutputFiles(true)
                 .setInput(inputPath + movieName)
                 .addOutput(HlsPath + fileName + ".m3u8")
+//                .addExtraArgs("-acodec", "copy")
+//                .addExtraArgs("-vcodec", "copy")
                 .addExtraArgs("-profile:v", "baseline")
                 .addExtraArgs("-level", "3.0")
                 .addExtraArgs("-start_number", "0")
                 .addExtraArgs("-hls_time", "10")
                 .addExtraArgs("-hls_list_size", "0")
                 .addExtraArgs("-f", "hls")
+                .addExtraArgs("-safe", "0")
+                .addExtraArgs("-preset", "ultrafast")
+
                 .setVideoResolution(640, 480)
                 .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
                 .done();
+
+        builder.setVerbosity(FFmpegBuilder.Verbosity.DEBUG);
 
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
         FFmpegJob job = executor.createJob(builder);
