@@ -10,7 +10,7 @@ nald:
   contact-user: ${CONTACT_USER}
   contact-password: ${CONTACT_PASSWORD}
   common-path: /nfs
-  ffmpeg-path: /usr/bin
+  ffmpeg-path: /nfs/ffmpeg-static
 
 server:
   port: 8000
