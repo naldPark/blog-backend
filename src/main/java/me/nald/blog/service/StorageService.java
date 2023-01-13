@@ -11,6 +11,12 @@ import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.job.FFmpegJob;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,12 +57,12 @@ public class StorageService {
         try {
             String osName = System.getProperty("os.name");
 //            if (osName.toLowerCase().contains("unix") || osName.toLowerCase().contains("linux")) {
-                File folder = new File(HlsPath);
-                if (!folder.exists()) {
-                    folder.mkdir(); //폴더 생성합니다.
-                }
-                ffmpeg = new FFmpeg(blogProperties.getFfmpegPath() + "/ffmpeg");
-                ffprobe = new FFprobe(blogProperties.getFfmpegPath() + "/ffprobe");
+            File folder = new File(HlsPath);
+            if (!folder.exists()) {
+                folder.mkdir(); //폴더 생성합니다.
+            }
+            ffmpeg = new FFmpeg(blogProperties.getFfmpegPath() + "/ffmpeg");
+            ffprobe = new FFprobe(blogProperties.getFfmpegPath() + "/ffprobe");
 //            } else {
 //                ffmpeg = new FFmpeg("mpeg/ffmpeg");
 //                ffprobe = new FFprobe("mpeg/ffprobe");
@@ -79,7 +85,6 @@ public class StorageService {
                 .addExtraArgs("-f", "hls")
                 .addExtraArgs("-safe", "0")
                 .addExtraArgs("-preset", "ultrafast")
-
                 .setVideoResolution(640, 480)
                 .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
                 .done();
@@ -95,6 +100,34 @@ public class StorageService {
 
 
         return result;
+    }
+
+    public ResponseEntity<Resource> videoHlsM3U8(String movieName) {
+
+        String movieDir = blogProperties.getCommonPath() + "/movie";
+        String fileName = FilenameUtils.getBaseName(movieName);
+        String HlsPath = movieDir + "/hls/" + fileName + "/";
+        String fileFullPath = HlsPath + fileName + ".m3u8";
+        Resource resource = new FileSystemResource(fileFullPath);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".m3u8");
+        headers.setContentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"));
+        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
+
+
+    }
+
+    public ResponseEntity<Resource> videoHlsTs(String movieName, String tsName) {
+        String movieDir = blogProperties.getCommonPath() + "/movie";
+        String fileName = FilenameUtils.getBaseName(movieName);
+        String HlsPath = movieDir + "/hls/" + fileName + "/";
+        String fileFullPath = HlsPath + tsName + ".ts";
+        Resource resource = new FileSystemResource(fileFullPath);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + tsName + ".ts");
+        headers.setContentType(MediaType.parseMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
+        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
+
     }
 
 }

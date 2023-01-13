@@ -134,27 +134,17 @@ public class StorageController {
     @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{fileName}.m3u8")
     public ResponseEntity<Resource> videoHlsM3U8(@PathVariable String fileName) {
-        String upload_dir = "C:\\naldstorage/";
-        String fileFullPath = upload_dir + fileName + "/" + fileName + ".m3u8";
-        Resource resource = new FileSystemResource(fileFullPath);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".m3u8");
-        headers.setContentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"));
-        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
+        return storageService.videoHlsM3U8(fileName);
+
+//        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
     }
 
 
     @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{tsName}.ts")
     public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
-        String upload_dir = "C:\\naldstorage/";
-        String fileFullPath = upload_dir + fileName + "/" + tsName + ".ts";
-        Resource resource = new FileSystemResource(fileFullPath);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + tsName + ".ts");
-        headers.setContentType(MediaType.parseMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
-        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
-    }
+        return storageService.videoHlsTs(fileName, tsName);
+   }
 
     @WithoutJwtCallable
     @GetMapping("/videoHls/{fileName}")
