@@ -11,7 +11,7 @@ ENV LANGUAGE en_US:en
 
 RUN apk add openssh && \
 #    apk add zip && \
-    apk add curl && \
+    apk add curl 
 #    apk add ffmpeg && \
 #    apk add nano
 
