@@ -11,9 +11,9 @@ ENV LANGUAGE en_US:en
 
 RUN apk add openssh && \
 #    apk add zip && \
-    apk add curl 
-#    apk add ffmpeg && \
-#    apk add nano
+    apk add curl && \
+    apk add ffmpeg && \
+    apk add nano
 
 RUN mkdir -p /root/.ssh
 RUN chmod 700 /root/.ssh
