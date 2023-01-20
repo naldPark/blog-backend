@@ -2,6 +2,13 @@ package me.nald.blog.service;
 
 import lombok.RequiredArgsConstructor;
 import me.nald.blog.config.BlogProperties;
+import me.nald.blog.data.dto.AccountDto;
+import me.nald.blog.data.dto.StorageDto;
+import me.nald.blog.data.persistence.entity.Storage;
+import me.nald.blog.repository.AccountRepository;
+import me.nald.blog.repository.StorageRepository;
+import me.nald.blog.response.CommonResponse;
+import me.nald.blog.response.Response;
 import me.nald.blog.util.FileUtils;
 import me.nald.blog.util.Util;
 import net.bramp.ffmpeg.FFmpeg;
@@ -19,12 +26,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.mail.Folder;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -32,6 +39,7 @@ import java.nio.file.Paths;
 public class StorageService {
 
     private static BlogProperties blogProperties;
+    private final StorageRepository storageRepository;
 
     @Autowired
     public void setBlogProperties(BlogProperties blogProperties) {
@@ -83,9 +91,10 @@ public class StorageService {
                 .addExtraArgs("-hls_time", "10")
                 .addExtraArgs("-hls_list_size", "0")
                 .addExtraArgs("-f", "hls")
+                .setVideoBitRate(1)
                 .addExtraArgs("-safe", "0")
                 .addExtraArgs("-preset", "ultrafast")
-                .setVideoResolution(640, 480)
+                .setVideoResolution(1920, 1080)
                 .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
                 .done();
 
@@ -127,6 +136,46 @@ public class StorageService {
         headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + tsName + ".ts");
         headers.setContentType(MediaType.parseMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
         return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
+
+    }
+
+//    public void uploadVideo(List<MultipartFile> files, String userId, Long noticeId, int groupId) {
+//        String noticeFilePath = Constants.FILE_MANAGER_PATH_PREFIX + Constants.NOTICE_FILE_PATH;
+//        String folderPath = noticeFilePath + "/" + noticeId;
+//        try {
+//            for (int i = 0; i < files.size(); ++i) {
+//                MultipartFile currentFile = files.get(i);
+//                FileUtils.createDirectoriesIfNotExists(folderPath);
+//                String fileName = currentFile.getOriginalFilename();
+//                String ext = fileName.substring(fileName.lastIndexOf("."));
+//                String filePath = folderPath + "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000) + i + ext;
+//                CreateAdminNoticeFile createAdminNoticeFile = new CreateAdminNoticeFile(fileName, filePath, currentFile.getSize(), userId, noticeId, groupId);
+//                InputStream readStream = currentFile.getInputStream();
+//                byte[] readBytes = new byte[4096];
+//                OutputStream writeStream = Files.newOutputStream(Paths.get(createAdminNoticeFile.getFileSrc()));
+//                while(readStream.read(readBytes) > 0) {
+//                    writeStream.write(readBytes);
+//                }
+//                writeStream.close();
+//                adminNoticeDAO.createNoticeFile(createAdminNoticeFile);
+//            }
+//        } catch (IOException e) {
+//            log.error("write file failed {}", e);
+//        }
+//    }
+
+    public Map<String, Object> playVideo(Long videoId){
+
+        HashMap<String, Object> map = new HashMap<>();
+        Storage storage = storageRepository.getById(videoId);
+        StorageDto.StorageInfo res = new StorageDto.StorageInfo(storage);
+        System.out.println("스토리지");
+        System.out.println(storage);
+
+        map.put("statusCode", 200);;
+        map.put("data", res);
+
+        return map;
 
     }
 

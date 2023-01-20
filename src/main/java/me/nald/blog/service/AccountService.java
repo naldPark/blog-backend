@@ -33,6 +33,7 @@ public class AccountService {
     }
 
     public Account findMemberByAccountId(String accountId) {
+
         return accountRepository.findByAccountId(accountId);
     }
 

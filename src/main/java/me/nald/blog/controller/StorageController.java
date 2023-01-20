@@ -21,6 +21,7 @@ import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.*;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
@@ -151,4 +152,32 @@ public class StorageController {
     public void videoHls(@PathVariable String fileName) {
         storageService.videoHls(fileName);
     }
+
+
+//    @AdminCallable
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public Callable<ResponseObject> uploadVideo(@RequestPart(value="files", required=false) List<MultipartFile> files,
+//                                               @RequestPart(value = "body") CreateAdminNotice body,
+//                                               HttpServletRequest request) {
+//        return () -> {
+//            if (request.getHeader(Constants.REQUEST_HEADER_KEY_USER_GROUP) == null){
+//                throw new NotFoundUserGroupException(log);
+//            }
+//            body.setGroupId(Integer.valueOf(request.getHeader(Constants.REQUEST_HEADER_KEY_USER_GROUP)));
+//            body.setUserId(String.valueOf(request.getAttribute(Constants.REQUEST_ATTRIBUTE_KEY_USER_ID)));
+//            adminNoticeService.createNotice(files, body);
+//            ResponseObject responseObject = new ResponseObject();
+//            responseObject.putResult(null);
+//            return responseObject;
+//        };
+//    }
+
+    @WithoutJwtCallable
+    @GetMapping("/playVideo/{videoId}")
+    public Callable<Object> playVideo(@PathVariable Long videoId) {
+        return () -> storageService.playVideo(videoId);
+    }
+
+
+
 }
