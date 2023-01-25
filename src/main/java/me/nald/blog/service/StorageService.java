@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -64,16 +65,16 @@ public class StorageService {
 
         try {
             String osName = System.getProperty("os.name");
-//            if (osName.toLowerCase().contains("unix") || osName.toLowerCase().contains("linux")) {
             File folder = new File(HlsPath);
             if (!folder.exists()) {
                 folder.mkdir(); //폴더 생성합니다.
             }
-            ffmpeg = new FFmpeg(blogProperties.getFfmpegPath() + "/ffmpeg");
-            ffprobe = new FFprobe(blogProperties.getFfmpegPath() + "/ffprobe");
+//            if (osName.toLowerCase().contains("unix") || osName.toLowerCase().contains("linux")) {
+                ffmpeg = new FFmpeg(blogProperties.getFfmpegPath() + "/ffmpeg");
+                ffprobe = new FFprobe(blogProperties.getFfmpegPath() + "/ffprobe");
 //            } else {
-//                ffmpeg = new FFmpeg("mpeg/ffmpeg");
-//                ffprobe = new FFprobe("mpeg/ffprobe");
+//                ffmpeg = new FFmpeg(blogProperties.getFfmpegPath() + "/ffmpeg.exe");
+//                ffprobe = new FFprobe(blogProperties.getFfmpegPath() + "/ffprobe.exe");
 //            }
         } catch (IOException e) {
             e.printStackTrace();
@@ -91,14 +92,15 @@ public class StorageService {
                 .addExtraArgs("-hls_time", "10")
                 .addExtraArgs("-hls_list_size", "0")
                 .addExtraArgs("-f", "hls")
-                .setVideoBitRate(1)
+//                .setVideoBitRate(1)
                 .addExtraArgs("-safe", "0")
                 .addExtraArgs("-preset", "ultrafast")
                 .setVideoResolution(1920, 1080)
                 .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
                 .done();
 
-        builder.setVerbosity(FFmpegBuilder.Verbosity.DEBUG);
+        builder.setVerbosity(FFmpegBuilder.Verbosity.INFO);
+
 
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
         FFmpegJob job = executor.createJob(builder);
@@ -164,15 +166,15 @@ public class StorageService {
 //        }
 //    }
 
-    public Map<String, Object> playVideo(Long videoId){
+    public Map<String, Object> playVideo(Long videoId) {
 
         HashMap<String, Object> map = new HashMap<>();
         Storage storage = storageRepository.getById(videoId);
         StorageDto.StorageInfo res = new StorageDto.StorageInfo(storage);
-        System.out.println("스토리지");
         System.out.println(storage);
 
-        map.put("statusCode", 200);;
+        map.put("statusCode", 200);
+        ;
         map.put("data", res);
 
         return map;
