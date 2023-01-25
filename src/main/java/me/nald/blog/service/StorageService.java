@@ -100,12 +100,17 @@ public class StorageService {
                 .done();
 
         builder.setVerbosity(FFmpegBuilder.Verbosity.INFO);
-
+        System.out.println("익스큐트전");
 
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
+        System.out.println("job생성");
         FFmpegJob job = executor.createJob(builder);
+
+        System.out.println("job런");
         job.run();
+        System.out.println("job런완료");
         if (job.getState() == FFmpegJob.State.FINISHED) {
+            System.out.println("리절트 트루");
             result = true;
         }
 
@@ -119,10 +124,16 @@ public class StorageService {
         String fileName = FilenameUtils.getBaseName(movieName);
         String HlsPath = movieDir + "/hls/" + fileName + "/";
         String fileFullPath = HlsPath + fileName + ".m3u8";
+        System.out.println("FileSystemResource ㅇ요청할게");
+
         Resource resource = new FileSystemResource(fileFullPath);
+
+        System.out.println("FileSystemResource 요청완료");
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".m3u8");
         headers.setContentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"));
+
+        System.out.println("리턴할게");
         return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
 
 
@@ -133,10 +144,15 @@ public class StorageService {
         String fileName = FilenameUtils.getBaseName(movieName);
         String HlsPath = movieDir + "/hls/" + fileName + "/";
         String fileFullPath = HlsPath + tsName + ".ts";
+        System.out.println("FileSystemResource ㅇ요청할게");
         Resource resource = new FileSystemResource(fileFullPath);
+
+        System.out.println("FileSystemResource 요청완료");
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + tsName + ".ts");
         headers.setContentType(MediaType.parseMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
+
+        System.out.println("리턴할게");
         return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
 
     }
