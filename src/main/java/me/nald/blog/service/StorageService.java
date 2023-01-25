@@ -49,7 +49,7 @@ public class StorageService {
 
 
     public Path postWorkspaceDownloads() {
-        Path zipFilePath = Paths.get("/naldstorage").resolve("sample." + "mp4");
+        Path zipFilePath = Paths.get(blogProperties.getCommonPath()+"/movie/hls/sample").resolve("sample0." + "ts");
 
         return zipFilePath;
     }
