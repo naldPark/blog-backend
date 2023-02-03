@@ -157,6 +157,22 @@ public class StorageService {
 
     }
 
+    public ResponseEntity<Resource> videoHlsTstest() {
+        String fileFullPath = "test.ts";
+        System.out.println("FileSystemResource ㅇ요청할게");
+        Resource resource = new FileSystemResource(fileFullPath);
+
+        System.out.println("FileSystemResource 요청완료");
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "test.ts");
+        headers.setContentType(MediaType.parseMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
+
+        System.out.println("리턴할게");
+        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
+
+    }
+
+
 //    public void uploadVideo(List<MultipartFile> files, String userId, Long noticeId, int groupId) {
 //        String noticeFilePath = Constants.FILE_MANAGER_PATH_PREFIX + Constants.NOTICE_FILE_PATH;
 //        String folderPath = noticeFilePath + "/" + noticeId;

@@ -157,6 +157,19 @@ public class StorageController {
         return test;
    }
 
+
+    @WithoutJwtCallable
+    @GetMapping("/hls/test.ts")
+    public ResponseEntity<Resource> videoHlsTstest() {
+
+        ResponseEntity<Resource> test = storageService.videoHlsTstest(fileName, tsName);
+
+        System.out.println("리턴직전 ts 컨트롤러"+test);
+
+        return test;
+    }
+
+
     @WithoutJwtCallable
     @GetMapping("/videoHls/{fileName}")
     public void videoHls(@PathVariable String fileName) {
