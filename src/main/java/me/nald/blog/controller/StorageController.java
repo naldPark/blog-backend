@@ -135,7 +135,12 @@ public class StorageController {
     @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{fileName}.m3u8")
     public ResponseEntity<Resource> videoHlsM3U8(@PathVariable String fileName) {
-        return storageService.videoHlsM3U8(fileName);
+
+         ResponseEntity<Resource> test = storageService.videoHlsM3U8(fileName);
+
+        System.out.println("리턴직전 컨트롤러"+test);
+
+        return test;
 
 //        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
     }
@@ -144,7 +149,12 @@ public class StorageController {
     @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{tsName}.ts")
     public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
-        return storageService.videoHlsTs(fileName, tsName);
+
+        ResponseEntity<Resource> test = storageService.videoHlsTs(fileName, tsName);
+
+        System.out.println("리턴직전 ts 컨트롤러"+test);
+
+        return test;
    }
 
     @WithoutJwtCallable
