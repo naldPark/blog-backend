@@ -172,6 +172,16 @@ public class StorageService {
 
     }
 
+    public String videoHlsTstest2(String movieName, String tsName) {
+        String movieDir = blogProperties.getCommonPath() + "/movie";
+        String fileName = FilenameUtils.getBaseName(movieName);
+        String HlsPath = movieDir + "/hls/" + fileName + "/";
+        String fileFullPath = HlsPath + tsName + ".ts";
+        System.out.println("리턴할게");
+        return fileFullPath;
+
+    }
+
 
 //    public void uploadVideo(List<MultipartFile> files, String userId, Long noticeId, int groupId) {
 //        String noticeFilePath = Constants.FILE_MANAGER_PATH_PREFIX + Constants.NOTICE_FILE_PATH;

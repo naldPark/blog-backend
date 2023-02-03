@@ -13,6 +13,7 @@ import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -168,6 +169,23 @@ public class StorageController {
 
         return test;
     }
+
+    @WithoutJwtCallable
+    @GetMapping("/hls2/{fileName}/{tsName}.ts")
+    public ResponseEntity<Resource> videoHlsTstest2(@PathVariable String fileName, @PathVariable String tsName) {
+        String fileFullPath = storageService.videoHlsTstest2(fileName, tsName);
+
+        Resource resource = new FileSystemResource(fileFullPath);
+
+        System.out.println("FileSystemResource 요청완료");
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + tsName + ".ts");
+        headers.setContentType(MediaType.parseMediaType(MediaType.APPLICATION_OCTET_STREAM_VALUE));
+
+        System.out.println("리턴할게");
+        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
+    }
+    
 
 
     @WithoutJwtCallable
