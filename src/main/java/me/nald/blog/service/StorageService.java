@@ -20,15 +20,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -126,12 +125,28 @@ public class StorageService {
         String fileFullPath = HlsPath + fileName + ".m3u8";
         System.out.println("FileSystemResource ㅇ요청할게");
 
-        Resource resource = new FileSystemResource(fileFullPath);
+        Path filePath = Paths.get(fileFullPath);
+
+        Resource resource = new FileSystemResource(filePath){
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return new FileInputStream(filePath.toFile()) {
+                    @Override
+                    public void close() throws IOException {
+                        super.close();
+//                                Files.delete(zipFilePath);
+                    }
+                };
+            }
+        };
 
         System.out.println("FileSystemResource 요청완료");
         HttpHeaders headers = new HttpHeaders();
-        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".m3u8");
-        headers.setContentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"));
+        MediaType mediaType = MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDisposition(ContentDisposition.builder("attachment").filename(resource.getFilename()).build());
+//        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".m3u8");
+        headers.setContentType(mediaType);
+//        headers.setContentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"));
 
         System.out.println("리턴할게");
         return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
