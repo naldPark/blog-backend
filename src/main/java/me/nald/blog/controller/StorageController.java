@@ -162,7 +162,7 @@ public class StorageController {
     @GetMapping("/hls/test.ts")
     public ResponseEntity<Resource> videoHlsTstest() {
 
-        ResponseEntity<Resource> test = storageService.videoHlsTstest(fileName, tsName);
+        ResponseEntity<Resource> test = storageService.videoHlsTstest();
 
         System.out.println("리턴직전 ts 컨트롤러"+test);
 
