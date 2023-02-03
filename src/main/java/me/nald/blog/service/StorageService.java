@@ -149,8 +149,7 @@ public class StorageService {
 //        headers.setContentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"));
 
         System.out.println("리턴할게");
-        return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK);
-
+        return ResponseEntity.ok().headers(headers).body(resource);
 
     }
 
