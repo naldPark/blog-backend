@@ -71,6 +71,34 @@ public class StorageController {
         storageService.videoHls(fileName);
     }
 
+    @WithoutJwtCallable
+    @PostMapping("/download")
+    public Callable<Object> downloads(HttpServletRequest request) {
+        return () -> {
+            Path filePath = storageService.downloads();
+            try {
+                Resource resource = new FileSystemResource(zipFilePath) {
+                    @Override
+                    public InputStream getInputStream() throws IOException {
+                        return new FileInputStream(filePath.toFile()) {
+                            @Override
+                            public void close() throws IOException {
+                                super.close();
+                            }
+                        };
+                    }
+                };
+                MediaType mediaType = MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(mediaType);
+                headers.setContentDisposition(ContentDisposition.builder("attachment").filename(resource.getFilename()).build());
+                return ResponseEntity.ok().headers(headers).body(resource);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+        };
+    }
+
 
 //    @AdminCallable
 //    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -89,5 +117,6 @@ public class StorageController {
 //            return responseObject;
 //        };
 //    }
+
 
 }

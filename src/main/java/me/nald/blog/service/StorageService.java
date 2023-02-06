@@ -40,6 +40,14 @@ public class StorageService {
         this.blogProperties = blogProperties;
     }
 
+
+
+    public Path downloads() {
+        Path filePath = Paths.get(blogProperties.getCommonPath()+"/movie/hls/sample").resolve("sample0." + "ts");
+        return filePath;
+    }
+
+
     public Map<String, Object> playVideo(Long videoId) {
         HashMap<String, Object> map = new HashMap<>();
         Storage storage = storageRepository.getById(videoId);
