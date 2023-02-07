@@ -38,12 +38,16 @@ public class StorageDto {
         String fileName;
         String fileSrc;
         Long fileSize;
+        String fileType;
+        String fileCover;
 
         public StorageInfo(Storage storage) {
             storageId = storage.getStorageId();
             fileName = storage.getFileName();
             fileSrc = storage.getFileSrc();
             fileSize = storage.getFileSize();
+            fileType= storage.getFileType();
+            fileCover = storage.getFileCover();
         }
     }
 }

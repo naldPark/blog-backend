@@ -46,6 +46,13 @@ public class StorageController {
     private final StorageService storageService;
 
     @WithoutJwtCallable
+    @GetMapping("/videoList")
+    public Callable<Object> getVideoList() {
+        return () -> storageService.getVideoList();
+    }
+
+
+    @WithoutJwtCallable
     @GetMapping("/playVideo/{videoId}")
     public Callable<Object> playVideo(@PathVariable Long videoId) {
         return () -> storageService.playVideo(videoId);
@@ -72,31 +79,9 @@ public class StorageController {
     }
 
     @WithoutJwtCallable
-    @PostMapping("/download")
-    public Callable<Object> downloads(HttpServletRequest request) {
-        return () -> {
-            Path filePath = storageService.downloads();
-            try {
-                Resource resource = new FileSystemResource(zipFilePath) {
-                    @Override
-                    public InputStream getInputStream() throws IOException {
-                        return new FileInputStream(filePath.toFile()) {
-                            @Override
-                            public void close() throws IOException {
-                                super.close();
-                            }
-                        };
-                    }
-                };
-                MediaType mediaType = MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(mediaType);
-                headers.setContentDisposition(ContentDisposition.builder("attachment").filename(resource.getFilename()).build());
-                return ResponseEntity.ok().headers(headers).body(resource);
-            } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).build();
-            }
-        };
+    @GetMapping("/download/{videoId}")
+    public ResponseEntity<Resource> downloads(@PathVariable Long videoId) {
+        return storageService.downloads(videoId);
     }
 
 

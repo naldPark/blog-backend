@@ -2,9 +2,11 @@ package me.nald.blog.service;
 
 import lombok.RequiredArgsConstructor;
 import me.nald.blog.config.BlogProperties;
+import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.dto.StorageDto;
 import me.nald.blog.data.persistence.entity.Storage;
 import me.nald.blog.repository.StorageRepository;
+import me.nald.blog.response.CommonResponse;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
@@ -25,7 +27,9 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -41,12 +45,9 @@ public class StorageService {
     }
 
 
-
-    public Path downloads() {
-        Path filePath = Paths.get(blogProperties.getCommonPath()+"/movie/hls/sample").resolve("sample0." + "ts");
-        return filePath;
+    public List<StorageDto.StorageInfo> getVideoList(){
+        return storageRepository.findAll().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
     }
-
 
     public Map<String, Object> playVideo(Long videoId) {
         HashMap<String, Object> map = new HashMap<>();
@@ -153,6 +154,59 @@ public class StorageService {
         return ResponseEntity.ok().headers(headers).body(resource);
 
     }
+
+
+    public ResponseEntity<Resource> downloads(Long videoId) {
+        Storage storage = storageRepository.getById(videoId);
+        Path filePath = Paths.get(blogProperties.getCommonPath()+"/movie"+storage.getDownloadSrc());
+        try {
+            Resource resource = new FileSystemResource(filePath) {
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    return new FileInputStream(filePath.toFile()) {
+                        @Override
+                        public void close() throws IOException {
+                            super.close();
+                        }
+                    };
+                }
+            };
+            MediaType mediaType = MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(mediaType);
+            headers.setContentDisposition(ContentDisposition.builder("attachment").filename(resource.getFilename()).build());
+            return ResponseEntity.ok().headers(headers).body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+    }
+
+
+    //    public void uploadVideo(List<MultipartFile> files, String userId, Long noticeId, int groupId) {
+//        String noticeFilePath = Constants.FILE_MANAGER_PATH_PREFIX + Constants.NOTICE_FILE_PATH;
+//        String folderPath = noticeFilePath + "/" + noticeId;
+//        try {
+//            for (int i = 0; i < files.size(); ++i) {
+//                MultipartFile currentFile = files.get(i);
+//                FileUtils.createDirectoriesIfNotExists(folderPath);
+//                String fileName = currentFile.getOriginalFilename();
+//                String ext = fileName.substring(fileName.lastIndexOf("."));
+//                String filePath = folderPath + "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000) + i + ext;
+//                CreateAdminNoticeFile createAdminNoticeFile = new CreateAdminNoticeFile(fileName, filePath, currentFile.getSize(), userId, noticeId, groupId);
+//                InputStream readStream = currentFile.getInputStream();
+//                byte[] readBytes = new byte[4096];
+//                OutputStream writeStream = Files.newOutputStream(Paths.get(createAdminNoticeFile.getFileSrc()));
+//                while(readStream.read(readBytes) > 0) {
+//                    writeStream.write(readBytes);
+//                }
+//                writeStream.close();
+//                adminNoticeDAO.createNoticeFile(createAdminNoticeFile);
+//            }
+//        } catch (IOException e) {
+//            log.error("write file failed {}", e);
+//        }
+//    }
+
 
 }
 

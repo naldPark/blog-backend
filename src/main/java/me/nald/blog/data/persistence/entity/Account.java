@@ -3,6 +3,7 @@ package me.nald.blog.data.persistence.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -33,6 +34,10 @@ public class Account {
 
     @Column(name = "authority", nullable = false, length = 50)
     private int authority;
+
+    @Column(name = "created_dt", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @UpdateTimestamp
+    private Timestamp createdDt;
 
     public static Account createAccount(String accountId,
                                         String accountName,
