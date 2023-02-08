@@ -32,6 +32,7 @@ public class Account {
     @Column(name = "status", nullable = false, length = 20)
     private int status;
 
+    //0 : super, 1: user, 2: guest
     @Column(name = "authority", nullable = false, length = 50)
     private int authority;
 

@@ -60,7 +60,7 @@ public class AuthAdvice {
             Account user = accountService.findMemberByAccountId(userId);
             if (user != null) {
                 request.setAttribute(USER_ID, user.getAccountId());
-                request.setAttribute(AUTHORITIES, user.getAuthority());
+                request.setAttribute(AUTHORITY, user.getAuthority());
             } else {
                 throw Errors.of(ErrorSpec.AccessDeniedException);
             }

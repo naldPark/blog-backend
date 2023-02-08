@@ -81,7 +81,7 @@ public class Util {
 
             payloads.put("exp", exp);
             payloads.put("user_name", user.getAccountName());
-            payloads.put("authorities", user.getAuthority());
+            payloads.put("authority", user.getAuthority());
             payloads.put("jti", UUID.randomUUID().toString());
             payloads.put("user_id", user.getAccountId());
 
@@ -100,7 +100,6 @@ public class Util {
     }
 
     private static PrivateKey toPrivateKey(String stringPrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        //평문으로 전달받은 개인키를 개인키객체로 만드는 과정
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         byte[] bytePrivateKey = Base64.getDecoder().decode(stringPrivateKey.getBytes());
         PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(bytePrivateKey);
@@ -152,7 +151,7 @@ public class Util {
                 if (!Util.verifyToken(tokenStr, userId, blogProperties.getPublicKey())) {
                     throw Errors.of(AccessDeniedException, "Invalid token");
                 }
-                request.setAttribute(AUTHORITIES, body.getInt(AUTHORITIES));
+                request.setAttribute(AUTHORITY, body.getInt(AUTHORITY));
                 request.setAttribute(USER_ID, body.getString(USER_ID));
                 return userId;
             } else {
