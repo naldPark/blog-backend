@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 public class ErrorResponse extends Response {
 
     private String error;
+    private String spec;
     private String message;
     private String stackTrace;
 
@@ -51,14 +52,19 @@ public class ErrorResponse extends Response {
         return this;
     }
 
-    public static ErrorResponse of (HttpServletRequest request,
-                                    Exception e) {
+    public static ErrorResponse of(HttpServletRequest request,
+                                   Exception e) {
 
-        ErrorResponse errorResponse =  new ErrorResponse()
+        ErrorResponse errorResponse = new ErrorResponse()
                 .error(e.getClass().getSimpleName())
                 .message(e.getMessage())
-                .statusCode(isCommonException(e) ?  ((Errors.CommonException) e).getHttpStatus() : HttpStatus.BAD_REQUEST);
+                .statusCode(isCommonException(e) ? ((Errors.CommonException) e).getHttpStatus() : HttpStatus.BAD_REQUEST);
 
+        if (isCommonException(e)) {
+            Errors.CommonException ce = (Errors.CommonException) e;
+            errorResponse.setSpec(ce.getName());
+            errorResponse.statusCode(ce.getHttpStatus());
+        }
         return errorResponse;
     }
 
