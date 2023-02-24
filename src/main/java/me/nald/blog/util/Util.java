@@ -31,7 +31,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static me.nald.blog.exception.ErrorSpec.AccessDeniedException;
+import static me.nald.blog.exception.ErrorSpec.*;
 import static me.nald.blog.exception.ErrorSpec.PermissionDenied;
 import static me.nald.blog.util.Constants.*;
 

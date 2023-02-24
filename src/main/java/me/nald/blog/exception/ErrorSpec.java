@@ -12,7 +12,7 @@ import static org.springframework.http.HttpStatus.*;
 public enum ErrorSpec {
     // AUTH
     AccessDeniedException(UNAUTHORIZED, AUTH.code(1)),
-    PermissionDenied(UNAUTHORIZED, AUTH.code(2)),
+    PermissionDenied(FORBIDDEN, AUTH.code(2)),
     UserNotFound(NOT_FOUND, AUTH.code(3)),
     UserIdBlocked(FORBIDDEN, AUTH.code(4)),
     AuthCodeNotFound(NOT_FOUND, AUTH.code(5)),
@@ -22,9 +22,9 @@ public enum ErrorSpec {
 
     // PASSWORD
     PasswordIsExpired(MOVED_PERMANENTLY, PASSWORD.code(1)),
-    PasswordExceedFailedCount(UNAUTHORIZED, PASSWORD.code(2)),
+    PasswordExceedFailedCount(BAD_REQUEST, PASSWORD.code(2)),
     PasswordNeedTobeChanged(FOUND, PASSWORD.code(3)),
-    PasswordIsNotMatched(UNAUTHORIZED, PASSWORD.code(4)),
+    PasswordIsNotMatched(BAD_REQUEST, PASSWORD.code(4)),
     PasswordIsLocked(METHOD_NOT_ALLOWED, PASSWORD.code(5)),
     InvalidPassword(BAD_REQUEST, INVALID.code(6)),
 
