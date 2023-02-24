@@ -158,7 +158,7 @@ public class Util {
                 throw Errors.of(AccessDeniedException, "Expired token");
             }
         } catch (Exception e) {
-            throw Errors.of(PermissionDenied, "Token parsing error");
+            throw Errors.of(AccessDeniedException, "Token parsing error");
         }
     }
 

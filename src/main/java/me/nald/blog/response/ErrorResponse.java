@@ -3,6 +3,7 @@ package me.nald.blog.response;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import me.nald.blog.exception.Errors;
 import org.springframework.http.HttpStatus;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,9 +57,12 @@ public class ErrorResponse extends Response {
         ErrorResponse errorResponse =  new ErrorResponse()
                 .error(e.getClass().getSimpleName())
                 .message(e.getMessage())
-                .statusCode(HttpStatus.BAD_REQUEST);
+                .statusCode(isCommonException(e) ?  ((Errors.CommonException) e).getHttpStatus() : HttpStatus.BAD_REQUEST);
 
         return errorResponse;
     }
 
+    private static boolean isCommonException(Exception e) {
+        return e instanceof Errors.CommonException;
+    }
 }
