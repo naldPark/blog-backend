@@ -97,6 +97,7 @@ public class CommonService {
                 "{ color: 'white', backgroundColor: '#4fc08d', name: 'vue', src: 'vue.svg' }",
                 "{ color: 'white', backgroundColor: '#DD0031', name: 'angular', src: 'angular.svg' }",
                 "{ color: 'white', backgroundColor: '#007ACC', name: 'typescript', src: 'typescript.svg' }",
+                "{ color: 'red', backgroundColor: '#F2F4F9', name: 'java', src: 'java.svg' }",
                 "{ color: 'white', backgroundColor: '#339933', name: 'node-js', src: 'node-js.svg' }",
                 "{ color: 'white', backgroundColor: '#73398D', name: 'amcharts', src: 'amchart.svg' }",
                 "{ color: 'white', backgroundColor: '#6DB33F', name: 'springBoot', src: 'springboot.svg' }",
