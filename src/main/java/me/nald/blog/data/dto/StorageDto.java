@@ -20,12 +20,14 @@ public class StorageDto {
     public static class getStorageList {
 
         int statusCode;
-        Map<String, Object> data;
+        List<StorageDto.StorageInfo> list;
+        Long total;
 
         @Builder
-        public getStorageList(int statusCode, Map<String, Object> list) {
+        public getStorageList(int statusCode, List<StorageDto.StorageInfo> list, Long total) {
             this.statusCode = statusCode;
-            this.data = list;
+            this.list = list;
+            this.total = total;
         }
     }
 

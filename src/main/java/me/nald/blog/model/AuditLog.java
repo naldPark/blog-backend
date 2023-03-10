@@ -43,19 +43,19 @@ public class AuditLog {
                         .toString()
                 ).build();
     }
+//
+//    public synchronized void write() {
+//        log.trace("{}", makeLine());
+//    }
 
-    public synchronized void write() {
-        log.trace("{}", makeLine());
-    }
-
-    private String makeLine() {
-        List<String> inLine = new ArrayList<>();
-
-        inLine.add(serviceName);
-        inLine.add(userId);
-        inLine.add(method);
-        inLine.add(api);
-
-        return String.join("\t", inLine);
-    }
+//    private String makeLine() {
+//        List<String> inLine = new ArrayList<>();
+//
+//        inLine.add(serviceName);
+//        inLine.add(userId);
+//        inLine.add(method);
+//        inLine.add(api);
+//
+//        return String.join("\t", inLine);
+//    }
 }

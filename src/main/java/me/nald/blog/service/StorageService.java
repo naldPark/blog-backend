@@ -1,12 +1,22 @@
 package me.nald.blog.service;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.QueryResults;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.dto.StorageDto;
+import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.data.persistence.entity.QAccount;
+import me.nald.blog.data.persistence.entity.QStorage;
 import me.nald.blog.data.persistence.entity.Storage;
+import me.nald.blog.model.SearchItem;
 import me.nald.blog.repository.StorageRepository;
 import me.nald.blog.response.CommonResponse;
+import me.nald.blog.response.Response;
+import me.nald.blog.util.Util;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
@@ -16,25 +26,28 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class StorageService {
+
+    @Autowired
+    EntityManager em;
 
     private static BlogProperties blogProperties;
     private final StorageRepository storageRepository;
@@ -45,8 +58,49 @@ public class StorageService {
     }
 
 
-    public List<StorageDto.StorageInfo> getVideoList(){
-        return storageRepository.findAll().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
+//    public List<StorageDto.StorageInfo> getVideoList(SearchItem searchItem){
+//        System.out.println(searchItem);
+//        return storageRepository.findAll().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
+//    }
+
+    public StorageDto.getStorageList getVideoList(SearchItem searchItem){
+        System.out.println(searchItem);
+
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+
+        QStorage storage = QStorage.storage;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if (!searchItem.getSearchText().isEmpty()) {
+            builder.and(storage.fileName.contains(searchItem.getSearchText()));
+        }
+        if (!searchItem.getType().isEmpty()) {
+            builder.and(storage.fileType.eq(searchItem.getType()));
+        }
+
+        List<StorageDto.StorageInfo> list = queryFactory
+                .selectFrom(storage).distinct()
+                .from(storage)
+                .where(builder)
+                .offset(searchItem.getOffset())
+                .limit(searchItem.getLimit())
+                .orderBy(storage.fileName.asc().nullsLast())
+                .fetch().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
+
+        Long totalCount = queryFactory
+                .select(storage.count())
+                .from(storage)
+                .fetchOne();
+
+
+//        List<StorageDto.StorageInfo> list = storageRepository.findAll().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
+
+
+        return StorageDto.getStorageList.builder()
+                .statusCode(200)
+                .list(list)
+                .total(totalCount)
+                .build();
     }
 
     public Map<String, Object> playVideo(Long videoId) {

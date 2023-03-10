@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.model.SearchItem;
 import me.nald.blog.service.AccountService;
 import me.nald.blog.service.StorageService;
 import me.nald.blog.util.Constants;
@@ -47,8 +48,8 @@ public class StorageController {
 
     @WithoutJwtCallable
     @GetMapping("/videoList")
-    public Callable<Object> getVideoList() {
-        return () -> storageService.getVideoList();
+    public Callable<Object> getVideoList(SearchItem searchItem) {
+        return () -> storageService.getVideoList(searchItem);
     }
 
 
