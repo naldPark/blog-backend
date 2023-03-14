@@ -3,6 +3,7 @@ package me.nald.blog.service;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import me.nald.blog.config.BlogProperties;
@@ -64,37 +65,36 @@ public class StorageService {
 //    }
 
     public StorageDto.getStorageList getVideoList(SearchItem searchItem){
-        System.out.println(searchItem);
 
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
 
         QStorage storage = QStorage.storage;
         BooleanBuilder builder = new BooleanBuilder();
 
-        if (!searchItem.getSearchText().isEmpty()) {
+        if (Objects.nonNull(searchItem.getSearchText()) && !searchItem.getSearchText().isEmpty()) {
             builder.and(storage.fileName.contains(searchItem.getSearchText()));
         }
-        if (!searchItem.getType().isEmpty()) {
+        if (Objects.nonNull(searchItem.getType()) && !searchItem.getType().isEmpty()) {
             builder.and(storage.fileType.eq(searchItem.getType()));
         }
 
-        List<StorageDto.StorageInfo> list = queryFactory
+        JPAQuery<Storage> query = queryFactory
                 .selectFrom(storage).distinct()
                 .from(storage)
                 .where(builder)
-                .offset(searchItem.getOffset())
-                .limit(searchItem.getLimit())
-                .orderBy(storage.fileName.asc().nullsLast())
-                .fetch().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
+                .orderBy(storage.fileName.asc().nullsLast());
+
+        if(searchItem.getLimit() != 0){
+            query.offset(searchItem.getOffset());
+            query.limit(searchItem.getLimit());
+        }
+
+        List<StorageDto.StorageInfo> list = query.fetch().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
 
         Long totalCount = queryFactory
                 .select(storage.count())
                 .from(storage)
                 .fetchOne();
-
-
-//        List<StorageDto.StorageInfo> list = storageRepository.findAll().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
-
 
         return StorageDto.getStorageList.builder()
                 .statusCode(200)
