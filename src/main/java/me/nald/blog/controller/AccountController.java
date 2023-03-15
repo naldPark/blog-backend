@@ -3,6 +3,7 @@ package me.nald.blog.controller;
 import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountDto;
+import me.nald.blog.data.model.AccountRequest;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.service.AccountService;
 import org.springframework.http.MediaType;
@@ -37,15 +38,15 @@ public class AccountController {
 
     @WithoutJwtCallable
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Callable<Object> checkUser(HttpServletRequest request, @RequestBody final AccountDto.LoginInfo loginInfo) {
+    public Callable<Object> checkUser(HttpServletRequest request, @RequestBody AccountRequest accountRequest) {
         HttpSession httpSession = request.getSession();
-        return () -> accountService.getLogin(loginInfo);
+        return () -> accountService.getLogin(accountRequest);
     }
 
 
     @PutMapping(value = "/editUser")
-    public Callable<Object> editUser(HttpServletRequest request, @RequestBody final AccountDto.LoginInfo loginInfo) {
-        return () -> accountService.editUser(loginInfo);
+    public Callable<Object> editUser(HttpServletRequest request,  @RequestBody AccountRequest accountRequest) {
+        return () -> accountService.editUser(accountRequest);
     }
 
 
