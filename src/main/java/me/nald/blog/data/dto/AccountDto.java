@@ -48,7 +48,7 @@ public class AccountDto {
             status = account.getStatus();
             email = account.getEmail();
             createdDt = sdf.format(account.getCreatedDt());
-            loginFailCnt = account.getAuthority();
+            loginFailCnt = account.getLoginFailCnt();
         }
 
     }

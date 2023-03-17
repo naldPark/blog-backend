@@ -70,30 +70,41 @@ public class AccountService {
 
         Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
 
-        int statusCode;
+        int statusCode = 0;
         HashMap<String, Object> data = new HashMap<>();
+
+        String ipAddr = HttpServletRequestUtil.getRemoteIP(request);
+        boolean isLocal = ipAddr.equals("127.0.0.1") || ipAddr.equals("localhosts");
 
         if(user==null){
             statusCode = 401;
-            data.put("error", "incorrect password");
+            data.put("error", "incorrect user");
         }else if(!user.getPassword().isMatched(accountInfo.getPassword())){
             statusCode = 401;
-            data.put("error", "incorrect password");
+            user.setLoginFailCnt(user.getLoginFailCnt()+0);
+            data.put("error", "incorrect password failed: "+user.getLoginFailCnt());
+            if(user.getLoginFailCnt() > 4){
+                user.setStatus(1);
+                data.put("error", "your id has been blocked");
+            }
+        }else if(user.getStatus() != 0){
+            data.put("error", "the account is not able to login");
         }else{
             statusCode = 200;
+            user.setLoginFailCnt(0);
+            user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
             data.put("access_token", Util.getJWTToken(user));
             data.put("message", "succeeded");
             data.put("accountId", user.getAccountId());
             data.put("accountName", user.getAccountName());
         }
-        
-        if(statusCode == 200){
-            String ipAddr = HttpServletRequestUtil.getRemoteIP(request);
-            if(!ipAddr.equals("127.0.0.1") && !ipAddr.equals("localhosts")){
+        if(!isLocal){
+            if(statusCode == 200){
                 user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
                 AccountLog accountLog = AccountLog.createLog(user, ipAddr);
                 accountLogRepository.save(accountLog);
             }
+            accountRepository.save(user);
         }
         Response.CommonRes result = Response.CommonRes.builder()
                 .statusCode(statusCode)
