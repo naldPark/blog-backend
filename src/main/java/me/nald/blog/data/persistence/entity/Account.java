@@ -34,7 +34,7 @@ public class Account {
     @Embedded
     private Password password;
 
-    //0 : ok, 1: locked, 2: deleted
+    //0 : active, 1: locked, 2: deleted
     @Column(name = "status", nullable = false, length = 20)
     private int status;
 
