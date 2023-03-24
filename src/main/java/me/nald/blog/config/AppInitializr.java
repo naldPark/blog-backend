@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.data.persistence.entity.Password;
 import me.nald.blog.repository.AccountRepository;
-import me.nald.blog.service.AccountService;
-import me.nald.blog.util.Constants;
 import me.nald.blog.util.Util;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -22,20 +20,21 @@ import java.time.Duration;
 @Component
 public class AppInitializr {
     private final AccountRepository accountRepository;
+    private final BlogProperties blogProperties;
 
     @Bean
     public ApplicationRunner initAccount() {
         return args -> {
             if (accountRepository.findAll().isEmpty()) {
-                String initPw = Util.encryptSHA256(Constants.DEFAULT_ACCOUNT_PASSWORD);
+                String initPw = Util.encryptSHA256(blogProperties.getDefaultAccountPassword());
                 Password password = Password.builder()
                         .password(initPw)
                         .build();
 
                 Account account = Account.createAccount(
-                        Constants.DEFAULT_ACCOUNT_ID,
-                        Constants.DEFAULT_ACCOUNT_NAME,
-                        Constants.DEFAULT_ACCOUNT_EMAIL,
+                        blogProperties.getDefaultAccountId(),
+                        blogProperties.getDefaultAccountId(),
+                        blogProperties.getContactEmail(),
                         0,
                         password,
                         0

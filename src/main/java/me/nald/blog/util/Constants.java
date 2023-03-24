@@ -1,12 +1,20 @@
 package me.nald.blog.util;
 
+import lombok.AllArgsConstructor;
 import me.nald.blog.config.BlogProperties;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
 
 public class Constants {
 
     private static BlogProperties blogProperties;
+
+    @Autowired
+    public void setBlogProperties(BlogProperties blogProperties) {
+        this.blogProperties = blogProperties;
+    }
 
     public static final String REQ_HEADER_LANG = "language";
     public static final String DEFAULT_ACCOUNT_ID = blogProperties.getDefaultAccountId();

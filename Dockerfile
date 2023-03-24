@@ -1,4 +1,4 @@
-FROM nald.me:5001/docker/settings/openjdk:8-alpine
+FROM nas.nald.me:35003/docker/settings/openjdk:8-alpine
 
 ARG JAR_FILE
 ENV TARGET_JAR_FILE ${JAR_FILE}

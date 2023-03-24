@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: main-backend
-        image: nald.me:5001/docker/main/backend:__DOCKER_IMG_VER__
+        image: nas.nald.me:35003/docker/main/backend:__DOCKER_IMG_VER__
         ports:
         - containerPort: 8000
       imagePullSecrets:
