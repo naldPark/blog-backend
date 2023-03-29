@@ -30,7 +30,7 @@ spring:
     properties:
       hibernate:
         show_sql: false # 콘솔에 sql문출력
-        format_sql: true # 콘솔에 출력되는 sql문을 더 예쁘고 보기쉽게 출력
+        format_sql: true
         naming:
           physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
           use-new-id-generator-mappings: false
