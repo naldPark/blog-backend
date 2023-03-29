@@ -139,6 +139,26 @@ public class AccountService {
         return result;
     }
 
+    @Transactional
+    public Response.CommonRes changeStatus(int status, List<String> users) {
+        int statusCode = 200;
+        HashMap<String, Object> data = new HashMap<>();
+
+        users.stream().forEach(s -> {
+            Account user = accountRepository.findByAccountId(s);
+            user.setStatus(status);
+            accountRepository.save(user);
+        });
+
+        
+        Response.CommonRes result = Response.CommonRes.builder()
+                .statusCode(statusCode)
+                .data(data)
+                .build();
+
+        return result;
+    }
+
 
 }
 

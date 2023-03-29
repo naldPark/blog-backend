@@ -43,10 +43,14 @@ public class AccountController {
         return () -> accountService.getLogin(accountRequest);
     }
 
-
     @PutMapping(value = "/editUser")
     public Callable<Object> editUser(HttpServletRequest request,  @RequestBody AccountRequest accountRequest) {
         return () -> accountService.editUser(accountRequest);
+    }
+
+    @PutMapping(value = "/changeStatus")
+    public Callable<Object> changeStatus(HttpServletRequest request, @RequestBody int status, @RequestBody List<String> users) {
+        return () -> accountService.changeStatus(status, users);
     }
 
 
