@@ -81,7 +81,7 @@ public class AccountService {
             data.put("error", "incorrect user");
         }else if(!user.getPassword().isMatched(accountInfo.getPassword())){
             statusCode = 401;
-            user.setLoginFailCnt(user.getLoginFailCnt()+0);
+            user.setLoginFailCnt(user.getLoginFailCnt()+1);
             data.put("error", "incorrect password failed: "+user.getLoginFailCnt());
             if(user.getLoginFailCnt() > 4){
                 user.setStatus(1);
