@@ -20,69 +20,70 @@ spec:
         image: nas.nald.me:35003/docker/main/backend:__DOCKER_IMG_VER__
         ports:
         - containerPort: 8000
+        env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DB_HOST
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DB_PASSWORD
+          - name: PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: PRIVATE_KEY
+          - name: PUBLIC_KEY
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: PUBLIC_KEY
+          - name: DEFAULT_ACCOUNT_ID
+            valueFrom:
+              configMapKeyRef:
+                name: main-backend
+                key: DEFAULT_ACCOUNT_ID
+          - name: DEFAULT_ACCOUNT_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: main-backend
+                key: DEFAULT_ACCOUNT_NAME
+          - name: DEFAULT_ACCOUNT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DEFAULT_ACCOUNT_PASSWORD
+          - name: CONTACT_HOST
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: CONTACT_HOST
+          - name: CONTACT_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: CONTACT_EMAIL
+          - name: CONTACT_USER
+            valueFrom:
+              configMapKeyRef:
+                name: main-backend
+                key: CONTACT_USER
+          - name: CONTACT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: CONTACT_PASSWORD
       imagePullSecrets:
         - name: regcred
-      env:
-        - name: DB_HOST
-          valueFrom:
-            secretKeyRef:
-              name: main-backend-secret
-              key: DB_HOST
-        - name: DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: main-backend-secret
-              key: DB_USERNAME
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: main-backend-secret
-              key: DB_PASSWORD
-        - name: PRIVATE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: main-backend-secret
-              key: PRIVATE_KEY
-        - name: PUBLIC_KEY
-          valueFrom:
-            secretKeyRef:
-              name: main-backend-secret
-              key: PUBLIC_KEY
-        - name: DEFAULT_ACCOUNT_ID
-          valueFrom:
-            configMapKeyRef:
-              name: main-backend
-              key: DEFAULT_ACCOUNT_ID
-        - name: DEFAULT_ACCOUNT_NAME
-          valueFrom:
-            configMapKeyRef:
-              name: main-backend
-              key: DEFAULT_ACCOUNT_NAME
-        - name: DEFAULT_ACCOUNT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: main-backend-secret
-              key: DEFAULT_ACCOUNT_PASSWORD
-        - name: CONTACT_HOST
-          valueFrom:
-            secretKeyRef:
-              name: main-backend-secret
-              key: CONTACT_HOST
-        - name: CONTACT_EMAIL
-          valueFrom:
-            secretKeyRef:
-              name: main-backend-secret
-              key: CONTACT_EMAIL
-        - name: CONTACT_USER
-          valueFrom:
-            configMapKeyRef:
-              name: main-backend
-              key: CONTACT_USER
-        - name: CONTACT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: main-backend-secret
-              key: CONTACT_PASSWORD
+
 
 ---
 
