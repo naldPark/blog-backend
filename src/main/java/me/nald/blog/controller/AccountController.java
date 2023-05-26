@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.model.AccountRequest;
+import me.nald.blog.data.model.AccountStatusRequest;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.service.AccountService;
 import org.springframework.http.MediaType;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -49,9 +51,13 @@ public class AccountController {
     }
 
     @PutMapping(value = "/changeStatus")
-    public Callable<Object> changeStatus(HttpServletRequest request, @RequestBody int status, @RequestBody List<String> users) {
-        return () -> accountService.changeStatus(status, users);
+    public Callable<Object> changeStatus(HttpServletRequest request, @RequestBody AccountStatusRequest accountStatusRequest) {
+        return () -> accountService.changeStatus(accountStatusRequest);
     }
 
+    @PostMapping("/createUser")
+    public Callable<Object> createUser(@Valid  @RequestBody AccountRequest accountRequest) {
+        return () -> accountService.createUser(accountRequest);
+    }
 
 }

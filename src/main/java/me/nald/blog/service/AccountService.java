@@ -5,12 +5,14 @@ import lombok.RequiredArgsConstructor;
 import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.dto.StorageDto;
 import me.nald.blog.data.model.AccountRequest;
+import me.nald.blog.data.model.AccountStatusRequest;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.data.persistence.entity.AccountLog;
 import me.nald.blog.data.persistence.entity.Password;
 import me.nald.blog.data.vo.YN;
 import me.nald.blog.exception.ErrorException;
 import me.nald.blog.exception.ErrorSpec;
+import me.nald.blog.exception.Errors;
 import me.nald.blog.repository.AccountLogRepository;
 import me.nald.blog.repository.AccountRepository;
 import me.nald.blog.response.CommonResponse;
@@ -29,6 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static me.nald.blog.exception.ErrorSpec.AccessDeniedException;
+import static me.nald.blog.exception.ErrorSpec.DuplicatedId;
 
 @Service
 @Transactional(readOnly = true)
@@ -140,17 +145,55 @@ public class AccountService {
     }
 
     @Transactional
-    public Response.CommonRes changeStatus(int status, List<String> users) {
+    public Response.CommonRes createUser(AccountRequest accountInfo) {
         int statusCode = 200;
         HashMap<String, Object> data = new HashMap<>();
 
-        users.stream().forEach(s -> {
+        Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() -> ErrorException.of(ErrorSpec.InvalidParameterValue));
+        Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> ErrorException.of(ErrorSpec.InvalidParameterValue));
+        Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
+
+        if (user == null) {
+            Password password = Password.builder()
+                    .password(accountInfo.getPassword())
+                    .build();
+            Account account = Account.createAccount(
+                    accountInfo.getAccountId(),
+                    accountInfo.getAccountName(),
+                    accountInfo.getEmail(),
+                    accountInfo.getAuthority(),
+                    password,
+                    0
+            );
+            accountRepository.save(account);
+        } else{
+           throw Errors.of(DuplicatedId);
+        }
+
+        Response.CommonRes result = Response.CommonRes.builder()
+                .statusCode(statusCode)
+                .data(data)
+                .build();
+
+        return result;
+    }
+
+
+
+
+    @Transactional
+    public Response.CommonRes changeStatus(AccountStatusRequest accountStatusRequest) {
+        int statusCode = 200;
+        HashMap<String, Object> data = new HashMap<>();
+
+        accountStatusRequest.getUserIds().stream().forEach(s -> {
             Account user = accountRepository.findByAccountId(s);
-            user.setStatus(status);
+            System.out.println("날드 유저는 "+ user);
+            user.setStatus(accountStatusRequest.getStatus());
+            System.out.println("날드 유저는 "+ user);
             accountRepository.save(user);
         });
 
-        
         Response.CommonRes result = Response.CommonRes.builder()
                 .statusCode(statusCode)
                 .data(data)

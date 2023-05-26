@@ -16,9 +16,10 @@ public enum ErrorSpec {
     UserNotFound(NOT_FOUND, AUTH.code(3)),
     UserIdBlocked(FORBIDDEN, AUTH.code(4)),
     AuthCodeNotFound(NOT_FOUND, AUTH.code(5)),
-    UserIdDeleted(FORBIDDEN, AUTH.code(7)),
-    TokenNotFound(UNAUTHORIZED, AUTH.code(8)),
+    UserIdDeleted(FORBIDDEN, AUTH.code(6)),
+    TokenNotFound(UNAUTHORIZED, AUTH.code(7)),
     GroupIdDeleted(FORBIDDEN, AUTH.code(8)),
+
 
     // PASSWORD
     PasswordIsExpired(MOVED_PERMANENTLY, PASSWORD.code(1)),
@@ -27,6 +28,7 @@ public enum ErrorSpec {
     PasswordIsNotMatched(BAD_REQUEST, PASSWORD.code(4)),
     PasswordIsLocked(METHOD_NOT_ALLOWED, PASSWORD.code(5)),
     InvalidPassword(BAD_REQUEST, INVALID.code(6)),
+    DuplicatedId(BAD_REQUEST, INVALID.code(7)),
 
     InvalidParameterValue(BAD_REQUEST, INVALID.code(1));
 
