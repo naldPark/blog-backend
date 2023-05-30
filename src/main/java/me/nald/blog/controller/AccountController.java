@@ -59,4 +59,9 @@ public class AccountController {
         return () -> accountService.createUser(accountRequest);
     }
 
+    @RequireAuthSuper
+    @PutMapping("/editUser")
+    public Callable<Object> editUser(@RequestBody AccountRequest accountRequest) {
+        return () -> accountService.editUser(accountRequest);
+    }
 }

@@ -32,8 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static me.nald.blog.exception.ErrorSpec.AccessDeniedException;
-import static me.nald.blog.exception.ErrorSpec.DuplicatedId;
+import static me.nald.blog.exception.ErrorSpec.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -66,6 +65,7 @@ public class AccountService {
         return result;
 
     }
+
     @Transactional
     public Response.CommonRes getLogin(AccountRequest accountInfo) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -81,20 +81,20 @@ public class AccountService {
         String ipAddr = HttpServletRequestUtil.getRemoteIP(request);
         boolean isLocal = ipAddr.equals("127.0.0.1") || ipAddr.equals("localhosts");
 
-        if(user==null){
+        if (user == null) {
             statusCode = 401;
             data.put("error", "incorrect user");
-        }else if(!user.getPassword().isMatched(accountInfo.getPassword())){
+        } else if (!user.getPassword().isMatched(accountInfo.getPassword())) {
             statusCode = 401;
-            user.setLoginFailCnt(user.getLoginFailCnt()+1);
-            data.put("error", "incorrect password failed: "+user.getLoginFailCnt());
-            if(user.getLoginFailCnt() > 4){
+            user.setLoginFailCnt(user.getLoginFailCnt() + 1);
+            data.put("error", "incorrect password failed: " + user.getLoginFailCnt());
+            if (user.getLoginFailCnt() > 4) {
                 user.setStatus(1);
                 data.put("error", "your id has been blocked");
             }
-        }else if(user.getStatus() != 0){
+        } else if (user.getStatus() != 0) {
             data.put("error", "the account is not able to login");
-        }else{
+        } else {
             statusCode = 200;
             user.setLoginFailCnt(0);
             user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
@@ -103,8 +103,8 @@ public class AccountService {
             data.put("accountId", user.getAccountId());
             data.put("accountName", user.getAccountName());
         }
-        if(!isLocal){
-            if(statusCode == 200){
+        if (!isLocal) {
+            if (statusCode == 200) {
                 user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
                 AccountLog accountLog = AccountLog.createLog(user, ipAddr);
                 accountLogRepository.save(accountLog);
@@ -165,9 +165,37 @@ public class AccountService {
                     password,
                     0
             );
+            data.put("message", "succeeded");
             accountRepository.save(account);
-        } else{
-           throw Errors.of(DuplicatedId, "Id is duplicated");
+        } else {
+            throw Errors.of(DuplicatedId, "Id is duplicated");
+        }
+
+        Response.CommonRes result = Response.CommonRes.builder()
+                .statusCode(statusCode)
+                .data(data)
+                .build();
+
+        return result;
+    }
+
+    @Transactional
+    public Response.CommonRes editUser(AccountRequest accountInfo) {
+        int statusCode = 200;
+        HashMap<String, Object> data = new HashMap<>();
+
+        Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() -> ErrorException.of(ErrorSpec.InvalidParameterValue));
+        Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
+
+        if (user != null) {
+            user.setAccountName(accountInfo.getAccountName());
+            user.setEmail(accountInfo.getEmail());
+            user.setAuthority(Integer.parseInt(accountInfo.getAuthority()));
+//            user.setStatus();
+            data.put("message", "succeeded");
+            accountRepository.save(user);
+        } else {
+            throw Errors.of(UserNotFound, "user not found");
         }
 
         Response.CommonRes result = Response.CommonRes.builder()
@@ -179,8 +207,6 @@ public class AccountService {
     }
 
 
-
-
     @Transactional
     public Response.CommonRes changeStatus(AccountStatusRequest accountStatusRequest) {
         int statusCode = 200;
@@ -188,9 +214,9 @@ public class AccountService {
 
         accountStatusRequest.getUserIds().stream().forEach(s -> {
             Account user = accountRepository.findByAccountId(s);
-            System.out.println("날드 유저는 "+ user);
+            System.out.println("날드 유저는 " + user);
             user.setStatus(accountStatusRequest.getStatus());
-            System.out.println("날드 유저는 "+ user);
+            System.out.println("날드 유저는 " + user);
             accountRepository.save(user);
         });
 
