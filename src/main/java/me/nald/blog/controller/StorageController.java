@@ -57,11 +57,13 @@ public class StorageController {
         return () -> storageService.playVideo(videoId);
     }
 
+    @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{fileName}.m3u8")
     public ResponseEntity<Resource> videoHlsM3U8(@PathVariable String fileName) {
         return storageService.videoHlsM3U8(fileName);
     }
 
+    @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{tsName}.ts")
     public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
         return  storageService.videoHlsTs(fileName, tsName);
