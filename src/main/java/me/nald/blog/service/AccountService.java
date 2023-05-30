@@ -120,10 +120,10 @@ public class AccountService {
     }
 
     @Transactional
-    public Response.CommonRes editUser(AccountRequest accountInfo) {
+    public Response.CommonRes editPassword(AccountRequest accountInfo) {
         int statusCode = 200;
         HashMap<String, Object> data = new HashMap<>();
-
+        data.put("message", "succeeded");
         Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() -> ErrorException.of(ErrorSpec.InvalidParameterValue));
         Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> ErrorException.of(ErrorSpec.InvalidParameterValue));
         Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
@@ -161,13 +161,13 @@ public class AccountService {
                     accountInfo.getAccountId(),
                     accountInfo.getAccountName(),
                     accountInfo.getEmail(),
-                    accountInfo.getAuthority(),
+                    Integer.parseInt(accountInfo.getAuthority()),
                     password,
                     0
             );
             accountRepository.save(account);
         } else{
-           throw Errors.of(DuplicatedId);
+           throw Errors.of(DuplicatedId, "Id is duplicated");
         }
 
         Response.CommonRes result = Response.CommonRes.builder()

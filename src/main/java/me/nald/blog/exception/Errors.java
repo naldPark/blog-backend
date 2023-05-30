@@ -6,9 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
 import static java.util.regex.Matcher.quoteReplacement;
+
 import java.util.Arrays;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -17,16 +21,23 @@ public class Errors {
     private static ErrorMessages errorMessages;
 
     @Autowired
-    public void setErrorMessages(ErrorMessages  errorMessages) {
+    public void setErrorMessages(ErrorMessages errorMessages) {
         this.errorMessages = errorMessages;
     }
 
-    public static CommonException of (ErrorSpec spec, String... args) {
-            String temp=    Arrays.stream(args)
-                        .reduce(errorMessages.getErrorMessage(spec),
-                                (m, a) -> m.replaceFirst("%s", quoteReplacement(a))).replaceAll("%s", "");
+    public static CommonException of(ErrorSpec spec, String... args) {
 
-        ExceptionContainer<CommonException> exceptionContainer = new ExceptionContainer<>(() -> new CommonException(spec,temp));
+        String temp = "";
+        if (Arrays.asList(args).size() == 1) {
+            temp = Arrays.asList(args).stream().collect(Collectors.joining("/"));
+        } else {
+            temp = Arrays.stream(args)
+                .reduce(errorMessages.getErrorMessage(spec),
+                (m, a) -> m.replaceFirst("%s", quoteReplacement(a))).replaceAll("%s", "");
+        }
+
+        String finalTemp = temp;
+        ExceptionContainer<CommonException> exceptionContainer = new ExceptionContainer<>(() -> new CommonException(spec, finalTemp));
 
         return exceptionContainer.createContents();
     }
@@ -37,7 +48,7 @@ public class Errors {
         private final int code;
         private final String name;
 
-        private CommonException (HttpStatus httpStatus, int code, String name, String message) {
+        private CommonException(HttpStatus httpStatus, int code, String name, String message) {
             super(message);
             this.httpStatus = httpStatus;
             this.code = code;

@@ -1,6 +1,8 @@
 package me.nald.blog.controller;
 
 import lombok.AllArgsConstructor;
+import me.nald.blog.annotation.RequireAuthAll;
+import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.model.AccountRequest;
@@ -27,16 +29,11 @@ public class AccountController {
     private final AccountService accountService;
 
 
-    @GetMapping("/test")
-    public Callable<Object> list() {
-        return () ->  accountService.findMembers();
-    }
-
+    @RequireAuthAll
     @GetMapping("/list")
     public Callable<Object> getUserList(HttpServletRequest request) {
         return () -> accountService.getUserList();
     }
-
 
     @WithoutJwtCallable
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -45,16 +42,18 @@ public class AccountController {
         return () -> accountService.getLogin(accountRequest);
     }
 
-    @PutMapping(value = "/editUser")
-    public Callable<Object> editUser(HttpServletRequest request,  @RequestBody AccountRequest accountRequest) {
-        return () -> accountService.editUser(accountRequest);
+    @PutMapping(value = "/editPassword")
+    public Callable<Object> editPassword(HttpServletRequest request,  @RequestBody AccountRequest accountRequest) {
+        return () -> accountService.editPassword(accountRequest);
     }
 
+    @RequireAuthSuper
     @PutMapping(value = "/changeStatus")
     public Callable<Object> changeStatus(HttpServletRequest request, @RequestBody AccountStatusRequest accountStatusRequest) {
         return () -> accountService.changeStatus(accountStatusRequest);
     }
 
+    @RequireAuthSuper
     @PostMapping("/createUser")
     public Callable<Object> createUser(@Valid  @RequestBody AccountRequest accountRequest) {
         return () -> accountService.createUser(accountRequest);

@@ -40,7 +40,7 @@ public class AccountDto {
         private int loginFailCnt;
 
         public UserInfo(Account account) {
-            SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd hh:mm");
+            SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd");
             accountId = account.getAccountId();
             accountName = account.getAccountName();
             authority = account.getAuthority();
@@ -52,5 +52,7 @@ public class AccountDto {
         }
 
     }
+
+
 
 }

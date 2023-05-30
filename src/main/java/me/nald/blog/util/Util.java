@@ -3,6 +3,7 @@ package me.nald.blog.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.data.vo.AccountVO;
 import me.nald.blog.exception.Errors;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -138,8 +140,8 @@ public class Util {
         return mapList;
     }
 
-    public static String extractUserIdFromJwt(HttpServletRequest request) {
-        try {
+    public static AccountVO extractUserIdFromJwt(HttpServletRequest request) {
+//        try {
             String jwtToken = request.getHeader("Authorization");
             String tokenStr = jwtToken.substring("Bearer ".length());
             String[] tmp = tokenStr.split("\\.");
@@ -147,19 +149,20 @@ public class Util {
             org.apache.commons.codec.binary.Base64 base64Url = new org.apache.commons.codec.binary.Base64(true);
             JSONObject body = new JSONObject(new String(base64Url.decode(base64EncodedBody)));
             if (body.getLong("exp") * 1000 > System.currentTimeMillis()) {
+                AccountVO jwtInfo  =  AccountVO.jsonToObj(body);
                 String userId = body.getString(USER_ID);
                 if (!Util.verifyToken(tokenStr, userId, blogProperties.getPublicKey())) {
                     throw Errors.of(AccessDeniedException, "Invalid token");
                 }
                 request.setAttribute(AUTHORITY, body.getInt(AUTHORITY));
                 request.setAttribute(USER_ID, body.getString(USER_ID));
-                return userId;
+                return jwtInfo;
             } else {
                 throw Errors.of(AccessDeniedException, "Expired token");
             }
-        } catch (Exception e) {
-            throw Errors.of(AccessDeniedException, "Token parsing error");
-        }
+//        } catch (Exception e) {
+//            throw Errors.of(AccessDeniedException, "Token parsing error");
+//        }
     }
 
     static RSAPublicKey rsaPublicKey;

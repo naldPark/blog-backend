@@ -18,7 +18,7 @@ public class AccountRequest {
     @NotBlank
     private String password;
     @NotBlank
-    private int authority;
+    private String authority;
     @NotBlank
     private String email;
 

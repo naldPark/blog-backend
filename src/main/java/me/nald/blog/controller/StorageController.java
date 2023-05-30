@@ -2,6 +2,7 @@ package me.nald.blog.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.persistence.entity.Account;
@@ -46,40 +47,32 @@ public class StorageController {
 
     private final StorageService storageService;
 
-    @WithoutJwtCallable
     @GetMapping("/videoList")
     public Callable<Object> getVideoList(SearchItem searchItem) {
         return () -> storageService.getVideoList(searchItem);
     }
 
-
-    @WithoutJwtCallable
     @GetMapping("/playVideo/{videoId}")
     public Callable<Object> playVideo(@PathVariable Long videoId) {
         return () -> storageService.playVideo(videoId);
     }
 
-
-    @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{fileName}.m3u8")
     public ResponseEntity<Resource> videoHlsM3U8(@PathVariable String fileName) {
-
         return storageService.videoHlsM3U8(fileName);
     }
 
-    @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{tsName}.ts")
     public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
         return  storageService.videoHlsTs(fileName, tsName);
    }
 
-    @WithoutJwtCallable
     @GetMapping("/videoHls/{fileName}")
     public void videoHls(@PathVariable String fileName) {
         storageService.videoHls(fileName);
     }
 
-    @WithoutJwtCallable
+    @RequireAuthSuper
     @GetMapping("/download/{videoId}")
     public ResponseEntity<Resource> downloads(@PathVariable Long videoId) {
         return storageService.downloads(videoId);
