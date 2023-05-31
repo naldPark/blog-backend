@@ -42,6 +42,7 @@ public class StorageDto {
         Long fileSize;
         String fileType;
         String fileCover;
+        String vttSrc;
 
         public StorageInfo(Storage storage) {
             storageId = storage.getStorageId();
@@ -50,6 +51,7 @@ public class StorageDto {
             fileSize = storage.getFileSize();
             fileType= storage.getFileType();
             fileCover = storage.getFileCover();
+            vttSrc = storage.getVttSrc();
         }
     }
 }

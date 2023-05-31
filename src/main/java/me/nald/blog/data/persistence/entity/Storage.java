@@ -29,6 +29,9 @@ public class Storage {
     @Column(name = "file_src", nullable = false)
     private String fileSrc;
 
+    @Column(name = "vtt_src", nullable = false)
+    private String vttSrc;
+
     @Column(name = "file_size", nullable = false)
     private Long fileSize;
 

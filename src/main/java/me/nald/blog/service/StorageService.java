@@ -118,9 +118,9 @@ public class StorageService {
             String movieDir = blogProperties.getCommonPath() + "/movie";
             String fileName = FilenameUtils.getBaseName(movieName);
             String inputPath = movieDir + "/upload/";
-            String HlsPath = movieDir + "/hls/" + fileName + "/";
+            String hlsPath = movieDir + "/hls/" + fileName + "/";
 
-            File folder = new File(HlsPath);
+            File folder = new File(hlsPath);
             if (!folder.exists()) {
                 folder.mkdir();
             }
@@ -130,7 +130,7 @@ public class StorageService {
             FFmpegBuilder builder = new FFmpegBuilder()
                     .overrideOutputFiles(true)
                     .setInput(inputPath + movieName)
-                    .addOutput(HlsPath + fileName + ".m3u8")
+                    .addOutput(hlsPath + fileName + ".m3u8")
                     .addExtraArgs("-profile:v", "baseline")
                     .addExtraArgs("-level", "3.0")
                     .addExtraArgs("-start_number", "0")
@@ -160,8 +160,8 @@ public class StorageService {
 
         String movieDir = blogProperties.getCommonPath() + "/movie";
         String fileName = FilenameUtils.getBaseName(movieName);
-        String HlsPath = movieDir + "/hls/" + fileName + "/";
-        String fileFullPath = HlsPath + fileName + ".m3u8";
+        String hlsPath = movieDir + "/hls/" + fileName + "/";
+        String fileFullPath = hlsPath + fileName + ".m3u8";
         Path filePath = Paths.get(fileFullPath);
         Resource resource = new FileSystemResource(filePath) {
             @Override
@@ -183,11 +183,36 @@ public class StorageService {
 
     }
 
+    public ResponseEntity<Resource> videoHlsVtt(String movieName, String language) {
+
+        String movieDir = blogProperties.getCommonPath() + "/movie";
+        String fileName = FilenameUtils.getBaseName(movieName);
+        String fileFullPath = movieDir + "/vtt/" + fileName + "_" + language + ".vtt";
+        Path filePath = Paths.get(fileFullPath);
+        Resource resource = new FileSystemResource(filePath) {
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return new FileInputStream(filePath.toFile()) {
+                    @Override
+                    public void close() throws IOException {
+                        super.close();
+                    }
+                };
+            }
+        };
+        HttpHeaders headers = new HttpHeaders();
+        MediaType mediaType = MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDisposition(ContentDisposition.builder("attachment").filename(resource.getFilename()).build());
+        headers.setContentType(mediaType);
+        return ResponseEntity.ok().headers(headers).body(resource);
+
+    }
+
     public ResponseEntity<Resource> videoHlsTs(String movieName, String tsName) {
         String movieDir = blogProperties.getCommonPath() + "/movie";
         String fileName = FilenameUtils.getBaseName(movieName);
-        String HlsPath = movieDir + "/hls/" + fileName + "/";
-        String fileFullPath = HlsPath + tsName + ".ts";
+        String hlsPath = movieDir + "/hls/" + fileName + "/";
+        String fileFullPath = hlsPath + tsName + ".ts";
 
         Path filePath = Paths.get(fileFullPath);
         Resource resource = new FileSystemResource(filePath) {
