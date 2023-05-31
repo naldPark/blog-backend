@@ -183,7 +183,7 @@ public class StorageService {
 
     }
 
-    public ResponseEntity<Resource> videoHlsVtt(String movieName, String language) {
+    public ResponseEntity<Resource> videoVtt(String movieName, String language) {
 
         String movieDir = blogProperties.getCommonPath() + "/movie";
         String fileName = FilenameUtils.getBaseName(movieName);

@@ -64,9 +64,9 @@ public class StorageController {
     }
 
     @WithoutJwtCallable
-    @GetMapping("/hls/{fileName}/{language}.vtt")
-    public ResponseEntity<Resource> videoHlsVtt(@PathVariable String fileName,  @PathVariable String language) {
-        return storageService.videoHlsVtt(fileName, language);
+    @GetMapping("/vtt/{fileName}_{language}.vtt")
+    public ResponseEntity<Resource> videoVtt(@PathVariable String fileName,  @PathVariable String language) {
+        return storageService.videoVtt(fileName, language);
     }
 
     @WithoutJwtCallable
