@@ -17,6 +17,7 @@ import me.nald.blog.model.SearchItem;
 import me.nald.blog.repository.StorageRepository;
 import me.nald.blog.response.CommonResponse;
 import me.nald.blog.response.Response;
+import me.nald.blog.util.FileUtils;
 import me.nald.blog.util.Util;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
@@ -31,12 +32,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -57,12 +57,6 @@ public class StorageService {
     public void setBlogProperties(BlogProperties blogProperties) {
         this.blogProperties = blogProperties;
     }
-
-
-//    public List<StorageDto.StorageInfo> getVideoList(SearchItem searchItem){
-//        System.out.println(searchItem);
-//        return storageRepository.findAll().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
-//    }
 
     public StorageDto.getStorageList getVideoList(SearchItem searchItem){
 
@@ -112,7 +106,7 @@ public class StorageService {
         return map;
     }
 
-    public Boolean videoHls(String movieName) {
+    public Boolean convertVideoHls(String movieName) {
         Boolean result = false;
         try {
             String movieDir = blogProperties.getCommonPath() + "/movie";
@@ -261,13 +255,15 @@ public class StorageService {
     }
 
 
-    //    public void uploadVideo(List<MultipartFile> files, String userId, Long noticeId, int groupId) {
-//        String noticeFilePath = Constants.FILE_MANAGER_PATH_PREFIX + Constants.NOTICE_FILE_PATH;
-//        String folderPath = noticeFilePath + "/" + noticeId;
+//        public void uploadVideo(List<MultipartFile> files, String movieName) {
+//
+//        String movieDir = blogProperties.getCommonPath() + "/movie";
+//        String inputPath = movieDir + "/upload/";
+//        String fullPath = inputPath + movieName;
 //        try {
 //            for (int i = 0; i < files.size(); ++i) {
 //                MultipartFile currentFile = files.get(i);
-//                FileUtils.createDirectoriesIfNotExists(folderPath);
+//                FileUtils.createDirectoriesIfNotExists(inputPath);
 //                String fileName = currentFile.getOriginalFilename();
 //                String ext = fileName.substring(fileName.lastIndexOf("."));
 //                String filePath = folderPath + "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000) + i + ext;

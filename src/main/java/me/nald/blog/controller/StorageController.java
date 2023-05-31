@@ -75,9 +75,9 @@ public class StorageController {
         return  storageService.videoHlsTs(fileName, tsName);
    }
 
-    @GetMapping("/videoHls/{fileName}")
-    public void videoHls(@PathVariable String fileName) {
-        storageService.videoHls(fileName);
+    @GetMapping("/convertVideoHls/{fileName}")
+    public void convertVideoHls(@PathVariable String fileName) {
+        storageService.convertVideoHls(fileName);
     }
 
     @RequireAuthSuper
@@ -85,6 +85,15 @@ public class StorageController {
     public ResponseEntity<Resource> downloads(@PathVariable Long videoId) {
         return storageService.downloads(videoId);
     }
+
+
+//    @RequireAuthSuper
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public Callable<Object> uploadVideo(@RequestPart(value="files", required=false) List<MultipartFile> files,
+//                                               @RequestPart(value = "body") CreateAdminNotice body,
+//                                               HttpServletRequest request) {
+//        return storageService.uploadVideo(files, body);
+//    }
 
 
 //    @AdminCallable
