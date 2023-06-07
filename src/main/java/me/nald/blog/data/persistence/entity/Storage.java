@@ -50,5 +50,19 @@ public class Storage {
     @UpdateTimestamp
     private Timestamp createdDt;
 
+    public static Storage createStorage(String fileName,
+                                        Long fileSize,
+                                        String fileType,
+                                        String fileCover,
+                                        YN fileAuth) {
+        Storage storage = new Storage();
+        storage.setFileName(fileName);
+        storage.setFileSize(fileSize);
+        storage.setFileCover(fileCover);
+        storage.setFileType(fileType);
+        storage.setFileAuth(fileAuth);
+        return storage;
+    }
+
 }
 

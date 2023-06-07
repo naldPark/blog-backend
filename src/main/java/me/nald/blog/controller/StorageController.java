@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountDto;
+import me.nald.blog.data.model.StorageRequest;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.model.SearchItem;
 import me.nald.blog.service.AccountService;
@@ -52,34 +53,41 @@ public class StorageController {
         return () -> storageService.getVideoList(searchItem);
     }
 
-    @GetMapping("/playVideo/{videoId}")
-    public Callable<Object> playVideo(@PathVariable Long videoId) {
-        return () -> storageService.playVideo(videoId);
+    // 단 건 비디오 상세정보
+    @GetMapping("/getVideoDetail/{videoId}")
+    public Callable<Object> getVideoDetail(@PathVariable Long videoId) {
+        return () -> storageService.getVideoDetail(videoId);
     }
 
+    // 스트리밍 최초 정보 로드
     @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{fileName}.m3u8")
     public ResponseEntity<Resource> videoHlsM3U8(@PathVariable String fileName) {
         return storageService.videoHlsM3U8(fileName);
     }
+    
+    // 스트리밍 파일 호출
+    @WithoutJwtCallable
+    @GetMapping("/hls/{fileName}/{tsName}.ts")
+    public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
+        return  storageService.videoHlsTs(fileName, tsName);
+    }
 
+    // 자막 로드
     @WithoutJwtCallable
     @GetMapping("/vtt/{fileName}_{language}.vtt")
     public ResponseEntity<Resource> videoVtt(@PathVariable String fileName,  @PathVariable String language) {
         return storageService.videoVtt(fileName, language);
     }
 
-    @WithoutJwtCallable
-    @GetMapping("/hls/{fileName}/{tsName}.ts")
-    public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
-        return  storageService.videoHlsTs(fileName, tsName);
-   }
 
+    // 파일 타입 변환
     @GetMapping("/convertVideoHls/{fileName}")
     public void convertVideoHls(@PathVariable String fileName) {
         storageService.convertVideoHls(fileName);
     }
 
+    // 다운로드 파일
     @RequireAuthSuper
     @GetMapping("/download/{videoId}")
     public ResponseEntity<Resource> downloads(@PathVariable Long videoId) {
@@ -87,13 +95,13 @@ public class StorageController {
     }
 
 
-//    @RequireAuthSuper
-//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public Callable<Object> uploadVideo(@RequestPart(value="files", required=false) List<MultipartFile> files,
-//                                               @RequestPart(value = "body") CreateAdminNotice body,
-//                                               HttpServletRequest request) {
-//        return storageService.uploadVideo(files, body);
-//    }
+    @RequireAuthSuper
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Callable<Object> uploadVideo(@RequestPart(value="files", required=false) List<MultipartFile> files,
+                                               @RequestPart(value = "body") StorageRequest body,
+                                               HttpServletRequest request) {
+        return () -> storageService.uploadVideo(files, body);
+    }
 
 
 //    @AdminCallable

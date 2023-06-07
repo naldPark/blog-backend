@@ -1,24 +1,19 @@
 package me.nald.blog.service;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.QueryResults;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
-import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.dto.StorageDto;
+import me.nald.blog.data.model.StorageRequest;
 import me.nald.blog.data.persistence.entity.Account;
-import me.nald.blog.data.persistence.entity.QAccount;
 import me.nald.blog.data.persistence.entity.QStorage;
 import me.nald.blog.data.persistence.entity.Storage;
 import me.nald.blog.model.SearchItem;
 import me.nald.blog.repository.StorageRepository;
-import me.nald.blog.response.CommonResponse;
-import me.nald.blog.response.Response;
 import me.nald.blog.util.FileUtils;
-import me.nald.blog.util.Util;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
@@ -28,7 +23,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +91,7 @@ public class StorageService {
                 .build();
     }
 
-    public Map<String, Object> playVideo(Long videoId) {
+    public Map<String, Object> getVideoDetail(Long videoId) {
         HashMap<String, Object> map = new HashMap<>();
         Storage storage = storageRepository.getById(videoId);
         StorageDto.StorageInfo res = new StorageDto.StorageInfo(storage);
@@ -252,6 +246,41 @@ public class StorageService {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
+    }
+
+    public Map<String, Object> uploadVideo(List<MultipartFile> files, StorageRequest info) {
+        HashMap<String, Object> map = new HashMap<>();
+        String movieDir = blogProperties.getCommonPath() + "/movie";
+        String inputPath = movieDir + "/upload/";
+        String fullPath = inputPath + info.getFileName();
+        try {
+            for (int i = 0; i < files.size(); ++i) {
+                MultipartFile currentFile = files.get(i);
+                FileUtils.createDirectoriesIfNotExists(inputPath);
+                String fileName = currentFile.getOriginalFilename();
+                String ext = fileName.substring(fileName.lastIndexOf("."));
+                String filePath = fullPath + "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000) + i + ext;
+                Storage storageInfo = Storage.createStorage(
+                        info.getFileName(),
+                        info.getFileSize(),
+                        info.getFileType(),
+                        info.getFileCover(),
+                        info.getFileAuth()
+                );
+                InputStream readStream = currentFile.getInputStream();
+                byte[] readBytes = new byte[4096];
+                OutputStream writeStream = Files.newOutputStream(Paths.get(filePath));
+                while(readStream.read(readBytes) > 0) {
+                    writeStream.write(readBytes);
+                }
+                writeStream.close();
+                storageRepository.save(storageInfo);
+            }
+            map.put("statusCode", 200);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return map;
     }
 
 
