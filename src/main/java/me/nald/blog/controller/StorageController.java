@@ -95,12 +95,18 @@ public class StorageController {
     }
 
 
+    // 업로드
     @RequireAuthSuper
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Callable<Object> uploadVideo(@RequestPart(value="files", required=false) List<MultipartFile> files,
-                                               @RequestPart(value = "body") StorageRequest body,
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, value = "/uploadLocal")
+        public Callable<Object> uploadVideo(@RequestPart StorageRequest info,
+                                            @RequestPart(value="file", required=true) MultipartFile file,
+                                            @RequestPart(value="fileCover", required=false) MultipartFile fileCover,
+                                            @RequestPart(value="fileVtt", required=false) MultipartFile fileVtt,
                                                HttpServletRequest request) {
-        return () -> storageService.uploadVideo(files, body);
+        info.setFile(file);
+        info.setFileVtt(fileVtt);
+        info.setFileCover(fileCover);
+        return () -> storageService.uploadVideo(info);
     }
 
 

@@ -11,6 +11,7 @@ import me.nald.blog.data.model.StorageRequest;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.data.persistence.entity.QStorage;
 import me.nald.blog.data.persistence.entity.Storage;
+import me.nald.blog.data.vo.YN;
 import me.nald.blog.model.SearchItem;
 import me.nald.blog.repository.StorageRepository;
 import me.nald.blog.util.FileUtils;
@@ -248,24 +249,25 @@ public class StorageService {
         }
     }
 
-    public Map<String, Object> uploadVideo(List<MultipartFile> files, StorageRequest info) {
+    public Map<String, Object> uploadVideo(StorageRequest info) {
+        System.out.println("인포정보"+ info);
         HashMap<String, Object> map = new HashMap<>();
         String movieDir = blogProperties.getCommonPath() + "/movie";
         String inputPath = movieDir + "/upload/";
         String fullPath = inputPath + info.getFileName();
+        String fileCoverPath = "";
         try {
-            for (int i = 0; i < files.size(); ++i) {
-                MultipartFile currentFile = files.get(i);
+                MultipartFile currentFile = info.getFile();
                 FileUtils.createDirectoriesIfNotExists(inputPath);
                 String fileName = currentFile.getOriginalFilename();
                 String ext = fileName.substring(fileName.lastIndexOf("."));
-                String filePath = fullPath + "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000) + i + ext;
+                String filePath = fullPath + "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000) + ext;
                 Storage storageInfo = Storage.createStorage(
                         info.getFileName(),
                         info.getFileSize(),
-                        info.getFileType(),
-                        info.getFileCover(),
-                        info.getFileAuth()
+                        "g",
+                        fileCoverPath,
+                        YN.Y
                 );
                 InputStream readStream = currentFile.getInputStream();
                 byte[] readBytes = new byte[4096];
@@ -275,7 +277,6 @@ public class StorageService {
                 }
                 writeStream.close();
                 storageRepository.save(storageInfo);
-            }
             map.put("statusCode", 200);
         } catch (IOException e) {
             throw new RuntimeException(e);
