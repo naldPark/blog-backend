@@ -100,12 +100,12 @@ public class StorageController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, value = "/uploadLocal")
         public Callable<Object> uploadVideo(@RequestPart StorageRequest info,
                                             @RequestPart(value="file", required=true) MultipartFile file,
-                                            @RequestPart(value="fileCover", required=false) MultipartFile fileCover,
+//                                            @RequestPart(value="fileCover", required=false) MultipartFile fileCover,
                                             @RequestPart(value="fileVtt", required=false) MultipartFile fileVtt,
                                                HttpServletRequest request) {
         info.setFile(file);
         info.setFileVtt(fileVtt);
-        info.setFileCover(fileCover);
+//        info.setFileCover(fileCover);
         return () -> storageService.uploadVideo(info);
     }
 

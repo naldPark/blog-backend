@@ -23,9 +23,13 @@ public class StorageRequest {
     @NotBlank
     private String category;
     private String description;
+    private Boolean fileAuth;
     private Boolean fileDownload;
     @NotBlank
     private MultipartFile file;
-    private MultipartFile fileCover;
+    private String fileCover;
+//    private MultipartFile fileCover;
     private MultipartFile fileVtt;
+
+
 }

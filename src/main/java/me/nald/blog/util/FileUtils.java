@@ -68,6 +68,7 @@ public class FileUtils {
     }
 
     public static String readFile(String fullPath) throws IOException {
+
         Path path = Paths.get(fullPath);
         return readFile(path);
     }

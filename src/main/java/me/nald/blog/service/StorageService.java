@@ -4,11 +4,13 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+
+import java.awt.image.BufferedImage;
+import java.util.Map.Entry;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.StorageDto;
 import me.nald.blog.data.model.StorageRequest;
-import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.data.persistence.entity.QStorage;
 import me.nald.blog.data.persistence.entity.Storage;
 import me.nald.blog.data.vo.YN;
@@ -29,7 +31,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
+import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,7 +57,7 @@ public class StorageService {
         this.blogProperties = blogProperties;
     }
 
-    public StorageDto.getStorageList getVideoList(SearchItem searchItem){
+    public StorageDto.getStorageList getVideoList(SearchItem searchItem) {
 
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
 
@@ -73,7 +77,7 @@ public class StorageService {
                 .where(builder)
                 .orderBy(storage.fileName.asc().nullsLast());
 
-        if(searchItem.getLimit() != 0){
+        if (searchItem.getLimit() != 0) {
             query.offset(searchItem.getOffset());
             query.limit(searchItem.getLimit());
         }
@@ -226,7 +230,7 @@ public class StorageService {
 
     public ResponseEntity<Resource> downloads(Long videoId) {
         Storage storage = storageRepository.getById(videoId);
-        Path filePath = Paths.get(blogProperties.getCommonPath()+"/movie"+storage.getDownloadSrc());
+        Path filePath = Paths.get(blogProperties.getCommonPath() + "/movie" + storage.getDownloadSrc());
         try {
             Resource resource = new FileSystemResource(filePath) {
                 @Override
@@ -249,34 +253,76 @@ public class StorageService {
         }
     }
 
+    private String getMultiFileExt(MultipartFile file) {
+        if(file !=null){
+            return file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        }else{
+            return null;
+        }
+    }
+
+
+    @Transactional
     public Map<String, Object> uploadVideo(StorageRequest info) {
-        System.out.println("인포정보"+ info);
         HashMap<String, Object> map = new HashMap<>();
         String movieDir = blogProperties.getCommonPath() + "/movie";
-        String inputPath = movieDir + "/upload/";
-        String fullPath = inputPath + info.getFileName();
-        String fileCoverPath = "";
+        String saveFileName = "/"+System.currentTimeMillis() + (int) (Math.random() * 1000000);
+        String uploadPath = "/upload" + saveFileName ;
+
         try {
-                MultipartFile currentFile = info.getFile();
-                FileUtils.createDirectoriesIfNotExists(inputPath);
-                String fileName = currentFile.getOriginalFilename();
-                String ext = fileName.substring(fileName.lastIndexOf("."));
-                String filePath = fullPath + "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000) + ext;
-                Storage storageInfo = Storage.createStorage(
-                        info.getFileName(),
-                        info.getFileSize(),
-                        "g",
-                        fileCoverPath,
-                        YN.Y
-                );
-                InputStream readStream = currentFile.getInputStream();
+            FileUtils.createDirectoriesIfNotExists(movieDir+uploadPath);
+            String fileExt = null;
+            String vttExt = null;
+            String imageExt = null;
+
+            Map<String, MultipartFile> files = new HashMap<>();
+            if(info.getFile()!=null) {
+                fileExt = uploadPath + saveFileName+getMultiFileExt(info.getFile());
+                files.put(fileExt, info.getFile());
+            }
+            if(info.getFileVtt()!=null) {
+                vttExt = uploadPath + saveFileName+getMultiFileExt(info.getFileVtt());
+                files.put(vttExt, info.getFileVtt());
+            }
+
+            if(info.getFileCover()!=null) {
+
+                String[] imageInfo = info.getFileCover().split(",");
+                String extension = imageInfo[0].replace("data:image/","").replace(";base64","");
+                byte[] data = DatatypeConverter.parseBase64Binary(imageInfo[1]);
+//                String path = movieDir + "test."+extension;
+                imageExt = uploadPath +saveFileName + "." + extension;
+                File file = new File(movieDir + imageExt);
+                try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
+                    outputStream.write(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Set<String> keySet = files.keySet();
+            for (String key : keySet) {
+                InputStream readStream = files.get(key).getInputStream();
                 byte[] readBytes = new byte[4096];
-                OutputStream writeStream = Files.newOutputStream(Paths.get(filePath));
-                while(readStream.read(readBytes) > 0) {
+                OutputStream writeStream = Files.newOutputStream(Paths.get(movieDir+key));
+                while (readStream.read(readBytes) > 0) {
                     writeStream.write(readBytes);
                 }
                 writeStream.close();
-                storageRepository.save(storageInfo);
+            }
+
+            Storage storageInfo = Storage.createStorage(
+                    info.getFileName(),
+                    info.getFileSize(),
+                    fileExt,
+                    info.getCategory(),
+                    imageExt,
+                    vttExt,
+                    YN.convert(info.getFileAuth()),
+                    YN.convert(info.getFileDownload())
+            );
+
+            storageRepository.save(storageInfo);
             map.put("statusCode", 200);
         } catch (IOException e) {
             throw new RuntimeException(e);
