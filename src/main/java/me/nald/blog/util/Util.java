@@ -22,6 +22,9 @@ import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -193,6 +196,18 @@ public class Util {
             log.error("Error loading public key", e);
         }
         return null;
+    }
+
+    public static String storageImgToString(String path) {
+        try {
+            String movieDir = blogProperties.getCommonPath() + "/movie";
+            byte[] bytes = Files.readAllBytes(Paths.get(movieDir +path));
+            String fileExtName = path.substring(path.lastIndexOf(".") + 1);
+            String base64EncodedImageBytes = Base64.getEncoder().encodeToString(bytes);
+            return  "data:image/"+fileExtName+";base64, "+base64EncodedImageBytes;
+        } catch (IOException e) {
+            return  null;
+        }
     }
 
 }

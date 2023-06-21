@@ -5,6 +5,7 @@ import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.data.persistence.entity.Storage;
 import me.nald.blog.util.FileUtils;
+import me.nald.blog.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.Column;
@@ -59,17 +60,7 @@ public class StorageDto {
             fileSrc = storage.getFileSrc();
             fileSize = storage.getFileSize();
             fileType= storage.getFileType();
-//            fileCover = storage.getFileCover();
-            System.out.println("=================");
-            System.out.println("C:/nfs" + "/movie" +storage.getFileCover());
-
-            try {
-                byte[] bytes = Files.readAllBytes(Paths.get("C:/nfs/movie" +storage.getFileCover()));
-                String base64EncodedImageBytes = Base64.getEncoder().encodeToString(bytes);
-                fileCover = base64EncodedImageBytes;
-            } catch (IOException e) {
-                fileCover = null;
-            }
+            fileCover =  Util.storageImgToString(storage.getFileCover());
             vttSrc = storage.getVttSrc();
         }
     }
