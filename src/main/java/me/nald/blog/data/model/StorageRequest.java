@@ -14,8 +14,6 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class StorageRequest {
 
-//    @NotBlank
-//    private String accountId;
     @NotBlank
     private String fileName;
     @NotBlank
@@ -28,7 +26,6 @@ public class StorageRequest {
     @NotBlank
     private MultipartFile file;
     private String fileCover;
-//    private MultipartFile fileCover;
     private MultipartFile fileVtt;
 
 

@@ -65,27 +65,28 @@ public class StorageController {
     public ResponseEntity<Resource> videoHlsM3U8(@PathVariable String fileName) {
         return storageService.videoHlsM3U8(fileName);
     }
-    
+
     // 스트리밍 파일 호출
     @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{tsName}.ts")
     public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
-        return  storageService.videoHlsTs(fileName, tsName);
+        return storageService.videoHlsTs(fileName, tsName);
     }
 
     // 자막 로드
     @WithoutJwtCallable
     @GetMapping("/vtt/{fileName}_{language}.vtt")
-    public ResponseEntity<Resource> videoVtt(@PathVariable String fileName,  @PathVariable String language) {
+    public ResponseEntity<Resource> videoVtt(@PathVariable String fileName, @PathVariable String language) {
         return storageService.videoVtt(fileName, language);
     }
 
 
     // 파일 타입 변환
-    @GetMapping("/convertVideoHls/{fileName}")
-    public void convertVideoHls(@PathVariable String fileName) {
-        storageService.convertVideoHls(fileName);
-    }
+//    @RequireAuthSuper
+//    @GetMapping("/convertVideoHls/{videoId}")
+//    public void convertVideoHls(@PathVariable Long videoId) {
+//        storageService.convertVideoHls(videoId);
+//    }
 
     // 다운로드 파일
     @RequireAuthSuper
@@ -98,35 +99,14 @@ public class StorageController {
     // 업로드
     @RequireAuthSuper
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, value = "/uploadLocal")
-        public Callable<Object> uploadVideo(@RequestPart StorageRequest info,
-                                            @RequestPart(value="file", required=true) MultipartFile file,
-//                                            @RequestPart(value="fileCover", required=false) MultipartFile fileCover,
-                                            @RequestPart(value="fileVtt", required=false) MultipartFile fileVtt,
-                                               HttpServletRequest request) {
+    public Callable<Object> uploadVideo(@RequestPart StorageRequest info,
+                                        @RequestPart(value = "file", required = true) MultipartFile file,
+                                        @RequestPart(value = "fileVtt", required = false) MultipartFile fileVtt,
+                                        HttpServletRequest request) {
         info.setFile(file);
         info.setFileVtt(fileVtt);
-//        info.setFileCover(fileCover);
         return () -> storageService.uploadVideo(info);
     }
-
-
-//    @AdminCallable
-//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public Callable<ResponseObject> uploadVideo(@RequestPart(value="files", required=false) List<MultipartFile> files,
-//                                               @RequestPart(value = "body") CreateAdminNotice body,
-//                                               HttpServletRequest request) {
-//        return () -> {
-//            if (request.getHeader(Constants.REQUEST_HEADER_KEY_USER_GROUP) == null){
-//                throw new NotFoundUserGroupException(log);
-//            }
-//            body.setGroupId(Integer.valueOf(request.getHeader(Constants.REQUEST_HEADER_KEY_USER_GROUP)));
-//            body.setUserId(String.valueOf(request.getAttribute(Constants.REQUEST_ATTRIBUTE_KEY_USER_ID)));
-//            adminNoticeService.createNotice(files, body);
-//            ResponseObject responseObject = new ResponseObject();
-//            responseObject.putResult(null);
-//            return responseObject;
-//        };
-//    }
 
 
 }
