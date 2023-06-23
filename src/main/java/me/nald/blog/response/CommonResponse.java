@@ -16,20 +16,6 @@ public class CommonResponse extends Response {
         data = new HashMap<>();
     }
 
-    @Getter
-    @NoArgsConstructor(access = AccessLevel.PROTECTED)
-    public static class OnPremiseTokenRes {
-        private int statusCode;
-
-        private Map<String, Object> data;
-
-        @Builder
-        private OnPremiseTokenRes(int statusCode, Map<String, Object > data) {
-            this.statusCode = statusCode;
-            this.data = data;
-        }
-    }
-    
     private CommonResponse(HashMap<String, Object> data) {
         this();
         this.data.putAll(data);

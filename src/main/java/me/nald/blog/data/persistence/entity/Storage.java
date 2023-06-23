@@ -28,6 +28,9 @@ public class Storage {
     @Column(name = "download_src", nullable = false)
     private String downloadSrc;
 
+    @Column(name = "status", nullable = false)
+    private Storage.Status status;
+
     @Column(name = "file_src", nullable = false)
     private String fileSrc;
 
@@ -77,6 +80,56 @@ public class Storage {
         storage.setFileAuth(fileAuth);
         storage.setFileDownload(fileDownload);
         return storage;
+    }
+
+
+    @Getter
+    public enum Status {
+        Converted("Converted"),
+        Progressing("Progressing"),
+        Inactive("Inactive"),
+        Deleted("Deleted");
+
+        private String description;
+
+        Status(String description) {this.description = description;}
+
+        public static Status from(int ordinal) {
+            switch (ordinal) {
+                case 1:
+                    return Converted;
+                case 2:
+                    return Progressing;
+                case 3:
+                default:
+                    return Inactive;
+                case 4:
+                    return Deleted;
+            }
+        }
+
+
+        @Override
+        public String toString() {
+            return super.toString();
+        }
+
+        public boolean isConverted () {
+            return Converted.equals(this);
+        }
+
+        public boolean isProgressing () {
+            return Progressing.equals(this);
+        }
+
+        public boolean isInactived () {
+            return Inactive.equals(this);
+        }
+
+        public boolean isDeleted () {
+            return Deleted.equals(this);
+        }
+
     }
 
 }

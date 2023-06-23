@@ -115,8 +115,25 @@ public class StorageService {
         return map;
     }
 
+    @Transactional
+    public void requestConvertVideoHls(Long videoId) {
+        Storage storage = storageRepository.getById(videoId);
+        storage.setStatus(Storage.Status.Progressing);
+        storageRepository.save(storage);
+        convertVideoHls(storage);
+    }
+
+    public HashMap<String, Object> getConvertVideoStatus(Long videoId){
+        HashMap<String, Object> map = new HashMap<>();
+        Storage storage = storageRepository.getById(videoId);
+        map.put("statusCode", 200);
+        map.put("status", storage.getStatus().toString());
+
+        return map;
+    }
+
+    @Transactional
     public void convertVideoHls(Storage storage) {
-        System.out.println("오긴오냐;");
         if (storage.getFileSrc() != null) {
             throw Errors.of(AlreadyExists, "AlreadyExists");
         } else {
@@ -152,8 +169,11 @@ public class StorageService {
                 builder.setVerbosity(FFmpegBuilder.Verbosity.INFO);
                 FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
                 FFmpegJob job = executor.createJob(builder);
-                System.out.println("여기가 끝");
+                System.out.println("before run job state!!! is " + job.getState());
                 job.run();
+                storage.setFileSrc(hlsPath + fileName + ".m3u8");
+                storage.setStatus(Storage.Status.Converted);
+                storageRepository.save(storage);
             } catch (IOException e) {
                 e.printStackTrace();
             }

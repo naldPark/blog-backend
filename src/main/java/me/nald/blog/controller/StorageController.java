@@ -57,11 +57,17 @@ public class StorageController {
 
 
     // 파일 타입 변환
-//    @RequireAuthSuper
-//    @GetMapping("/convertVideoHls/{videoId}")
-//    public void convertVideoHls(@PathVariable Long videoId) {
-//        storageService.convertVideoHls(videoId);
-//    }
+    @RequireAuthSuper
+    @GetMapping("/convertVideoHls/{videoId}")
+    public void convertVideoHls(@PathVariable Long videoId) {
+        storageService.requestConvertVideoHls(videoId);
+    }
+
+    // 업로드 상태 확인
+    @GetMapping("/getConvertVideoStatus/{videoId}")
+    public Callable<Object> getConvertVideoStatus(@PathVariable Long videoId) {
+        return () ->  storageService.getConvertVideoStatus(videoId);
+    }
 
     // 다운로드 파일
     @RequireAuthSuper
