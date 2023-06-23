@@ -115,10 +115,8 @@ public class StorageService {
         return map;
     }
 
-    @Async
-    public void convertVideoHls(Long videoId) {
-
-        Storage storage = storageRepository.getById(videoId);
+    public void convertVideoHls(Storage storage) {
+        System.out.println("오긴오냐;");
         if (storage.getFileSrc() != null) {
             throw Errors.of(AlreadyExists, "AlreadyExists");
         } else {
@@ -274,223 +272,67 @@ public class StorageService {
         }
     }
 
-
     @Transactional
-    @Async
-    public Map<String, Object> uploadVideo1(StorageRequest info) {
-        HashMap<String, Object> map = new HashMap<>();
-        String movieDir = blogProperties.getCommonPath() + "/movie";
-        String saveFileName = "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000);
-        String uploadPath = "/upload" + saveFileName;
-        System.out.println("1번");
-
-        try {
-            FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String fileExt = null;
-        String vttExt = null;
-        String imageExt = null;
-        System.out.println("2번");
-        Map<String, MultipartFile> files = new HashMap<>();
-        if (info.getFile() != null) {
-            fileExt = uploadPath + saveFileName + getMultiFileExt(info.getFile());
-            files.put(fileExt, info.getFile());
-        }
-        System.out.println("3번" + info.getFileVtt() == null);
-        if (info.getFileVtt() != null) {
-            vttExt = uploadPath + saveFileName + getMultiFileExt(info.getFileVtt());
-            files.put(vttExt, info.getFileVtt());
-        }
-
-        if (info.getFileCover() != null) {
-            System.out.println("4번");
-            String[] imageInfo = info.getFileCover().split(",");
-            String extension = imageInfo[0].replace("data:image/", "").replace(";base64", "");
-            byte[] data = DatatypeConverter.parseBase64Binary(imageInfo[1]);
-            imageExt = uploadPath + saveFileName + "." + extension;
-            File file = new File(movieDir + imageExt);
-            try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
-                outputStream.write(data);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            System.out.println("5번");
-        }
-
-        Set<String> keySet = files.keySet();
-        for (String key : keySet) {
-            InputStream readStream = null;
-            try {
-                readStream = files.get(key).getInputStream();
-
-                byte[] readBytes = new byte[4096];
-                OutputStream writeStream = null;
-
-                writeStream = Files.newOutputStream(Paths.get(movieDir + key));
-
-                while (readStream.read(readBytes) > 0) {
-                    writeStream.write(readBytes);
-                }
-                System.out.println("6번");
-                writeStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        Storage storageInfo = Storage.createStorage(
-                info.getFileName(),
-                info.getFileSize(),
-                fileExt,
-                info.getCategory(),
-                imageExt,
-                vttExt,
-                YN.convert(info.getFileAuth()),
-                YN.convert(info.getFileDownload())
-        );
-        System.out.println("7번");
-        storageRepository.save(storageInfo);
-//            System.out.println("8번");
-//            convertVideoHls(storageInfo.getStorageId());
-//            System.out.println("9번");
-        map.put("statusCode", 200);
-        map.put("storageId", storageInfo.getStorageId());
-        System.out.println("10번");
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-        return map;
-    }
-
-    @Transactional
-//    @Async
     public Map<String, Object> uploadVideo(StorageRequest info) {
 
         String movieDir = blogProperties.getCommonPath() + "/movie";
         String saveFileName = "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000);
         String uploadPath = "/upload" + saveFileName;
-        System.out.println("1번");
-
         HashMap<String, Object> map = new HashMap<>();
-        try {
-            FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-            CompletableFuture<Storage> future = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Storage> future = CompletableFuture.supplyAsync(() -> {
+            Storage storageInfo = Storage.createStorage(
+                    info.getFileName(),
+                    info.getFileSize(),
+                    null,
+                    info.getCategory(),
+                    null,
+                    null,
+                    YN.convert(info.getFileAuth()),
+                    YN.convert(info.getFileDownload())
+            );
 
-                String fileExt = null;
-                String vttExt = null;
-                String imageExt = null;
-                System.out.println("2번");
-                Map<String, MultipartFile> files = new HashMap<>();
+            try {
                 if (info.getFile() != null) {
-                    fileExt = uploadPath + saveFileName + getMultiFileExt(info.getFile());
-                    files.put(fileExt, info.getFile());
-                }
-                System.out.println("3번" + info.getFileVtt() == null);
-                if (info.getFileVtt() != null) {
-                    vttExt = uploadPath + saveFileName + getMultiFileExt(info.getFileVtt());
-                    files.put(vttExt, info.getFileVtt());
-                }
-
-                if (info.getFileCover() != null) {
-                    System.out.println("4번");
-                    String[] imageInfo = info.getFileCover().split(",");
-                    String extension = imageInfo[0].replace("data:image/", "").replace(";base64", "");
-                    byte[] data = DatatypeConverter.parseBase64Binary(imageInfo[1]);
-                    imageExt = uploadPath + saveFileName + "." + extension;
-                    File file = new File(movieDir + imageExt);
-                    try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
-                        outputStream.write(data);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("5번");
-                }
-
-                Set<String> keySet = files.keySet();
-                for (String key : keySet) {
-                    InputStream readStream = null;
-                    try {
-                        readStream = files.get(key).getInputStream();
-
+                    storageInfo.setDownloadSrc(uploadPath + saveFileName + getMultiFileExt(info.getFile()));
+                        FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
+                        InputStream readStream = info.getFile().getInputStream();
                         byte[] readBytes = new byte[4096];
-                        OutputStream writeStream = null;
-
-                        writeStream = Files.newOutputStream(Paths.get(movieDir + key));
-
+                        OutputStream writeStream = Files.newOutputStream(Paths.get(movieDir + storageInfo.getDownloadSrc()));
                         while (readStream.read(readBytes) > 0) {
                             writeStream.write(readBytes);
                         }
-                        System.out.println("6번");
                         writeStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
-                Storage storageInfo = Storage.createStorage(
-                        info.getFileName(),
-                        info.getFileSize(),
-                        fileExt,
-                        info.getCategory(),
-                        imageExt,
-                        vttExt,
-                        YN.convert(info.getFileAuth()),
-                        YN.convert(info.getFileDownload())
-                );
-                System.out.println("7번");
-                storageRepository.save(storageInfo);
-                return storageInfo;
-//            }).thenAccept(result -> {
-//                System.out.println("checkBackupState success" + result);
-//                convertVideoHls(result.getStorageId());
-//            }).thenAccept(result -> {
-//                return "ㅋㅋㅋ";
-//                System.out.println("checkBackupState success" + result);
-//                convertVideoHls(result.getStorageId());
-            });
+                if (info.getFileVtt() != null) {
+                    storageInfo.setVttSrc(uploadPath + saveFileName + getMultiFileExt(info.getFileVtt()));
+                    InputStream readStream = info.getFileVtt().getInputStream();
+                    FileUtils.writeFile(movieDir + storageInfo.getVttSrc(), readStream);
 
+                }
+                if (info.getFileCover() != null) {
+                    String[] imageInfo = info.getFileCover().split(",");
+                    String extension = imageInfo[0].replace("data:image/", "").replace(";base64", "");
+                    byte[] data = DatatypeConverter.parseBase64Binary(imageInfo[1]);
+                    storageInfo.setFileCover(uploadPath + saveFileName + "." + extension);
+                    File file = new File(movieDir + storageInfo.getFileCover());
+                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
+                    outputStream.write(data);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            storageRepository.save(storageInfo);
+            map.put("statusCode", 200);
+            map.put("data", storageInfo);
+            return storageInfo;
+        });
+        future.thenAccept(storageInfo -> {
+            convertVideoHls(storageInfo);
+        });
 
-
-
-
-//            }).exceptionally(e -> {
-//                log.error("checkBackupState error", e);
-//                try {
-//                    FileUtils.deletePath(workspaceBackup.getBackupPath());
-//                } catch (Exception exception) {
-//                    exception.printStackTrace();
-//                } finally {
-//                    if (e.getCause() instanceof BackupRequestFailedException) {// e로 instanceof하면 안걸러짐
-//                        BackupRequestFailedException exception = (BackupRequestFailedException)(e.getCause());
-//                        workspaceBackup.setErrorMessage(exception.getAdditionalMessage());
-//                        workspaceBackup.setErrorSubCode(exception.getSubCode());
-//                    } else {
-//                        workspaceBackup.setErrorMessage(e.getMessage());
-//                        workspaceBackup.setErrorSubCode(Constants.RESTORE_ERROR_SUB_CODE.UNKNOWN.VALUE);
-//                    }
-//                    writeStatusWorkspace(Constants.BACKUP_STATUS.ERROR, workspaceBackup);
-//                }
-//                return null;
-//            });
-//        } catch (Exception e) {
-//            e.printStackTrace();
-////            handleBackupWorkspaceException(workspaceBackup, e);
-//        }
-        System.out.println("맵");
-        try {
-            convertVideoHls(future.get().getStorageId());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
         return map;
 
     }
-
 
 
 }
