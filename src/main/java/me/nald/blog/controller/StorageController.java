@@ -45,14 +45,16 @@ public class StorageController {
     @WithoutJwtCallable
     @GetMapping("/hls/{fileName}/{tsName}.ts")
     public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
+
         return storageService.videoHlsTs(fileName, tsName);
     }
 
     // 자막 로드
     @WithoutJwtCallable
-    @GetMapping("/vtt/{fileName}_{language}.vtt")
-    public ResponseEntity<Resource> videoVtt(@PathVariable String fileName, @PathVariable String language) {
-        return storageService.videoVtt(fileName, language);
+    @GetMapping("/vtt/{videoId}.vtt")
+    public ResponseEntity<Resource> videoVtt(@PathVariable Long videoId) {
+        System.out.println("날드 안눙");
+        return storageService.videoVtt(videoId);
     }
 
 

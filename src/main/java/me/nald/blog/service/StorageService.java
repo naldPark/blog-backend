@@ -207,11 +207,10 @@ public class StorageService {
 
     }
 
-    public ResponseEntity<Resource> videoVtt(String movieName, String language) {
-
+    public ResponseEntity<Resource> videoVtt(Long videoId) {
+        Storage storage = storageRepository.getById(videoId);
         String movieDir = blogProperties.getCommonPath() + "/movie";
-        String fileName = FilenameUtils.getBaseName(movieName);
-        String fileFullPath = movieDir + "/vtt/" + fileName + "_" + language + ".vtt";
+        String fileFullPath = movieDir + storage.getVttSrc();
         Path filePath = Paths.get(fileFullPath);
         Resource resource = new FileSystemResource(filePath) {
             @Override

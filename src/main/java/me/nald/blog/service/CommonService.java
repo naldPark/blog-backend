@@ -116,7 +116,16 @@ public class CommonService {
                 "{ color: 'white', backgroundColor: '#FF9900', name: 'aws', src: 'aws.svg' }",
                 "{ color: 'white', backgroundColor: '#D24939', name: 'jenkins', src: 'jenkins.svg' }",
                 "{ color: 'white', backgroundColor: '#009639', name: 'nginx', src: 'nginx.svg' }",
-                "{ color: 'black', backgroundColor: '#FCC624', name: 'linux', src: 'linux.svg' }"
+                "{ color: 'black', backgroundColor: '#FCC624', name: 'linux', src: 'linux.svg' }",
+                "{ color: 'black', backgroundColor: '#3D4245', name: 'kafka', src: 'kafka.svg' }",
+                "{ color: 'black', backgroundColor: '#FFFFFF', name: 'ansible', src: 'ansible.svg' }",
+                "{ color: 'white', backgroundColor: '#1E2631', name: 'travisci', src: 'travisci.svg' }",
+                "{ color: 'white', backgroundColor: '#000000', name: 'redis', src: 'redis.svg' }",
+                "{ color: 'white', backgroundColor: '#212425', name: 'terraform', src: 'terraform.svg' }",
+                "{ color: 'white', backgroundColor: '#0C2232', name: 'sonarqube', src: 'sonarqube.svg' }",
+                "{ color: '#0A7390', backgroundColor: '#1A1C1D', name: 'react', src: 'react.svg' }"
+
+
         );
         return Response.CommonRes.builder()
                 .statusCode(200)
