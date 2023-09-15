@@ -25,6 +25,7 @@ public class Constants {
     public static final String ANONYMOUS_YN = "isAnonymous";
     public static final String USER_ID = "user_id";
     public static final String USER_NAME = "user_name";
+    public static final String USER_EMAIL = "user_email";
     public static final String AUTHORITY = "authority";
     public static final SimpleDateFormat DEFAULT_DATETIME_FORMAT = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
     public static final String LOG_ITEM = "logItem";

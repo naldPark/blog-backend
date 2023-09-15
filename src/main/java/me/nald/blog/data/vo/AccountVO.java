@@ -19,6 +19,7 @@ public class AccountVO {
     private String accountId;
     private String accountName;
     private int authority;
+    private String accountEmail;
 
 
     public static AccountVO jsonToObj(JSONObject body) {
@@ -26,6 +27,7 @@ public class AccountVO {
                         .accountId(body.getString(USER_ID))
                         .accountName(body.getString(USER_NAME))
                         .authority(body.getInt(AUTHORITY))
+                        .accountEmail(body.getString(USER_EMAIL))
                         .build();
     }
 }

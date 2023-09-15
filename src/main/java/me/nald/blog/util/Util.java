@@ -86,6 +86,7 @@ public class Util {
 
             payloads.put("exp", exp);
             payloads.put("user_name", user.getAccountName());
+            payloads.put("user_email", user.getEmail());
             payloads.put("authority", user.getAuthority());
             payloads.put("jti", UUID.randomUUID().toString());
             payloads.put("user_id", user.getAccountId());
