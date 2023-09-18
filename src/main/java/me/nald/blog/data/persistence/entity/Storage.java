@@ -109,14 +109,14 @@ public class Storage {
 
         public static Status from(int ordinal) {
             switch (ordinal) {
-                case 1:
+                case 0:
                     return Converted;
-                case 2:
+                case 1:
                     return Progressing;
-                case 3:
+                case 2:
                 default:
                     return Inactive;
-                case 4:
+                case 3:
                     return Deleted;
             }
         }
