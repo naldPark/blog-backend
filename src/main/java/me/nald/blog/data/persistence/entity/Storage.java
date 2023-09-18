@@ -29,12 +29,12 @@ public class Storage {
     private String downloadSrc;
 
     @Column(name = "status", nullable = false)
-    private Storage.Status status;
+    private Storage.Status status;   //업로드 진행
 
-    @Column(name = "file_src", nullable = false)
+    @Column(name = "file_src")
     private String fileSrc;
 
-    @Column(name = "vtt_src", nullable = false)
+    @Column(name = "vtt_src")
     private String vttSrc;
 
     @Column(name = "file_size", nullable = false)
@@ -42,6 +42,10 @@ public class Storage {
 
     @Column(name = "file_type", nullable = false)
     private String fileType;
+
+    @Lob
+    @Column(name = "file_desc", columnDefinition="LONGTEXT")
+    private String description;
 
 //    @Lob
 //    @Column(name = "file_cover", nullable = false, columnDefinition="LONGTEXT")
@@ -62,12 +66,19 @@ public class Storage {
     @UpdateTimestamp
     private Timestamp createdDt;
 
+    @PrePersist
+    public void prePersist() {
+        this.status = this.status == null ? Status.Inactive : this.status;
+    }
+
     public static Storage createStorage(String fileName,
                                         Long fileSize,
                                         String downloadSrc,
                                         String fileType,
                                         String fileCover,
+                                        String fileDesc,
                                         String vttSrc,
+                                        Storage.Status status,
                                         YN fileAuth,
                                         YN fileDownload) {
         Storage storage = new Storage();
@@ -76,7 +87,9 @@ public class Storage {
         storage.setDownloadSrc(downloadSrc);
         storage.setFileCover(fileCover);
         storage.setFileType(fileType);
+        storage.setDescription(fileDesc);
         storage.setVttSrc(vttSrc);
+        storage.setStatus(status);
         storage.setFileAuth(fileAuth);
         storage.setFileDownload(fileDownload);
         return storage;
@@ -90,9 +103,9 @@ public class Storage {
         Inactive("Inactive"),
         Deleted("Deleted");
 
-        private String description;
+        private String currentStatus;
 
-        Status(String description) {this.description = description;}
+        Status(String currentStatus) {this.currentStatus = currentStatus;}
 
         public static Status from(int ordinal) {
             switch (ordinal) {

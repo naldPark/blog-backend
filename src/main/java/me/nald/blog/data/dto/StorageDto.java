@@ -50,6 +50,7 @@ public class StorageDto {
         String fileName;
         String fileSrc;
         Long fileSize;
+        String fileDesc;
         String fileType;
         String fileCover;
         String vttSrc;
@@ -59,6 +60,7 @@ public class StorageDto {
             fileName = storage.getFileName();
             fileSrc = storage.getFileSrc();
             fileSize = storage.getFileSize();
+            fileDesc = storage.getDescription();
             fileType= storage.getFileType();
             fileCover =  Util.storageImgToString(storage.getFileCover());
             vttSrc = storage.getVttSrc();

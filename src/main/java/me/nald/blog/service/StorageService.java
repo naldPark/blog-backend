@@ -141,9 +141,9 @@ public class StorageService {
                 String movieDir = blogProperties.getCommonPath() + "/movie";
                 String fileName = FilenameUtils.getBaseName(storage.getDownloadSrc());
                 String inputPath = movieDir + storage.getDownloadSrc();
-                String hlsPath = movieDir + "/hls/" + fileName + "/";
+                String hlsPath = "/hls/" + fileName + "/";
 
-                File folder = new File(hlsPath);
+                File folder = new File(movieDir + hlsPath);
                 if (!folder.exists()) {
                     folder.mkdir();
                 }
@@ -153,7 +153,7 @@ public class StorageService {
                 FFmpegBuilder builder = new FFmpegBuilder()
                         .overrideOutputFiles(true)
                         .setInput(inputPath)
-                        .addOutput(hlsPath + fileName + ".m3u8")
+                        .addOutput(movieDir + hlsPath + fileName + ".m3u8")
                         .addExtraArgs("-profile:v", "baseline")
                         .addExtraArgs("-level", "3.0")
                         .addExtraArgs("-start_number", "0")
@@ -175,6 +175,8 @@ public class StorageService {
                 storage.setStatus(Storage.Status.Converted);
                 storageRepository.save(storage);
             } catch (IOException e) {
+                storage.setStatus(Storage.Status.Inactive);
+                storageRepository.save(storage);
                 e.printStackTrace();
             }
         }
@@ -305,11 +307,12 @@ public class StorageService {
                     null,
                     info.getCategory(),
                     null,
+                    info.getDescription(),
+                    null,
                     null,
                     YN.convert(info.getFileAuth()),
                     YN.convert(info.getFileDownload())
             );
-
             try {
                 if (info.getFile() != null) {
                     storageInfo.setDownloadSrc(uploadPath + saveFileName + getMultiFileExt(info.getFile()));
@@ -340,6 +343,7 @@ public class StorageService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            storageInfo.setStatus(Storage.Status.Progressing);
             storageRepository.save(storageInfo);
             map.put("statusCode", 200);
             map.put("data", storageInfo);
