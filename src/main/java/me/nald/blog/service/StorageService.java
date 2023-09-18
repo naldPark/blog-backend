@@ -162,7 +162,8 @@ public class StorageService {
                         .addExtraArgs("-f", "hls")
                         .addExtraArgs("-safe", "0")
                         .addExtraArgs("-preset", "ultrafast")
-                        .setVideoResolution(1920, 1080)
+//                        .setVideoResolution(1920, 1080)   용량이 너무 커져 ㅠㅠ
+                        .setVideoResolution(800, 600)
                         .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
                         .done();
 
