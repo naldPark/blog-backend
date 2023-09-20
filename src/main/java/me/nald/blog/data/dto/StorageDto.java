@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +56,10 @@ public class StorageDto {
         String fileType;
         String fileCover;
         String vttSrc;
+        String createdDt;
 
         public StorageInfo(Storage storage) {
+            SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd");
             storageId = storage.getStorageId();
             fileName = storage.getFileName();
             fileSrc = storage.getFileSrc();
@@ -64,6 +68,7 @@ public class StorageDto {
             fileType= storage.getFileType();
             fileCover =  Util.storageImgToString(storage.getFileCover());
             vttSrc = storage.getVttSrc();
+            createdDt = sdf.format(storage.getCreatedDt());
         }
     }
 
