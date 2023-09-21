@@ -6,6 +6,7 @@ import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.model.StorageRequest;
 import me.nald.blog.model.SearchItem;
 import me.nald.blog.service.StorageService;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;

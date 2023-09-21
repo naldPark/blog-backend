@@ -1,6 +1,7 @@
 package me.nald.blog.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -29,6 +30,7 @@ import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.job.FFmpegJob;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -47,6 +49,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static me.nald.blog.exception.ErrorSpec.DuplicatedId;
@@ -123,7 +126,7 @@ public class StorageService {
         convertVideoHls(storage);
     }
 
-    public HashMap<String, Object> getConvertVideoStatus(Long videoId){
+    public HashMap<String, Object> getConvertVideoStatus(Long videoId) {
         HashMap<String, Object> map = new HashMap<>();
         Storage storage = storageRepository.getById(videoId);
         map.put("statusCode", 200);
@@ -151,20 +154,50 @@ public class StorageService {
                 FFprobe ffprobe = new FFprobe(blogProperties.getFfmpegPath() + "/ffprobe");
 
                 FFmpegBuilder builder = new FFmpegBuilder()
-                        .overrideOutputFiles(true)
-                        .setInput(inputPath)
-                        .addOutput(movieDir + hlsPath + fileName + ".m3u8")
+                        .overrideOutputFiles(true) //오버라이드
+                        .setInput(inputPath) //파일 경로
+                        .addOutput(movieDir + hlsPath + fileName + ".m3u8") //저장위치
+//                        .disableSubtitle() // 자막제거
+//                        .setVideoCodec("libx264") //비디오 코덱
+//                        .setVideoBitRate(1464800) //비트레이트
+//                        .setVideoFrameRate(30) //프레임
+                        .setAudioChannels(2) // 오디오 채널 ( 1 : 모노 , 2 : 스테레오 )
                         .addExtraArgs("-profile:v", "baseline")
                         .addExtraArgs("-level", "3.0")
                         .addExtraArgs("-start_number", "0")
-                        .addExtraArgs("-hls_time", "10")
+                        .addExtraArgs("-hls_time", "15") // 몇초로 짜를까
                         .addExtraArgs("-hls_list_size", "0")
                         .addExtraArgs("-f", "hls")
                         .addExtraArgs("-safe", "0")
                         .addExtraArgs("-preset", "ultrafast")
-//                        .setVideoResolution(1920, 1080)   용량이 너무 커져 ㅠㅠ
-                        .setVideoResolution(800, 600)
+//                        .setVideoResolution(1920, 1080)  //해상도 용량이 너무 커져 ㅠㅠ
+                        .setVideoResolution(1280, 720)
                         .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
+
+//                        // 1080 화질 옵션
+//                        .addExtraArgs("-b:v:0", "5000k")
+//                        .addExtraArgs("-maxrate:v:0", "5000k")
+//                        .addExtraArgs("-bufsize:v:0", "10000k")
+//                        .addExtraArgs("-s:v:0", "1920x1080")
+//                        .addExtraArgs("-crf:v:0", "15")
+//                        .addExtraArgs("-b:a:0", "128k")
+//
+//                        // 720 화질 옵션
+//                        .addExtraArgs("-b:v:1", "2500k")
+//                        .addExtraArgs("-maxrate:v:1", "2500k")
+//                        .addExtraArgs("-bufsize:v:1", "5000k")
+//                        .addExtraArgs("-s:v:1", "1280x720")
+//                        .addExtraArgs("-crf:v:1", "22")
+//                        .addExtraArgs("-b:a:1", "96k")
+//
+//                        // 480 화질 옵션
+//                        .addExtraArgs("-b:v:2", "1000k")
+//                        .addExtraArgs("-maxrate:v:2", "1000k")
+//                        .addExtraArgs("-bufsize:v:2", "2000k")
+//                        .addExtraArgs("-s:v:2", "854x480")
+//                        .addExtraArgs("-crf:v:2", "28")
+//                        .addExtraArgs("-b:a:2", "64k")
+
                         .done();
 
                 builder.setVerbosity(FFmpegBuilder.Verbosity.INFO);
@@ -295,10 +328,21 @@ public class StorageService {
     }
 
     @Transactional
-    public Map<String, Object> uploadVideo(StorageRequest info) {
-
+    public Map<String, Object> uploadVideo(StorageRequest info) throws IOException {
         String movieDir = blogProperties.getCommonPath() + "/movie";
-        String saveFileName = "/" + System.currentTimeMillis() + (int) (Math.random() * 1000000);
+        HashMap<String, String> phoneticSymbol = new ObjectMapper()
+                .readValue(new ClassPathResource("phoneticSymbol.json").getInputStream(), HashMap.class);
+
+        String nameToEng = "";
+        for (String fileChar : info.getFileName().split("")) {
+            if (Pattern.matches("^[0-9a-zA-Z]*$", fileChar)) {
+                nameToEng += fileChar;
+            } else if (phoneticSymbol.get(fileChar) != null) {
+                nameToEng += phoneticSymbol.get(fileChar);
+            }
+            if (nameToEng.length() > 20) break;
+        }
+        String saveFileName = "/" + nameToEng + System.currentTimeMillis() + (int) (Math.random() * 100);
         String uploadPath = "/upload" + saveFileName;
         HashMap<String, Object> map = new HashMap<>();
         CompletableFuture<Storage> future = CompletableFuture.supplyAsync(() -> {
@@ -328,9 +372,8 @@ public class StorageService {
                 }
                 if (info.getFileVtt() != null) {
                     storageInfo.setVttSrc(uploadPath + saveFileName + getMultiFileExt(info.getFileVtt()));
-                    InputStream readStream = info.getFileVtt().getInputStream();
-                    FileUtils.writeFile(movieDir + storageInfo.getVttSrc(), readStream);
-
+                    File file = new File(movieDir + storageInfo.getVttSrc());
+                    info.getFileVtt().transferTo(file);
                 }
                 if (info.getFileCover() != null) {
                     String[] imageInfo = info.getFileCover().split(",");
