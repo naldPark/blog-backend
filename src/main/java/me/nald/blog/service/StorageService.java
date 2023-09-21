@@ -158,9 +158,7 @@ public class StorageService {
                         .setInput(inputPath) //파일 경로
                         .addOutput(movieDir + hlsPath + fileName + ".m3u8") //저장위치
 //                        .disableSubtitle() // 자막제거
-//                        .setVideoCodec("libx264") //비디오 코덱
-//                        .setVideoBitRate(1464800) //비트레이트
-//                        .setVideoFrameRate(30) //프레임
+
                         .setAudioChannels(2) // 오디오 채널 ( 1 : 모노 , 2 : 스테레오 )
                         .addExtraArgs("-profile:v", "baseline")
                         .addExtraArgs("-level", "3.0")
@@ -172,7 +170,14 @@ public class StorageService {
                         .addExtraArgs("-preset", "ultrafast")
 //                        .setVideoResolution(1920, 1080)  //해상도 용량이 너무 커져 ㅠㅠ
                         .setVideoResolution(1280, 720)
+//                        .setVideoResolution(854, 480)
                         .setStrict(FFmpegBuilder.Strict.EXPERIMENTAL)
+
+                        //고화질할때 주석처리 하는 애들
+//                        .setVideoCodec("libx264") //비디오 코덱
+//                        .setVideoBitRate(1464800) //비트레이트
+//                        .setVideoFrameRate(30) //프레임
+
 
 //                        // 1080 화질 옵션
 //                        .addExtraArgs("-b:v:0", "5000k")
@@ -359,6 +364,14 @@ public class StorageService {
                     YN.convert(info.getFileDownload())
             );
             try {
+                if (info.getFileVtt() != null) {
+                    FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
+                    MultipartFile multipartFileVtt = info.getFileVtt();
+                    //TODO 확장자 .vtt하드코딩해놨음;
+                    storageInfo.setVttSrc(uploadPath + saveFileName + getMultiFileExt(multipartFileVtt));
+                    Path path = Paths.get(movieDir + uploadPath + saveFileName+".vtt").toAbsolutePath();
+                    multipartFileVtt.transferTo(path.toFile());
+                }
                 if (info.getFile() != null) {
                     storageInfo.setDownloadSrc(uploadPath + saveFileName + getMultiFileExt(info.getFile()));
                         FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
@@ -370,11 +383,7 @@ public class StorageService {
                         }
                         writeStream.close();
                 }
-                if (info.getFileVtt() != null) {
-                    storageInfo.setVttSrc(uploadPath + saveFileName + getMultiFileExt(info.getFileVtt()));
-                    File file = new File(movieDir + storageInfo.getVttSrc());
-                    info.getFileVtt().transferTo(file);
-                }
+
                 if (info.getFileCover() != null) {
                     String[] imageInfo = info.getFileCover().split(",");
                     String extension = imageInfo[0].replace("data:image/", "").replace(";base64", "");
