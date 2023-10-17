@@ -21,3 +21,4 @@ Thumbs.db
 
 Logs/
 src/main/resources/profiles/local/application-local.yml
+src/main/resources/k8s-config

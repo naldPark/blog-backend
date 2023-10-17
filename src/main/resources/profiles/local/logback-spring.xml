@@ -65,9 +65,10 @@
         </rollingPolicy>
     </appender>
 
+<!--    얘가 콘솔-->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>trace</level>
+            <level>debug</level>
             <onMatch>DENY</onMatch>
         </filter>
         <layout class="ch.qos.logback.classic.PatternLayout">
@@ -98,6 +99,7 @@
     <logger name="org.springframework" level="WARN"></logger>
     <logger name="com.zaxxer.hikari" level="WARN"></logger>
     <logger name="org.apache.http" level="WARN"></logger>
+    <logger name="me.nald.blog.mapper" level="WARN"></logger>
 
     <root level="debug">
         <appender-ref ref="fileAppender"/>

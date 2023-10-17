@@ -9,10 +9,6 @@ import lombok.RequiredArgsConstructor;
 
 import static me.nald.blog.exception.ErrorSpec.*;
 
-import java.awt.image.BufferedImage;
-import java.util.Map.Entry;
-
-import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.StorageDto;
 import me.nald.blog.data.model.StorageRequest;

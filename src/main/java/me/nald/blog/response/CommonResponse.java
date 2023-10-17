@@ -41,6 +41,10 @@ public class CommonResponse extends Response {
         return this;
     }
 
+    public void addData(String key, Object value) {
+        data.put(key, value);
+    }
+
     public static CommonResponse of() {
         return new CommonResponse();
     }
