@@ -90,7 +90,7 @@ public class KubernetesAdaptor {
                 if (k8sConfig.exists()) {
                     apiClient = Config.fromConfig(new ClassPathResource("k8s-config").getInputStream());
                 } else {
-                    Path configPath = Paths.get(blogProperties.getCommonPath() + "/k8s-config");
+                    Path configPath = Paths.get(blogProperties.getCommonPath() + "/k8s-config.yml");
                     apiClient = Config.fromConfig(Files.newInputStream(configPath));
                 }
                 apiClient.setReadTimeout(60 * 1000);
