@@ -81,6 +81,36 @@ spec:
               secretKeyRef:
                 name: main-backend-secret
                 key: CONTACT_PASSWORD
+          - name: DOCKER_REPO_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_ENDPOINT
+          - name: DOCKER_REPO_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_USERNAME
+          - name: DOCKER_REPO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_PASSWORD
+          - name: DOCKER_REPO_SECRET_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_SECRET_PASSWORD
+          - name: DOCKER_REPO_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_EMAIL
+          - name: DOCKER_REPO_URI
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_URI
       imagePullSecrets:
         - name: regcred
 
