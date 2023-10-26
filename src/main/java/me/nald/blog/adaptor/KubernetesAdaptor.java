@@ -12,6 +12,7 @@ import io.kubernetes.client.openapi.models.*;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.KubeConfig;
 import lombok.AccessLevel;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
@@ -37,11 +38,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.InvalidParameterException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service("kubeAdaptor")
 @Slf4j
 public class KubernetesAdaptor {
+
+    static final int CONVERT_TYPE_BYTE = 0;
+    static final int CONVERT_TYPE_CORE = 1;
+
     private static Agent defaultAgent;
     private static BlogProperties blogProperties;
 
@@ -100,11 +107,433 @@ public class KubernetesAdaptor {
                 throw new RuntimeException(e);
             }
         }
+        try {
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return defaultAgent;
     }
 
     public static String convertNamespaceName(String name) {
         return KUBERNETES_NAMESPACE_PREFIX + name;
+    }
+
+
+    private static void cmdResult(String cmd, KubectlDetail result) throws Exception {
+//        System.out.println("완성된 cmd는"+ cmd);
+        Process process = Runtime.getRuntime().exec(cmd);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                System.out.println("★★★"+line);
+                switch (result.getType()) {
+                    case KubectlDetail.NODE:
+                    case KubectlDetail.POD:
+                    case KubectlDetail.NODE_SUMMARY:
+                        result.setDescribe(line);
+                        break;
+                    case KubectlDetail.NODE_USAGE:
+                        result.setListData(line);
+                        break;
+                }
+            }
+        }
+    }
+
+
+    private static long convertToLong(String value, int type) {
+        long result = 0;
+        try {
+            switch (type) {
+                case CONVERT_TYPE_BYTE:
+                    if (value.contains("i")) {
+                        String unit = value.substring(value.length() - 2);
+                        result = Integer.parseInt(value.substring(0, value.length() - 2));
+                        switch (unit) {
+                            case "Ei":
+                                result *= 1024;
+                            case "Pi":
+                                result *= 1024;
+                            case "Ti":
+                                result *= 1024;
+                            case "Gi":
+                                result *= 1024;
+                            case "Mi":
+                                result *= 1024;
+                            case "Ki":
+                                result *= 1024;
+                                break;
+                        }
+                    }
+                    break;
+                case CONVERT_TYPE_CORE:
+                    try {
+                        result = Integer.parseInt(value);
+                    } catch (NumberFormatException e) {
+                        result = Integer.parseInt(value.substring(0, value.length() - 1));
+                    }
+                    break;
+            }
+        } catch (Exception e) {
+            result = 0;
+        }
+        return result;
+    }
+
+
+
+    @Data
+    static class KubectlDetail {
+
+        public static final int NODE = 0;
+        public static final int POD = 1;
+        public static final int NODE_SUMMARY = 2;
+        public static final int NODE_USAGE = 3;
+
+        final String[] LIST_NODE_COLUMN = {"name", "usageCpu", "percentCpu", "usageMemory", "percentMemory"};
+
+        Map<String, List<String>> dataMap;
+        String key;
+        int type = -1;
+        List<Map<String, Object>> list = new ArrayList<>();
+        SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+
+        Map<String, Object> summaryCpu = new HashMap<>();
+        Map<String, Object> summaryMemory = new HashMap<>();
+        Map<String, Object> summaryPod = new HashMap<>();
+
+        String namespace;
+
+        KubectlDetail(int type) {
+            this.type = type;
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
+            if (type == NODE_SUMMARY) {
+                summaryCpu.put("usage", new Long(0));
+                summaryCpu.put("requests", new Long(0));
+                summaryCpu.put("limits", new Long(0));
+                summaryCpu.put("capacity", new Long(0));
+                summaryMemory.put("usage", new Long(0));
+                summaryMemory.put("requests", new Long(0));
+                summaryMemory.put("limits", new Long(0));
+                summaryMemory.put("capacity", new Long(0));
+                summaryPod.put("usage", new Long(0));
+                summaryPod.put("capacity", new Long(0));
+            }
+        }
+
+
+        public void setListData(String data) {
+            if (data.indexOf("NAME ") == -1) {
+                Map<String, Object> dataMap = new HashMap<>();
+                List<String> list = getListString(data);
+                String[] column = null;
+                switch (type) {
+                    case NODE_USAGE:
+                        column = LIST_NODE_COLUMN;
+                        break;
+                }
+                if (column != null && list.size() == column.length) {
+                    for (int i = 0; i < column.length; ++i) {
+                        dataMap.put(column[i], list.get(i));
+                    }
+                    this.list.add(dataMap);
+                }
+            }
+        }
+
+        public void setDescribe(String data) {
+            System.out.println("데이터+"+data);
+
+            if (data.indexOf("Name:") == 0) {
+                dataMap = new LinkedHashMap<>();
+            }
+
+            if (dataMap != null) {
+                if (data.length() > 0) {
+                    String[] splitData = data.split(":");
+                    if (data.charAt(0) != ' ') {
+                        key = splitData[0];
+                    }
+                    List<String> dataList = dataMap.get(key);
+                    if (dataList == null) {
+                        dataList = new ArrayList<>();
+                        dataMap.put(key, dataList);
+                    }
+                    dataList.add(data);
+                    System.out.println(dataList);
+                }
+
+                if (data.indexOf("Events:") == 0) {
+                    String createdAt = null;
+                    Map<String, Object> detail = new LinkedHashMap<>();
+                    List<String> resources = Arrays.asList("cpu", "memory");
+                    switch (type) {
+                        case NODE:
+                            System.out.println("안눙");
+                            detail.put("name", getSingleString("Name"));
+                            detail.put("role", getSingleString("Roles"));
+                            detail.putAll(getResource("Allocated resources", resources));
+                            detail.put("podCount", getPodCount("Non-terminated Pods"));
+                            createdAt = getSingleString("CreationTimestamp");
+                            detail.put("age", getAge(createdAt));
+                            detail.put("createdAt", createdAt);
+                            detail.put("systemInfo", getMapData("System Info", ":"));
+                            detail.put("addresses", getMapData("Addresses", ":"));
+                            detail.put("capacity", getMapData("Capacity", ":"));
+                            list.add(detail);
+                            break;
+                        case POD:
+                            List<Map<String, Object>> containers = getContainers("Containers");
+                            int restartCount = 0;
+                            int readyCount = 0;
+                            String reason = null;
+                            for (Map<String, Object> container : containers) {
+                                restartCount += (int)container.get("restartCount");
+                                if ((boolean)container.get("ready")) {
+                                    readyCount++;
+                                }
+                                if (reason == null && !"Running".equals(container.get("state"))) {
+                                    Map<String, String> subData =  (Map)container.get("stateData");
+                                    if (subData != null) {
+                                        reason = subData.get("Reason");
+                                    }
+                                }
+                            }
+                            detail.put("name", getSingleString("Name"));
+                            if (reason != null) {
+                                detail.put("status", reason);
+                            } else {
+                                detail.put("status", getSingleString("Status"));
+                            }
+                            detail.put("ready", String.format("%d/%d", readyCount, containers.size()));
+                            detail.put("restartCount", restartCount);
+                            detail.put("namespace", getSingleString("Namespace"));
+                            createdAt = getSingleString("Start Time");
+                            detail.put("age", getAge(createdAt));
+                            detail.put("node", getSingleString("Node"));
+                            detail.put("createdAt", createdAt);
+                            detail.put("label", getMapData("Labels", "="));
+                            detail.put("ip", getSingleString("IP"));
+                            detail.put("controllerBy", getSingleString("Controlled By"));
+                            detail.put("conditions", getMapDataSpace("Conditions"));
+                            detail.put("containers", containers);
+                            list.add(detail);
+                            break;
+                        case NODE_SUMMARY:
+                            summaryPod.put("usage", (long)summaryPod.get("usage") + getPodCount("Non-terminated Pods"));
+                            Map<String, String> capacity = getMapData("Capacity", ":");
+                            summaryCpu.put("capacity", (long)summaryCpu.get("capacity") + convertToLong(String.valueOf(capacity.get("cpu")), CONVERT_TYPE_CORE));
+                            summaryMemory.put("capacity", (long)summaryMemory.get("capacity") + convertToLong(String.valueOf(capacity.get("memory")), CONVERT_TYPE_BYTE));
+                            summaryPod.put("capacity", (long)summaryPod.get("capacity") + Integer.parseInt(String.valueOf(capacity.get("pods"))));
+                            Map<String, Object> resourceMap = getResource("Allocated resources", resources);
+                            Map<String, Object> cpuMap = (Map<String, Object>)resourceMap.get("cpu");
+                            summaryCpu.put("requests", (long)summaryCpu.get("requests") + convertToLong(String.valueOf(cpuMap.get("requests")).split(" ")[0], CONVERT_TYPE_CORE));
+                            summaryCpu.put("limits", (long)summaryCpu.get("limits") + convertToLong(String.valueOf(cpuMap.get("limits")).split(" ")[0], CONVERT_TYPE_CORE));
+                            Map<String, Object> memoryMap = (Map<String, Object>)resourceMap.get("memory");
+                            summaryMemory.put("requests", (long)summaryMemory.get("requests") + convertToLong(String.valueOf(memoryMap.get("requests")).split(" ")[0], CONVERT_TYPE_BYTE));
+                            summaryMemory.put("limits", (long)summaryMemory.get("limits") + convertToLong(String.valueOf(memoryMap.get("limits")).split(" ")[0], CONVERT_TYPE_BYTE));
+                            break;
+                        default:
+                            break;
+                    }
+                    dataMap.clear();
+                    dataMap = null;
+                }
+            }
+        }
+
+        private String getAge(String createdAt) {
+            String result = null;
+            long runningTime = 0;
+            try {
+                runningTime = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis() - format.parse(createdAt).getTime();
+            } catch (Exception e) {
+                runningTime = 0;
+            }
+            if (TimeUnit.MILLISECONDS.toDays(runningTime) > 0 ) {
+                result = String.format("%dd", TimeUnit.MILLISECONDS.toDays(runningTime));
+            } else if (TimeUnit.MILLISECONDS.toHours(runningTime) > 0 ) {
+                result = String.format("%dh", TimeUnit.MILLISECONDS.toHours(runningTime));
+            } else if (TimeUnit.MILLISECONDS.toMinutes(runningTime) > 0 ) {
+                result = String.format("%dm", TimeUnit.MILLISECONDS.toMinutes(runningTime));
+            } else if (TimeUnit.MILLISECONDS.toSeconds(runningTime) > 0 ) {
+                result = String.format("%ds", TimeUnit.MILLISECONDS.toSeconds(runningTime));
+            }
+            return result;
+        }
+
+        private List<Map<String, Object>> getContainers(String Keyword) {
+            List<Map<String, Object>> result = new ArrayList<>();
+            List<String> dataList = dataMap.get(Keyword);
+            dataList.remove(0);
+            List<Map<String, Object>> containers = new ArrayList<>();
+            Map<String, Object> container = null;
+            String key = null;
+            String lastSubKey = null;
+            for (String str : dataList) {
+                if (str.charAt(2) != ' ' && str.indexOf(":") + 1 == str.length()) {
+                    container = new LinkedHashMap<>();
+                    containers.add(container);
+                    container.put("Name", str.substring(0, str.indexOf(":")).trim());
+                } else if (container != null) {
+                    if (str.length() > 5 && str.charAt(4) != ' ') {
+                        lastSubKey = null;
+                        if (str.indexOf(":") + 1 == str.length()) {
+                            key = str.substring(0, str.indexOf(":")).trim();
+                            continue;
+                        } else {
+                            key = null;
+                            lastSubKey = str.substring(0, str.indexOf(":")).trim();
+                            container.put(lastSubKey, str.substring(str.indexOf(":") + 1).trim());
+                        }
+                    } else if (str.length() > 7 && str.charAt(6) != ' ' && lastSubKey != null && str.contains(":")) {
+                        Map<String, String> subData = (Map)container.get(String.format("%s_sub", lastSubKey));
+                        if (subData == null) {
+                            subData = new LinkedHashMap<>();
+                            container.put(String.format("%s_sub", lastSubKey), subData);
+                        }
+                        subData.put(str.substring(0, str.indexOf(":")).trim(), str.substring(str.indexOf(":") + 1).trim());
+                    }
+                    if (key != null && str.contains(":")) {
+                        Map<String, Object> data = (Map)container.get(key);
+                        if (data == null) {
+                            data = new LinkedHashMap<>();
+                            container.put(key, data);
+                        }
+                        data.put(str.substring(0, str.indexOf(":")).trim(), str.substring(str.indexOf(":") + 1).trim());
+                    }
+                }
+            }
+
+            for (Map<String, Object> con : containers) {
+                Map<String, Object> map = new LinkedHashMap<>();
+                result.add(map);
+                map.put("name", con.get("Name"));
+                map.put("image", con.get("Image"));
+                if (con.get("Ports") != null) {
+                    map.put("ports", con.get("Ports"));
+                } else {
+                    map.put("ports", con.get("Port"));
+                }
+                map.put("ready", Boolean.parseBoolean(String.valueOf(con.get("Ready"))));
+                try {
+                    map.put("restartCount", Integer.parseInt(String.valueOf(con.get("Restart Count"))));
+                } catch (NumberFormatException e) {
+                    map.put("restartCount", 0);
+                }
+                map.put("environment", con.get("Environment"));
+                map.put("state", con.get("State"));
+                map.put("stateData", con.get("State_sub"));
+            }
+
+            return result;
+        }
+
+        private List<String> getListString(String data) {
+            List<String> list = new ArrayList<>();
+            String tmpArray[] = data.split(" ");
+            for (String tmp : tmpArray) {
+                if (tmp.length() > 0) {
+                    list.add(tmp);
+                }
+            }
+            return list;
+        }
+
+        private String getSingleString(String keyword) {
+            String result = null;
+            if (dataMap.get(keyword) != null) {
+                result = dataMap.get(keyword).get(0);
+                if (result.indexOf(":") + 1 < result.length()) {
+                    result = result.substring(result.indexOf(":") + 1).trim();
+                } else {
+                    result = null;
+                }
+            }
+            return result;
+        }
+
+        private Map<String, String> getMapData(String keyword, String split) {
+            Map<String, String> result = new LinkedHashMap<>();
+            List<String> dataList = dataMap.get(keyword);
+            if (dataList != null) {
+                String first = getSingleString(keyword);
+                if (first != null) {
+                    dataList.set(0, first);
+                }
+                for (String data : dataList) {
+                    String[] tmp = data.trim().split(split);
+                    if (tmp.length > 1) {
+                        result.put(tmp[0].trim(), tmp[1].trim());
+                    }
+                }
+            }
+            return result;
+        }
+
+        private Map<String, String> getMapDataSpace(String keyword) {
+            Map<String, String> result = new LinkedHashMap<>();
+            List<String> dataList = dataMap.get(keyword);
+            if (dataList != null) {
+                String first = getSingleString(keyword);
+                if (first != null) {
+                    dataList.set(0, first);
+                }
+                for (String data : dataList) {
+                    data = data.trim();
+                    if (data.indexOf(" ") != -1) {
+                        result.put(data.substring(0, data.indexOf(" ")), data.substring(data.indexOf(" ")).trim());
+                    }
+                }
+            }
+            return result;
+        }
+
+        private int getPodCount(String keyword) {
+            int result = 0;
+            if (dataMap.get(keyword) != null) {
+                result = dataMap.get(keyword).size() - 3;
+                if (result < 0) {
+                    result = 0;
+                }
+            }
+            return result;
+        }
+
+        private Map<String, Object> getResource(String keyword, List<String> keys) {
+            Map<String, Object> result = new LinkedHashMap<>();
+            if (dataMap.get(keyword) != null) {
+                List<String> dataList = dataMap.get(keyword);
+                boolean isData = false;
+                for (String data : dataList) {
+                    data = data.trim();
+                    if (data.indexOf("--------") != -1) {
+                        isData = true;
+                        continue;
+                    }
+                    if (isData) {
+                        String key = data.substring(0, data.indexOf(" "));
+                        if (keys.contains(key)) {
+                            Map<String, String> map = new HashMap<>();
+                            map.put("requests", data.substring(data.indexOf("  "), data.indexOf(")") + 1).trim());
+                            map.put("limits", data.substring(data.indexOf(")") + 1).trim());
+                            result.put(key, map);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        public Map<String, Object> getSummary() {
+            Map<String, Object> result = new HashMap<>();
+            summaryCpu.put("capacity", (long)summaryCpu.get("capacity") * 1000);
+            result.put("cpu", summaryCpu);
+            result.put("memory", summaryMemory);
+            result.put("pod", summaryPod);
+            return result;
+        }
     }
 
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
@@ -145,6 +574,23 @@ public class KubernetesAdaptor {
         private AppsV1Api appsV1Api() {
             return new AppsV1Api(apiClient());
         }
+
+
+        public  List<Map<String, Object>> getNodeSummary() throws Exception {
+            String cmd = String.format("kubectl get nodes");
+            KubectlDetail summary = new KubectlDetail(KubectlDetail.NODE);
+            cmdResult(cmd, summary);
+            System.out.println(summary);
+//            Map<String, Object> result = summary.getSummary();
+            cmd = String.format("kubectl top nodes");
+            KubectlDetail usage = new KubectlDetail(KubectlDetail.NODE_USAGE);
+            cmdResult(cmd, usage);
+            List<Map<String, Object>> usageList = usage.getList();
+            System.out.println("리스트"+ usageList);
+            return usageList;
+        }
+
+
 
         public V1NodeList listNode(String fieldSelector) throws ApiException {
             return coreV1Api().listNode(STR_FALSE, null, null, null, fieldSelector, null, null, null, null, false);

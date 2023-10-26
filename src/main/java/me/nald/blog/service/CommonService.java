@@ -134,40 +134,7 @@ public class CommonService {
 
     }
 
-    public Response.CommonRes getDiagramList() {
 
-        List<String> diagramList = Arrays.asList(
-                "{ key: 0, name: 'Nald', icon: 'nald', description: 'nald.me' }",
-                "{ key: 1, parent: 0, name: 'Infra', icon: 'infra', description: 'infra' }",
-                "{ key: 2, parent: 0, name: 'Frontend', icon: 'frontend', description: 'frontend' }",
-                "{ key: 3, parent: 0, name: 'Backend', icon: 'backend', description: 'backend' }",
-                "{ key: 101, parent: 0, name: 'Infra',  isGroup: true }",
-                "{ key: 102, parent: 0, name: 'Frontend', isGroup: true }",
-                "{ key: 103, parent: 0, name: 'Backend',  isGroup: true }",
-                "{ key: 4, parent: 1, name: 'Jenkins', icon: 'jenkins', group: 101 }",
-                "{ key: 5, parent: 1, name: 'Argocd', icon: 'argocd', group: 101 }",
-                "{ key: 6, parent: 3, name: 'Maven', icon: 'maven',  group: 103 }",
-                "{ key: 7, parent: 3, name: 'Java', icon: 'java', asd: 'backend language', group: 103 }",
-                "{ key: 8, parent: 2, name: 'Vue', icon: 'vue',  group: 102 }",
-                "{ key: 9, parent: 3, name: 'JPA', icon: 'jpa', asd: 'JPA', group: 103 }",
-                "{ key: 10, parent: 3, name: 'Typescript', icon: 'typescript', group: 102 }",
-                "{ key: 12, parent: 1, name: 'Kubernetes', icon: 'kubernetes', group: 101 }",
-                "{ key: 13, parent: 1, name: 'Docker', icon: 'docker',group: 101 }",
-                "{ key: 14, parent: 2, name: 'Nginx', icon: 'nginx',  group: 102 }",
-                "{ key: 15, parent: 1, name: 'Ubuntu', icon: 'ubuntu', group: 101 }",
-                "{ key: 16, parent: 3, name: 'SpringBoot', icon: 'springBoot',  group: 103 }",
-                "{ key: 18, parent: 1, name: 'Nexus', icon: 'nexus', group: 101 }",
-                "{ key: 19, parent: 2, name: 'JavaScript', icon: 'javaScript', group: 102 }",
-                "{ key: 20, parent: 3, name: 'Mariadb', icon: 'mariadb', group: 103 }",
-                "{ key: 21, parent: 1, name: 'Nas', icon: 'nas', group: 101 }",
-                "{ key: 22, parent: 1, name: 'Github', icon: 'git', group: 101 }",
-                "{ key: 23, parent: 1, name: 'Helm', icon: 'helm',  group: 101 }"
-        );
-        return Response.CommonRes.builder()
-                .statusCode(200)
-                .data(Util.stringListToHashMapList(diagramList))
-                .build();
-    }
 
 }
 

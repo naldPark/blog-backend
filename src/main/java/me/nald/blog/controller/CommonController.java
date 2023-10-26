@@ -36,9 +36,4 @@ public class CommonController {
         return () -> commonService.getBadgeList();
     }
 
-    @GetMapping("/diagramList")
-    public Callable<Object> getDiagramList() {
-        return () -> commonService.getDiagramList();
-    }
-
 }

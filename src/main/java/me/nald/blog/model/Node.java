@@ -1,10 +1,12 @@
 package me.nald.blog.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.openapi.models.*;
 import lombok.*;
-import org.joda.time.DateTime;
-
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -12,24 +14,31 @@ import java.util.Optional;
 @NoArgsConstructor
 public class Node {
     String name;
-    Map<String, String> annotations;
+//    Map<String, String> annotations;
     Map<String, String> labels;
-    DateTime creationTimestamp;
-    V1NodeSpec spec;
-    V1NodeStatus status;
-    Map<String, Object> nodeSummary;
+    String createdDt;
+    Map<String, Long> capacity;
     String condition;
+    String percentMemory;
+    String percentCpu;
 
-    public Node(V1Node node) {
+
+    public Node(V1Node node, Map<String, Object> nodeUsage) {
         V1ObjectMeta meta = node.getMetadata();
         name = meta.getName();
-        annotations = meta.getAnnotations();
+//        annotations = meta.getAnnotations();
         labels = meta.getLabels();
-        creationTimestamp = meta.getCreationTimestamp();
-        spec = node.getSpec();
-        status = node.getStatus();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm");
+        createdDt = dateFormat.format(meta.getCreationTimestamp().toDate());
+        HashMap<String, Long> data = new HashMap<>();
+        node.getStatus().getCapacity().forEach((strKey, strValue)->{
+            data.put(strKey,strValue.getNumber().longValue());
+        });
+        capacity = data;
         Optional<V1NodeCondition> first = node.getStatus().getConditions().stream().skip(node.getStatus().getConditions().size() > 1 ? node.getStatus().getConditions().size() - 1 : 0).findFirst();
         condition = first.get().getType();
+        percentMemory = (String) nodeUsage.get("percentMemory");
+        percentCpu = (String) nodeUsage.get("percentCpu");
     }
 
     @Getter
@@ -39,7 +48,7 @@ public class Node {
     @NoArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class NodeVO {
-        private DateTime created;
+        private String createdDt;
         private String name;
         private Map<String, String> address;
         private String os;
@@ -47,7 +56,7 @@ public class Node {
         private String kernelVersion;
         private String containerRuntime;
         private String kubeletVersion;
-        private Map<String, String> annotations;
+//        private Map<String, String> annotations;
         private Map<String, String> labels;
         private String taints;
         private String conditions;
