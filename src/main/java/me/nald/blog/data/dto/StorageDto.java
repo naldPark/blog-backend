@@ -4,6 +4,7 @@ import lombok.*;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.data.persistence.entity.Storage;
+import me.nald.blog.data.vo.YN;
 import me.nald.blog.util.FileUtils;
 import me.nald.blog.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,7 @@ public class StorageDto {
         String fileCover;
         String vttSrc;
         String createdDt;
+        String downloadable;
 
         public StorageInfo(Storage storage) {
             SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd");
@@ -69,6 +71,7 @@ public class StorageDto {
             fileCover =  Util.storageImgToString(storage.getFileCover());
             vttSrc = storage.getVttSrc();
             createdDt = sdf.format(storage.getCreatedDt());
+            downloadable = storage.getFileDownload().name();
         }
     }
 

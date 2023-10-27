@@ -297,6 +297,9 @@ public class StorageService {
 
     public ResponseEntity<Resource> downloads(Long videoId) {
         Storage storage = storageRepository.getById(videoId);
+        if(storage.getFileDownload().isN()){
+            throw Errors.of(AccessDeniedException);
+        }
         Path filePath = Paths.get(blogProperties.getCommonPath() + "/movie" + storage.getDownloadSrc());
         try {
             Resource resource = new FileSystemResource(filePath) {

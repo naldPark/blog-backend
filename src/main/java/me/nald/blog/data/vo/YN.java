@@ -25,6 +25,7 @@ public enum YN {
         return YN.Y.name().equals(value) ? YN.Y : YN.N;
     }
 
+
     public static YN convert (boolean value) {
         return value ? YN.Y : YN.N;
     }

@@ -7,17 +7,24 @@ import lombok.RequiredArgsConstructor;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.AccountDto;
 import me.nald.blog.data.model.ContactRequest;
+import me.nald.blog.exception.Errors;
 import me.nald.blog.response.Response;
+import me.nald.blog.service.store.AccountStore;
 import me.nald.blog.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
+
+import static me.nald.blog.exception.ErrorSpec.TooManyRequests;
 
 
 @Service
@@ -26,6 +33,7 @@ import javax.mail.internet.MimeMessage;
 public class CommonService {
 
     private static BlogProperties blogProperties;
+    private final AccountStore accountStore;
 
     @Autowired
     public void setBlogProperties(BlogProperties blogProperties) {
@@ -33,6 +41,11 @@ public class CommonService {
     }
 
     public Response.CommonRes sendMail(ContactRequest contactRequest) {
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        if(!accountStore.checkMailSentCount(request)){
+            throw Errors.of(TooManyRequests, "only 5 times available per day");
+        }
         Properties props = new Properties();
         HashMap<String, Object> data = new HashMap<>();
 
@@ -131,6 +144,12 @@ public class CommonService {
                 .statusCode(200)
                 .data(Util.stringListToHashMapList(badgeList))
                 .build();
+
+    }
+
+    public void mailCountReset(){
+
+        accountStore.mailCountReset();
 
     }
 

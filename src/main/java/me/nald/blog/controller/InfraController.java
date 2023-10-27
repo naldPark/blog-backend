@@ -2,9 +2,9 @@ package me.nald.blog.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.nald.blog.annotation.RequireAuthBiz;
 import me.nald.blog.service.InfraService;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,15 +22,23 @@ public class InfraController {
         return () -> infraService.getDiagramList();
     }
 
-
+    @RequireAuthBiz
     @GetMapping("/clusterInfo")
     public Callable<Object> clusterInfo() {
         return () -> infraService.getClusterInfo();
     }
 
+    @RequireAuthBiz
     @GetMapping("/clusterResource")
     public Callable<Object> getClusterResource() {
         return () -> infraService.getClusterInfo();
     }
 
+    @RequireAuthBiz
+    @GetMapping("/sandboxAccessPoint")
+    public Callable<Object> getSandboxAccessPoint() {
+        return () -> infraService.getSandboxAccessPoint();
+    }
+
 }
+

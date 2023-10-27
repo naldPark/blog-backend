@@ -2,27 +2,42 @@ package me.nald.blog.service;
 
 import com.google.gson.Gson;
 import io.kubernetes.client.openapi.ApiClient;
+import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.models.V1NamespaceList;
 import io.kubernetes.client.openapi.models.V1Node;
+import io.kubernetes.client.openapi.models.V1PodList;
 import io.kubernetes.client.util.Config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.adaptor.KubernetesAdaptor;
+import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.data.persistence.entity.Sandbox;
 import me.nald.blog.model.Node;
+import me.nald.blog.repository.AccountRepository;
+import me.nald.blog.repository.SandboxRepository;
 import me.nald.blog.response.CommonResponse;
 import me.nald.blog.response.Response;
 import me.nald.blog.response.ServerResourceResponse;
 import me.nald.blog.util.Util;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+
+import static me.nald.blog.util.Constants.K8S_SANDBOX_NAMESPACE;
+import static me.nald.blog.util.Constants.USER_ID;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class InfraService {
     private final KubernetesAdaptor kubeAdaptor;
+    private final SandboxRepository sandboxRepository;
+    private final AccountRepository accountRepository;
+
 
     public Response.CommonRes getClusterInfo() throws Exception {
 
@@ -79,19 +94,10 @@ public class InfraService {
                 .build();
     }
 
-    public CommonResponse getClusterResource(Long id) throws Exception {
+    public CommonResponse getClusterResource() throws Exception {
 
        CommonResponse commonResponse = CommonResponse.of();
-        ApiClient kubeConfig = Config.fromConfig(new ClassPathResource("k8s-config").getInputStream());
 
-//        Cluster cluster = Cluster.builder()
-//                .csp(0)
-//                .defaultYn("Y")
-//                .groupId(7)
-//                .id(31)
-//                .name("nald-cluster")
-//                .k8sConfig(kubeConfig)
-//                .build();
         Map<String, Float> usedResource = new HashMap<>();
 
         List<ServerResourceResponse> serverResource = new ArrayList<>();
@@ -156,6 +162,29 @@ public class InfraService {
         commonResponse.addData("gpuPriority", gpuPrioryty);
         System.out.println("========="+commonResponse);
         log.info("^^^ return value getNodeResource {} ", commonResponse);
+        return commonResponse;
+    }
+
+    public CommonResponse getSandboxAccessPoint() throws ApiException {
+        CommonResponse commonResponse = CommonResponse.of();
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        Account user = accountRepository.findByAccountId((String) request.getAttribute(USER_ID));
+        String objectName = user.getAccountId()+"-sandbox";
+
+        if(user.getSandbox().isEmpty()){
+            try {
+                String result = kubeAdaptor.agentWith().createNamespacedDeployment(objectName);
+                System.out.println("리절트는 = "+ result);
+                Sandbox sandbox = Sandbox.createSandbox(user, objectName, true);
+                sandboxRepository.save(sandbox);
+            } catch (ApiException e) {
+                e.printStackTrace();
+            }
+        }
+        V1PodList podList = kubeAdaptor.agentWith().listNamespacePod(K8S_SANDBOX_NAMESPACE, "app="+objectName);
+        String serviceName = kubeAdaptor.agentWith().createNamespacedService(objectName);
+
+        System.out.println("서비스 네임"+ serviceName);
         return commonResponse;
     }
 }

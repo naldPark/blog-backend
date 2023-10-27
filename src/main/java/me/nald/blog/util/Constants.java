@@ -32,47 +32,25 @@ public class Constants {
     public static final String LOG_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:dd";
     public static final String LOG_DELIMITER = "\t";
 
-
-
-    // Modeler Config
+    // K8S Config
     public static final String STR_TRUE = "true";
     public static final String STR_FALSE = "false";
-    public static final String KUBERNETES_CPU_NODE_SERVICE_TYPE = "cpu";
-    public static final String KUBERNETES_GPU_NODE_SERVICE_TYPE = "gpu";
-    public static final String KUBERNETES_NAMESPACE_PREFIX = "";
-    public static final String KUBERNETES_TYPE_WORKSPACE = "workspace";
-    public static final String KUBERNETES_WORKSPACE_LABEL_SELECTOR = "type="+KUBERNETES_TYPE_WORKSPACE;
-    public static final String KUBERNETES_NAMESPACE_NORMAL_NAME_FORMAT = "%d-i-%s";
-    public static final String KUBERNETES_NAMESPACE_RUNTIME_NAME_FORMAT = "%d-r-%s";
-    public static final String KUBERNETES_LABEL_KEY_NODE_TYPE = "nodetype";
-    public static final String KUBERNETES_LABEL_KEY_SERVICE_TYPE = "servicetype";
-    public static final String KUBERNETES_NODE_TYPE_MASTER = "master";
-    public static final String KUBERNETES_NODE_TYPE_WORKER = "worker";
+    public static final String K8S_SANDBOX_NAMESPACE = "sandbox";
+    public static final String K8S_SANDBOX_DEFAULT_LABEL = "default-sandbox";
+    public static final String K8S_IMAGE_PULL_SECRET_NAME = "regcred";
+    public static final String K8S_CPU_NODE_SERVICE_TYPE = "cpu";
+    public static final String K8S_GPU_NODE_SERVICE_TYPE = "gpu";
+    public static final String K8S_NAMESPACE_PREFIX = "";
+    public static final String K8S_LABEL_KEY_SERVICE_TYPE = "servicetype";
     public static final String K8S_RESOURCE_TYPE_CPU = "cpu";
     public static final String K8S_RESOURCE_TYPE_MEMORY = "memory";
     public static final String K8S_EXTENDED_RESOURCE_TYPE_GPU = "gpu";
     public static final String K8S_EXTENDED_RESOURCE_TYPE_NVIDIA_GPU = "nvidia.com/gpu";
-    public static final String K8S_RESOURCE_LIMITS = "limits";
     public static final String K8S_RESOURCE_REQUESTS = "requests";
-    public static final String K8S_RESOURCE_QUOTA_LIMIT_MEMORY = K8S_RESOURCE_LIMITS + "." + K8S_RESOURCE_TYPE_MEMORY;
-    public static final String K8S_RESOURCE_QUOTA_LIMIT_CPU = K8S_RESOURCE_LIMITS + "." + K8S_RESOURCE_TYPE_CPU;
-    public static final String K8S_RESOURCE_QUOTA_REQUEST_NVIDIA_GPU = K8S_RESOURCE_REQUESTS + "." + K8S_EXTENDED_RESOURCE_TYPE_NVIDIA_GPU;
-    public static final String K8S_CPU_UNIT = "m";
-    public static final String K8S_MEMORY_UNIT = "Mi";
-    public static final String K8S_GPU_UNIT = "";
     public static final String RESOURCE_QUOTA_NAME = "resource-quota-limit-mem-cpu";
     public static final String RESOURCE_QUOTA_FIELD_SELECTOR  = "metadata.name=" + RESOURCE_QUOTA_NAME;
     public static final String KUBE_CONFIG_WINDOWS_PATH = "..\\.kube2";
     public static final String KUBE_CONFIG_LINUX_PATH = "/tmp/.kube";
-    public static final int MAX_CHECK_STATUS_COUNT = 30;
-    public static final long CHECK_STATUS_PERIOD = 1000L;
-    public static final int MAX_RETRY_REQUEST_COUNT = 5;
-    public static final long RETRY_REQUEST_WAITING_PERIOD = 1000L;
-    public static final float RESOURCE_CAUTION_VALUE = 70.0F;
-    public static final float RESOURCE_WARNING_VALUE = 90.0F;
-    public static final String K8S_RESOURCE_QUANTITY_KEY_CPU = "limits.cpu";
-    public static final String K8S_RESOURCE_QUANTITY_KEY_MEMORY = "limits.memory";
-    public static final String K8S_RESOURCE_QUANTITY_KEY_GPU = "limits.gpu";
 
 
 }

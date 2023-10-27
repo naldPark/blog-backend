@@ -30,8 +30,10 @@ public enum ErrorSpec {
     InvalidPassword(BAD_REQUEST, INVALID.code(6)),
     DuplicatedId(BAD_REQUEST, INVALID.code(7)),
 
+    // ETC
     InvalidParameterValue(BAD_REQUEST, INVALID.code(1)),
-    AlreadyExists(BAD_REQUEST, INVALID.code(2));
+    AlreadyExists(BAD_REQUEST, INVALID.code(2)),
+    TooManyRequests(BAD_REQUEST, INVALID.code(3));
 
     private final HttpStatus httpStatus;
     private final int code;

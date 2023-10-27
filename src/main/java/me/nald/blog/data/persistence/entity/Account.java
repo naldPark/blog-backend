@@ -58,6 +58,10 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<AccountLog> accountLogs = new ArrayList<>();
 
+    @JsonIgnoreProperties("account")
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    private List<Sandbox> sandbox = new ArrayList<>();
+
     public static Account createAccount(String accountId,
                                         String accountName,
                                         String email,

@@ -58,7 +58,6 @@ public class StorageController {
         return storageService.videoVtt(videoId);
     }
 
-
     // 파일 타입 변환
     @RequireAuthSuper
     @GetMapping("/convertVideoHls/{videoId}")

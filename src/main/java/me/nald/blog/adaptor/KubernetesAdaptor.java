@@ -1,13 +1,10 @@
 package me.nald.blog.adaptor;
 
-import io.kubernetes.client.custom.Quantity;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.ApiResponse;
 import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
-import io.kubernetes.client.openapi.apis.RbacAuthorizationV1Api;
 import io.kubernetes.client.openapi.models.*;
 import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.KubeConfig;
@@ -17,14 +14,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.model.Cluster;
-import me.nald.blog.model.JsonPatch;
 import me.nald.blog.util.KubeConfigValidator;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -32,12 +25,10 @@ import org.yaml.snakeyaml.error.YAMLException;
 import static me.nald.blog.util.Constants.*;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -116,7 +107,7 @@ public class KubernetesAdaptor {
     }
 
     public static String convertNamespaceName(String name) {
-        return KUBERNETES_NAMESPACE_PREFIX + name;
+        return K8S_NAMESPACE_PREFIX + name;
     }
 
 
@@ -126,7 +117,7 @@ public class KubernetesAdaptor {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line = null;
             while ((line = br.readLine()) != null) {
-                System.out.println("★★★"+line);
+//                System.out.println("★★★"+line);
                 switch (result.getType()) {
                     case KubectlDetail.NODE:
                     case KubectlDetail.POD:
@@ -180,7 +171,6 @@ public class KubernetesAdaptor {
         }
         return result;
     }
-
 
 
     @Data
@@ -243,7 +233,7 @@ public class KubernetesAdaptor {
         }
 
         public void setDescribe(String data) {
-            System.out.println("데이터+"+data);
+            System.out.println("데이터+" + data);
 
             if (data.indexOf("Name:") == 0) {
                 dataMap = new LinkedHashMap<>();
@@ -289,12 +279,12 @@ public class KubernetesAdaptor {
                             int readyCount = 0;
                             String reason = null;
                             for (Map<String, Object> container : containers) {
-                                restartCount += (int)container.get("restartCount");
-                                if ((boolean)container.get("ready")) {
+                                restartCount += (int) container.get("restartCount");
+                                if ((boolean) container.get("ready")) {
                                     readyCount++;
                                 }
                                 if (reason == null && !"Running".equals(container.get("state"))) {
-                                    Map<String, String> subData =  (Map)container.get("stateData");
+                                    Map<String, String> subData = (Map) container.get("stateData");
                                     if (subData != null) {
                                         reason = subData.get("Reason");
                                     }
@@ -321,18 +311,18 @@ public class KubernetesAdaptor {
                             list.add(detail);
                             break;
                         case NODE_SUMMARY:
-                            summaryPod.put("usage", (long)summaryPod.get("usage") + getPodCount("Non-terminated Pods"));
+                            summaryPod.put("usage", (long) summaryPod.get("usage") + getPodCount("Non-terminated Pods"));
                             Map<String, String> capacity = getMapData("Capacity", ":");
-                            summaryCpu.put("capacity", (long)summaryCpu.get("capacity") + convertToLong(String.valueOf(capacity.get("cpu")), CONVERT_TYPE_CORE));
-                            summaryMemory.put("capacity", (long)summaryMemory.get("capacity") + convertToLong(String.valueOf(capacity.get("memory")), CONVERT_TYPE_BYTE));
-                            summaryPod.put("capacity", (long)summaryPod.get("capacity") + Integer.parseInt(String.valueOf(capacity.get("pods"))));
+                            summaryCpu.put("capacity", (long) summaryCpu.get("capacity") + convertToLong(String.valueOf(capacity.get("cpu")), CONVERT_TYPE_CORE));
+                            summaryMemory.put("capacity", (long) summaryMemory.get("capacity") + convertToLong(String.valueOf(capacity.get("memory")), CONVERT_TYPE_BYTE));
+                            summaryPod.put("capacity", (long) summaryPod.get("capacity") + Integer.parseInt(String.valueOf(capacity.get("pods"))));
                             Map<String, Object> resourceMap = getResource("Allocated resources", resources);
-                            Map<String, Object> cpuMap = (Map<String, Object>)resourceMap.get("cpu");
-                            summaryCpu.put("requests", (long)summaryCpu.get("requests") + convertToLong(String.valueOf(cpuMap.get("requests")).split(" ")[0], CONVERT_TYPE_CORE));
-                            summaryCpu.put("limits", (long)summaryCpu.get("limits") + convertToLong(String.valueOf(cpuMap.get("limits")).split(" ")[0], CONVERT_TYPE_CORE));
-                            Map<String, Object> memoryMap = (Map<String, Object>)resourceMap.get("memory");
-                            summaryMemory.put("requests", (long)summaryMemory.get("requests") + convertToLong(String.valueOf(memoryMap.get("requests")).split(" ")[0], CONVERT_TYPE_BYTE));
-                            summaryMemory.put("limits", (long)summaryMemory.get("limits") + convertToLong(String.valueOf(memoryMap.get("limits")).split(" ")[0], CONVERT_TYPE_BYTE));
+                            Map<String, Object> cpuMap = (Map<String, Object>) resourceMap.get("cpu");
+                            summaryCpu.put("requests", (long) summaryCpu.get("requests") + convertToLong(String.valueOf(cpuMap.get("requests")).split(" ")[0], CONVERT_TYPE_CORE));
+                            summaryCpu.put("limits", (long) summaryCpu.get("limits") + convertToLong(String.valueOf(cpuMap.get("limits")).split(" ")[0], CONVERT_TYPE_CORE));
+                            Map<String, Object> memoryMap = (Map<String, Object>) resourceMap.get("memory");
+                            summaryMemory.put("requests", (long) summaryMemory.get("requests") + convertToLong(String.valueOf(memoryMap.get("requests")).split(" ")[0], CONVERT_TYPE_BYTE));
+                            summaryMemory.put("limits", (long) summaryMemory.get("limits") + convertToLong(String.valueOf(memoryMap.get("limits")).split(" ")[0], CONVERT_TYPE_BYTE));
                             break;
                         default:
                             break;
@@ -351,13 +341,13 @@ public class KubernetesAdaptor {
             } catch (Exception e) {
                 runningTime = 0;
             }
-            if (TimeUnit.MILLISECONDS.toDays(runningTime) > 0 ) {
+            if (TimeUnit.MILLISECONDS.toDays(runningTime) > 0) {
                 result = String.format("%dd", TimeUnit.MILLISECONDS.toDays(runningTime));
-            } else if (TimeUnit.MILLISECONDS.toHours(runningTime) > 0 ) {
+            } else if (TimeUnit.MILLISECONDS.toHours(runningTime) > 0) {
                 result = String.format("%dh", TimeUnit.MILLISECONDS.toHours(runningTime));
-            } else if (TimeUnit.MILLISECONDS.toMinutes(runningTime) > 0 ) {
+            } else if (TimeUnit.MILLISECONDS.toMinutes(runningTime) > 0) {
                 result = String.format("%dm", TimeUnit.MILLISECONDS.toMinutes(runningTime));
-            } else if (TimeUnit.MILLISECONDS.toSeconds(runningTime) > 0 ) {
+            } else if (TimeUnit.MILLISECONDS.toSeconds(runningTime) > 0) {
                 result = String.format("%ds", TimeUnit.MILLISECONDS.toSeconds(runningTime));
             }
             return result;
@@ -388,7 +378,7 @@ public class KubernetesAdaptor {
                             container.put(lastSubKey, str.substring(str.indexOf(":") + 1).trim());
                         }
                     } else if (str.length() > 7 && str.charAt(6) != ' ' && lastSubKey != null && str.contains(":")) {
-                        Map<String, String> subData = (Map)container.get(String.format("%s_sub", lastSubKey));
+                        Map<String, String> subData = (Map) container.get(String.format("%s_sub", lastSubKey));
                         if (subData == null) {
                             subData = new LinkedHashMap<>();
                             container.put(String.format("%s_sub", lastSubKey), subData);
@@ -396,7 +386,7 @@ public class KubernetesAdaptor {
                         subData.put(str.substring(0, str.indexOf(":")).trim(), str.substring(str.indexOf(":") + 1).trim());
                     }
                     if (key != null && str.contains(":")) {
-                        Map<String, Object> data = (Map)container.get(key);
+                        Map<String, Object> data = (Map) container.get(key);
                         if (data == null) {
                             data = new LinkedHashMap<>();
                             container.put(key, data);
@@ -528,7 +518,7 @@ public class KubernetesAdaptor {
 
         public Map<String, Object> getSummary() {
             Map<String, Object> result = new HashMap<>();
-            summaryCpu.put("capacity", (long)summaryCpu.get("capacity") * 1000);
+            summaryCpu.put("capacity", (long) summaryCpu.get("capacity") * 1000);
             result.put("cpu", summaryCpu);
             result.put("memory", summaryMemory);
             result.put("pod", summaryPod);
@@ -552,14 +542,12 @@ public class KubernetesAdaptor {
                     KubeConfigValidator.validate(kubeConfig);
                 } catch (IOException | YAMLException | ClassCastException e) {
                     log.error("apiClient", e);
-                    String message = String.format("K8S-Config 로드가 실패했습니다.(%s)", e.getMessage());
                     throw new RuntimeException(e);
                 }
                 try {
                     client = Config.fromConfig(kubeConfig);
                 } catch (IOException | RuntimeException e) {
                     log.error("apiClient", e);
-                    String message = String.format("Cluster의 K8S-Config가 유효하지 않은 값으로 설정되어 있습니다. Cluster Owner 에게 문의하세요.(%s)", e.getMessage());
                     throw new RuntimeException(e);
                 }
                 client.setReadTimeout(60 * 1000);
@@ -576,133 +564,68 @@ public class KubernetesAdaptor {
         }
 
 
-        public  List<Map<String, Object>> getNodeSummary() throws Exception {
+        public List<Map<String, Object>> getNodeSummary() throws Exception {
             String cmd = String.format("kubectl get nodes");
             KubectlDetail summary = new KubectlDetail(KubectlDetail.NODE);
             cmdResult(cmd, summary);
-            System.out.println(summary);
-//            Map<String, Object> result = summary.getSummary();
             cmd = String.format("kubectl top nodes");
             KubectlDetail usage = new KubectlDetail(KubectlDetail.NODE_USAGE);
             cmdResult(cmd, usage);
             List<Map<String, Object>> usageList = usage.getList();
-            System.out.println("리스트"+ usageList);
+            System.out.println("리스트" + usageList);
             return usageList;
         }
-
 
 
         public V1NodeList listNode(String fieldSelector) throws ApiException {
             return coreV1Api().listNode(STR_FALSE, null, null, null, fieldSelector, null, null, null, null, false);
         }
 
-        //        TODO sa-922
-        public V1ConfigMap readNamespacedConfigMap(String configMapName, String namespace) throws ApiException {
-            V1ConfigMap v1ConfigMap = coreV1Api().readNamespacedConfigMap(configMapName, namespace, "true", false, false);
-            return v1ConfigMap;
+
+        public String createNamespacedDeployment(String name) throws ApiException {
+            System.out.println("이름은="+name);
+            V1DeploymentList deployments = appsV1Api()
+                    .listNamespacedDeployment(K8S_SANDBOX_NAMESPACE, "false", true, "", "", "app=" + K8S_SANDBOX_DEFAULT_LABEL, null, "", null, 0, false);
+            V1Deployment defaultDeployment = deployments.getItems().stream().filter(f -> f.getMetadata().getName().equals(K8S_SANDBOX_DEFAULT_LABEL)).findAny().get();
+            Map<String, String> label = new HashMap<String, String>() {{
+                put("app", name);
+            }};
+            List<V1LocalObjectReference> imagePullSecrets = new ArrayList<>();
+            imagePullSecrets.add(new V1LocalObjectReference().name(K8S_IMAGE_PULL_SECRET_NAME));
+            V1PodSpec podSpec = new V1PodSpec().containers(defaultDeployment.getSpec().getTemplate().getSpec().getContainers()).imagePullSecrets(imagePullSecrets);
+            V1DeploymentSpec deploymentSpec = new V1DeploymentSpec()
+                    .replicas(1)
+                    .selector(new V1LabelSelector().matchLabels(label))
+                    .template(new V1PodTemplateSpec()
+                            .metadata(new V1ObjectMeta().labels(label)).spec(podSpec));
+            V1Deployment newDeployment = new V1Deployment()
+                    .kind("Deployment").metadata(new V1ObjectMeta().name(name)).spec(deploymentSpec);
+
+            V1Deployment result = appsV1Api().createNamespacedDeployment(K8S_SANDBOX_NAMESPACE, newDeployment, "false", null, null);
+
+            return result.getMetadata().getName();
         }
 
+        public String createNamespacedService(String name) throws ApiException {
+//            V1ObjectMeta meta = new V1ObjectMeta().name(name).labels(metaLabels);
+
+            Map<String, String> selector = new HashMap<>();
+            selector.put("app", name);
+
+//            Cluster cluster = namespace.getCluster();
+            V1ServiceSpec spec = new V1ServiceSpec().ports(Arrays.asList(new V1ServicePort().port(8088))).selector(selector).type("ClusterIP");
+            V1Service body = new V1Service().kind("Service").metadata(new V1ObjectMeta().name(name)).spec(spec);
+
+            V1Service result = coreV1Api().createNamespacedService(K8S_SANDBOX_NAMESPACE, body, "false", null, null);
+
+            return result.getMetadata().getName();
+        }
         public V1NamespaceList listNamespace(String fieldSelector) throws ApiException {
             return coreV1Api().listNamespace(STR_FALSE, null, null, null, fieldSelector, null, null, null, null, false);
         }
 
-        public V1Namespace readNamespace(String namespace, boolean convert) throws ApiException {
-            return coreV1Api().readNamespace(convert ? convertNamespaceName(namespace) : namespace, STR_FALSE, null, null);
-        }
-
-        public V1ResourceQuota readNamespacedResourceQuota(String name, boolean convert) throws ApiException {
-            return coreV1Api().readNamespacedResourceQuota(RESOURCE_QUOTA_NAME, convert ? convertNamespaceName(name) : name, null, null, null);
-        }
-
-        public V1Namespace createNamespace(String name) throws ApiException {
-            Map<String, String> labels = new HashMap<>();
-            labels.put("katib-metricscollector-injection", "enabled");
-            V1ObjectMeta meta = new V1ObjectMeta().labels(labels).name(convertNamespaceName(name));
-            V1Namespace namespace = new V1Namespace().kind("Namespace").metadata(meta);
-            return coreV1Api().createNamespace(namespace, STR_FALSE, null, null);
-        }
-
-        public ApiResponse<V1Status> deleteNamespace(String namespace) throws ApiException {
-            V1DeleteOptions option = new V1DeleteOptions();
-            return coreV1Api().deleteNamespaceWithHttpInfo(convertNamespaceName(namespace), STR_FALSE, null, null, null, STR_FALSE, option);
-        }
-
-        public V1ServiceAccount createNamespacedServiceAccount(String namespace, String name) throws ApiException {
-            V1ServiceAccount serviceAccount = new V1ServiceAccount()
-                    .kind("ServiceAccount").metadata(new V1ObjectMeta().name(name));
-            return coreV1Api().createNamespacedServiceAccount(namespace, serviceAccount, STR_FALSE, null, null);
-        }
-
-        public V1ServiceAccount readNamespacedServiceAccount(String namespace, String name) throws ApiException {
-            return coreV1Api().readNamespacedServiceAccount(name, namespace, STR_FALSE, null, null);
-        }
-
-        public V1ClusterRoleBinding createNamespacedClusterRoleBinding(String namespace, String name) throws ApiException {
-            RbacAuthorizationV1Api rbacAuthorizationApi = rbacAuthorizationV1Api();
-            V1ClusterRoleBinding body = new V1ClusterRoleBinding()
-                    .kind("ClusterRoleBinding")
-                    .metadata(new V1ObjectMeta().name(name))
-                    .subjects(Arrays.asList(new V1Subject().kind("ServiceAccount").name("accu-modeler").namespace(namespace)))
-                    .roleRef(new V1RoleRef().kind("ClusterRole").name("cluster-admin").apiGroup("rbac.authorization.k8s.io"));
-            return rbacAuthorizationApi.createClusterRoleBinding(body, STR_FALSE, null, null);
-        }
-
-        private RbacAuthorizationV1Api rbacAuthorizationV1Api() {
-            return new RbacAuthorizationV1Api(apiClient());
-        }
-
-        public V1Secret createSecret(String namespace, String dockerEndpoint, String dockerUsername, String dockerSecretPassword, String dockerEmail) throws ApiException, JSONException {
-            Map<String, byte[]> data = new HashMap<>();
-            JSONObject config = new JSONObject();
-            JSONObject dockerInfo = new JSONObject()
-                    .put("username", dockerUsername)
-                    .put("password", dockerSecretPassword)
-                    .put("email", dockerEmail);
-            config.put("auths", new JSONObject().put(dockerEndpoint, dockerInfo));
-            data.put(".dockerconfigjson", config.toString().getBytes());
-
-            V1ObjectMeta metaData = new V1ObjectMeta().name("regcred").namespace(convertNamespaceName(namespace));
-            V1Secret body = new V1Secret().metadata(metaData).type("kubernetes.io/dockerconfigjson").data(data);
-            return coreV1Api().createNamespacedSecret(convertNamespaceName(namespace), body, STR_FALSE, null, null);
-        }
-
-        public V1SecretList listNamespaceSecret(String namespace, String labelSelector) throws ApiException {
-            return coreV1Api().listNamespacedSecret(namespace, STR_FALSE, true, "", "", labelSelector, null, "", null, 0, false);
-        }
-
-        public V1Secret readNamespaceSecret(String name, String namespace) throws ApiException {
-            return coreV1Api().readNamespacedSecret(name, namespace, STR_TRUE, null, null);
-        }
-
-        public V1DeploymentList listNamespaceDeployment(String namespace) throws ApiException {
-            return appsV1Api().listNamespacedDeployment(convertNamespaceName(namespace), STR_FALSE, true, "", "", "", null, "", null, 0, false);
-        }
-
         public V1PodList listNamespacePod(String namespace, String labelSelector) throws ApiException {
             return coreV1Api().listNamespacedPod(convertNamespaceName(namespace), STR_FALSE, true, "", "", labelSelector, null, "", null, 0, false);
-        }
-
-        public V1PodList listDefaultNamespacePod(String namespace, String labelSelector) throws ApiException {
-            return coreV1Api().listNamespacedPod(namespace, STR_FALSE, true, "", "", labelSelector, null, "", null, 0, false);
-        }
-
-        public V1Pod readNamespacedPod(String namespace, String name) {
-            V1Pod pod = null;
-            try {
-                pod = coreV1Api().readNamespacedPodStatus(name, convertNamespaceName(namespace), STR_TRUE);
-            } catch (ApiException e) {
-                e.printStackTrace();
-                pod = readErrorPod(convertNamespaceName(namespace), name);
-            }
-            return pod;
-        }
-
-        public V1PodList listPodForAllNamespaces(String labelSelector) throws ApiException {
-            return coreV1Api().listPodForAllNamespaces(false, null, null, labelSelector, null, null, null, null, null, false);
-        }
-
-        public V1ResourceQuotaList listNamespacedResourceQuota() throws ApiException {
-            return coreV1Api().listResourceQuotaForAllNamespaces(false, null, RESOURCE_QUOTA_FIELD_SELECTOR, null, null, null, null, null, null, false);
         }
 
         private V1Pod readErrorPod(String namespace, String name) {
@@ -720,111 +643,6 @@ public class KubernetesAdaptor {
             return pod;
         }
 
-//        public V1EventList listNamespacedPodEvent(String namespace, String name) throws ApiException {
-//            String fieldSelector = String.format("involvedObject.name=%s", name);
-//            return coreV1Api().listNamespacedEvent(convertNamespaceName(namespace), STR_FALSE, null, null, fieldSelector, null, 100, null, null,10, false);
-//        }
-
-        // GPU 리소스 제한은 업데이트가 불가능 하여 디비로만 관리한다고 함, gpu 값 제거
-        public V1ResourceQuota createNamespacedResourceQuota(String namespace, Float cpu, Float mem) throws ApiException {
-            V1ObjectMeta meta = new V1ObjectMeta().name(RESOURCE_QUOTA_NAME);
-
-            Map<String, Quantity> hard = new HashMap<>();
-            hard.put(K8S_RESOURCE_QUOTA_LIMIT_CPU, new Quantity(cpuToCoreUnit(cpu)));
-            hard.put(K8S_RESOURCE_QUOTA_LIMIT_MEMORY, new Quantity(memToCoreUnit(mem)));
-
-            V1ResourceQuotaSpec spec = new V1ResourceQuotaSpec().hard(hard);
-            V1ResourceQuota body = new V1ResourceQuota().kind("ResourceQuota").metadata(meta).spec(spec);
-
-            return coreV1Api()
-                    .createNamespacedResourceQuota(convertNamespaceName(namespace), body, STR_FALSE, null, null);
-        }
-
-        // GPU 리소스 제한은 업데이트가 불가능 하여 디비로만 관리한다고 함, gpu 값 제거
-        public V1ResourceQuota patchNamespacedResourceQuota(String namespace, Float cpu, Float mem) throws ApiException {
-            return coreV1Api().patchNamespacedResourceQuota(
-                    RESOURCE_QUOTA_NAME,
-                    convertNamespaceName(namespace),
-                    new io.kubernetes.client.custom.V1Patch(
-                            Arrays.asList(
-                                    JsonPatch.replace("/spec/hard/limits.cpu", cpuToCoreUnit(cpu)),
-                                    JsonPatch.replace("/spec/hard/limits.memory", memToCoreUnit(mem))
-                            ).toString()),
-                    STR_FALSE,
-                    null,
-                    null,
-                    null
-            );
-        }
-
-        /*
-        private String gpuToCoreUnit(Float gpu) {
-            return Math.round(gpu) + K8S_GPU_UNIT;
-        }
-        */
-
-        private String cpuToCoreUnit(Float cpu) {
-            return Math.round(cpu * 1000) + K8S_CPU_UNIT;
-        }
-
-        private String memToCoreUnit(Float memory) {
-            return Math.round(memory * 1000) + K8S_MEMORY_UNIT;
-        }
-
-        /*
-        private int cpuToCoreValue(Float cpu) {
-            return Math.round(cpu * 1000);
-        }
-
-        private int memToCoreValue(Float memory) {
-            return Math.round(memory * 1000);
-        }
-
-        private Float CoreUnitToCpu(String cpu) {
-            if (cpu.indexOf(K8S_CPU_UNIT) != -1) {
-                return Float.valueOf(cpu.replace(K8S_CPU_UNIT, "")).floatValue() / 1000;
-            } else {
-                return Float.valueOf(cpu).floatValue();
-            }
-        }
-
-        private Float CoreUnitToMem(String mem) {
-            return Float.valueOf(mem.replace(K8S_MEMORY_UNIT, "")).floatValue() / 1000;
-        }
-        */
-
-        public V1Status deleteNamspacedSecret(String namespace) {
-            V1DeleteOptions body = new V1DeleteOptions();
-            try {
-                return coreV1Api().deleteNamespacedSecret("regcred", convertNamespaceName(namespace), STR_FALSE, null, 0, false, STR_TRUE, body);
-            } catch (ApiException ignore) {
-                log.error("deleteNamspacedSecret {}", ignore);
-                return null;
-            }
-        }
-
-        public Float getMaximumGpuResourceCapacity() throws ApiException {
-            Float max = 0F;
-
-            V1NodeList nodeList = listNode("");
-            for (V1Node node : nodeList.getItems()) {
-                if (nodeList.getItems().size() > 1 && node.getMetadata().getLabels().containsKey("node-role.kubernetes.io/master")) {
-                    continue;
-                }
-
-                Float gpu = Optional.ofNullable(node)
-                        .map(V1Node::getStatus)
-                        .map(V1NodeStatus::getCapacity)
-                        .map(capa -> capa.get(K8S_EXTENDED_RESOURCE_TYPE_NVIDIA_GPU))
-                        .map(Quantity::getNumber)
-                        .map(BigDecimal::floatValue)
-                        .orElse(0F);
-
-                max = (max.compareTo(gpu) > 0) ? max : gpu;
-            }
-            return max;
-        }
-
         public Map<String, List<Float>> getClusterResource() throws ApiException, IOException {
             HashMap<String, List<Float>> result = new HashMap<>();
 
@@ -832,9 +650,9 @@ public class KubernetesAdaptor {
 //            System.out.println("노드리스트 ="+nodeList);
             for (V1Node node : nodeList.getItems()) {
                 if (nodeList.getItems().size() > 1
-                        && (node.getMetadata().getLabels().containsKey(KUBERNETES_LABEL_KEY_SERVICE_TYPE)
-                        && (node.getMetadata().getLabels().get(KUBERNETES_LABEL_KEY_SERVICE_TYPE).equals(KUBERNETES_CPU_NODE_SERVICE_TYPE)
-                        || node.getMetadata().getLabels().get(KUBERNETES_LABEL_KEY_SERVICE_TYPE).equals(KUBERNETES_GPU_NODE_SERVICE_TYPE)))) {
+                        && (node.getMetadata().getLabels().containsKey(K8S_LABEL_KEY_SERVICE_TYPE)
+                        && (node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_CPU_NODE_SERVICE_TYPE)
+                        || node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_GPU_NODE_SERVICE_TYPE)))) {
                     List<Float> value = getAllResourceNode(node.getMetadata().getName(), 0);
                     result.put(node.getMetadata().getName(), value);
                 }
@@ -851,9 +669,9 @@ public class KubernetesAdaptor {
 //            System.out.println("노드리스트 ="+nodeList);
             for (V1Node node : nodeList.getItems()) {
                 if (nodeList.getItems().size() > 1
-                        && (node.getMetadata().getLabels().containsKey(KUBERNETES_LABEL_KEY_SERVICE_TYPE)
-                        && (node.getMetadata().getLabels().get(KUBERNETES_LABEL_KEY_SERVICE_TYPE).equals(KUBERNETES_CPU_NODE_SERVICE_TYPE)
-                        || node.getMetadata().getLabels().get(KUBERNETES_LABEL_KEY_SERVICE_TYPE).equals(KUBERNETES_GPU_NODE_SERVICE_TYPE)))) {
+                        && (node.getMetadata().getLabels().containsKey(K8S_LABEL_KEY_SERVICE_TYPE)
+                        && (node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_CPU_NODE_SERVICE_TYPE)
+                        || node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_GPU_NODE_SERVICE_TYPE)))) {
                     List<Float> value = getAllResourceNode(node.getMetadata().getName(), cId);
                     result.put(node.getMetadata().getName(), value);
                 }
@@ -861,33 +679,11 @@ public class KubernetesAdaptor {
             return result;
         }
 
-        public Map<String, List<Object>> getUsageResource(String namespaces, Cluster cluster, String podType, String type) throws IOException {
-            long cId = cluster.getId();
-            checkKubeconfigFile(cluster);
-            return getResourcelimitsOfPods(namespaces, cId, podType, type);
-        }
-
-        public Float getUsedNodeResource(String type, Cluster cluster) throws ApiException, IOException {
-            Float result = 0F;
-            long cId = cluster.getId();
-            checkKubeconfigFile(cluster);
-            V1NodeList nodeList = KubernetesAdaptor.agentWith(cluster).listNode("");
-            // 노드가 두개 이상(마스터 제외한 노드가 있을 때)
-            if (nodeList.getItems().size() > 1) {
-                for (V1Node node : nodeList.getItems()) {
-                    if (node.getMetadata().getLabels().containsKey(KUBERNETES_LABEL_KEY_SERVICE_TYPE) && isNodeTypeWithResource(type, node)) {
-                        result += getResourcelimitsOfNode(node.getMetadata().getName(), cId, type);
-                    }
-                }
-            }
-            return result;
-        }
-
         private boolean isNodeTypeWithResource(String type, V1Node node) {
-            return (type.equals(K8S_RESOURCE_TYPE_CPU) && node.getMetadata().getLabels().get(KUBERNETES_LABEL_KEY_SERVICE_TYPE).equals(KUBERNETES_CPU_NODE_SERVICE_TYPE))
-                    || (type.equals(K8S_EXTENDED_RESOURCE_TYPE_GPU) && node.getMetadata().getLabels().get(KUBERNETES_LABEL_KEY_SERVICE_TYPE).equals(KUBERNETES_GPU_NODE_SERVICE_TYPE))
-                    || (type.equals(K8S_RESOURCE_TYPE_MEMORY) && (node.getMetadata().getLabels().get(KUBERNETES_LABEL_KEY_SERVICE_TYPE).equals(KUBERNETES_CPU_NODE_SERVICE_TYPE)
-                    || node.getMetadata().getLabels().get(KUBERNETES_LABEL_KEY_SERVICE_TYPE).equals(KUBERNETES_GPU_NODE_SERVICE_TYPE)));
+            return (type.equals(K8S_RESOURCE_TYPE_CPU) && node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_CPU_NODE_SERVICE_TYPE))
+                    || (type.equals(K8S_EXTENDED_RESOURCE_TYPE_GPU) && node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_GPU_NODE_SERVICE_TYPE))
+                    || (type.equals(K8S_RESOURCE_TYPE_MEMORY) && (node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_CPU_NODE_SERVICE_TYPE)
+                    || node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_GPU_NODE_SERVICE_TYPE)));
         }
 
         private Map<String, List<Object>> getResourcelimitsOfPods(String namespace, long cId, String podyType, String type) throws IOException {
@@ -930,38 +726,6 @@ public class KubernetesAdaptor {
             return dataMap;
         }
 
-        private Float getResourcelimitsOfNode(String nodeName, long cId, String type) throws IOException {
-            Float result = 0F;
-            Map<String, List<String>> dataMap = new LinkedHashMap<>();
-            String key = null;
-            String fileName = getKubeConfigFileName(getKubeConfigFilePath(), cId);
-
-            String cmd = String.format("kubectl describe node %s --kubeconfig=%s", nodeName, fileName);
-            Process process = Runtime.getRuntime().exec(cmd);
-
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    if (line.indexOf("name") == 0) {
-                        dataMap = new LinkedHashMap<>();
-                    }
-                    if (dataMap != null) {
-                        if (line.length() > 0) {
-                            key = addDataToDataMap(line, dataMap, key);
-                        }
-                        if (line.indexOf("Events:") == 0) {
-                            result = processEvents(type, dataMap);
-                            dataMap.clear();
-                            dataMap = null;
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return result;
-        }
-
         private String addDataToDataMap(String line, Map<String, List<String>> dataMap, String key) {
             String[] splitData = line.split(":");
             if (line.charAt(0) != ' ') {
@@ -970,27 +734,6 @@ public class KubernetesAdaptor {
             List<String> dataList = dataMap.computeIfAbsent(key, k -> new ArrayList<>());
             dataList.add(line);
             return key;
-        }
-
-        private Float processEvents(String type, Map<String, List<String>> dataMap) {
-            List<String> resource = Arrays.asList(K8S_RESOURCE_TYPE_CPU, K8S_RESOURCE_TYPE_MEMORY, K8S_EXTENDED_RESOURCE_TYPE_NVIDIA_GPU);
-//            Map<String, String> capacity = getMapData("Capacity", ":", dataMap);
-            Map<String, Map<String, String>> allocated = getUsedData("Allocated resources", resource, dataMap);
-            Map<String, String> cpuUsed = allocated.get(K8S_RESOURCE_TYPE_CPU);
-            Map<String, String> memoryUsed = allocated.get(K8S_RESOURCE_TYPE_MEMORY);
-            Map<String, String> gpuUsed = allocated.get(K8S_EXTENDED_RESOURCE_TYPE_NVIDIA_GPU);
-            if (type.equals(K8S_RESOURCE_TYPE_CPU)) {
-                return convertToFloat(String.valueOf(cpuUsed.get(K8S_RESOURCE_REQUESTS)).split(" ")[0], true, false);
-            } else if (type.equals(K8S_RESOURCE_TYPE_MEMORY)) {
-                return convertToFloat(String.valueOf(memoryUsed.get(K8S_RESOURCE_REQUESTS)).split(" ")[0], false, false);
-            } else if (type.equals(K8S_EXTENDED_RESOURCE_TYPE_GPU)) {
-                if (gpuUsed != null) {
-                    return Float.parseFloat(String.valueOf(gpuUsed.get(K8S_RESOURCE_REQUESTS)).split(" ")[0].substring(0, 1));
-                }
-            } else {
-                log.error("error : Type is unknown");
-            }
-            return 0f;
         }
 
         private List<Float> getAllResourceNode(String nodeName, long cId) throws IOException {
