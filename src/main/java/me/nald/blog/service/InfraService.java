@@ -5,14 +5,17 @@ import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.models.V1NamespaceList;
 import io.kubernetes.client.openapi.models.V1Node;
+import io.kubernetes.client.openapi.models.V1Pod;
 import io.kubernetes.client.openapi.models.V1PodList;
 import io.kubernetes.client.util.Config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.adaptor.KubernetesAdaptor;
+import me.nald.blog.data.dto.StorageDto;
 import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.data.persistence.entity.Sandbox;
 import me.nald.blog.model.Node;
+import me.nald.blog.model.Pod;
 import me.nald.blog.repository.AccountRepository;
 import me.nald.blog.repository.SandboxRepository;
 import me.nald.blog.response.CommonResponse;
@@ -26,6 +29,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static me.nald.blog.util.Constants.K8S_SANDBOX_NAMESPACE;
 import static me.nald.blog.util.Constants.USER_ID;
@@ -39,24 +43,25 @@ public class InfraService {
     private final AccountRepository accountRepository;
 
 
-    public Response.CommonRes getClusterInfo() throws Exception {
+    public CommonResponse getClusterInfo() throws Exception {
 
         CommonResponse commonResponse = CommonResponse.of();
 
-        List<V1Node> list = kubeAdaptor.agentWith().listNode("").getItems();
+        List<V1Node> nodesList = kubeAdaptor.agentWith().listNode("").getItems();
         List<Map<String, Object>> nodeUsageSummary = kubeAdaptor.agentWith().getNodeSummary();
-        List<Node> result = new ArrayList<>();
+        List<Node> nodeResult = new ArrayList<>();
 
-        for (V1Node node : list) {
+        for (V1Node node : nodesList) {
             Map<String, Object> nodeUsage= nodeUsageSummary.stream().filter(s -> s.get("name").equals(node.getMetadata().getName())).findAny().get();
-            result.add(new Node(node, nodeUsage));
+            nodeResult.add(new Node(node, nodeUsage));
         }
 
-        commonResponse.addData("data",result);
-        return Response.CommonRes.builder()
-                .statusCode(200)
-                .data(result)
-                .build();
+        List<V1Pod> podsList = kubeAdaptor.agentWith().listPodForAllNamespaces().getItems();
+        List<Pod> podResult = podsList.stream().map(Pod::new).collect(Collectors.toList());
+
+        commonResponse.addData("nodeResult", nodeResult);
+        commonResponse.addData("podResult",podResult);
+        return commonResponse;
     }
 
     public Response.CommonRes getDiagramList() {

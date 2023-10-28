@@ -233,7 +233,6 @@ public class KubernetesAdaptor {
         }
 
         public void setDescribe(String data) {
-            System.out.println("데이터+" + data);
 
             if (data.indexOf("Name:") == 0) {
                 dataMap = new LinkedHashMap<>();
@@ -251,7 +250,6 @@ public class KubernetesAdaptor {
                         dataMap.put(key, dataList);
                     }
                     dataList.add(data);
-                    System.out.println(dataList);
                 }
 
                 if (data.indexOf("Events:") == 0) {
@@ -572,7 +570,6 @@ public class KubernetesAdaptor {
             KubectlDetail usage = new KubectlDetail(KubectlDetail.NODE_USAGE);
             cmdResult(cmd, usage);
             List<Map<String, Object>> usageList = usage.getList();
-            System.out.println("리스트" + usageList);
             return usageList;
         }
 
@@ -622,6 +619,10 @@ public class KubernetesAdaptor {
         }
         public V1NamespaceList listNamespace(String fieldSelector) throws ApiException {
             return coreV1Api().listNamespace(STR_FALSE, null, null, null, fieldSelector, null, null, null, null, false);
+        }
+
+        public V1PodList listPodForAllNamespaces() throws ApiException {
+            return coreV1Api().listPodForAllNamespaces(null, null, "", null, null, null, null, null, null, false);
         }
 
         public V1PodList listNamespacePod(String namespace, String labelSelector) throws ApiException {

@@ -14,7 +14,6 @@ import java.util.Optional;
 @NoArgsConstructor
 public class Node {
     String name;
-//    Map<String, String> annotations;
     Map<String, String> labels;
     String createdDt;
     Map<String, Long> capacity;
@@ -26,7 +25,6 @@ public class Node {
     public Node(V1Node node, Map<String, Object> nodeUsage) {
         V1ObjectMeta meta = node.getMetadata();
         name = meta.getName();
-//        annotations = meta.getAnnotations();
         labels = meta.getLabels();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm");
         createdDt = dateFormat.format(meta.getCreationTimestamp().toDate());
@@ -39,26 +37,5 @@ public class Node {
         condition = first.get().getType();
         percentMemory = (String) nodeUsage.get("percentMemory");
         percentCpu = (String) nodeUsage.get("percentCpu");
-    }
-
-    @Getter
-    @Setter
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class NodeVO {
-        private String createdDt;
-        private String name;
-        private Map<String, String> address;
-        private String os;
-        private String osImage;
-        private String kernelVersion;
-        private String containerRuntime;
-        private String kubeletVersion;
-//        private Map<String, String> annotations;
-        private Map<String, String> labels;
-        private String taints;
-        private String conditions;
     }
 }
