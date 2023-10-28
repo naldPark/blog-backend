@@ -68,7 +68,7 @@ public class StorageDto {
             fileSize = storage.getFileSize();
             fileDesc = storage.getDescription();
             fileType= storage.getFileType();
-//            fileCover= storage.getFileCover();
+            fileCover= storage.getFileCover();
 //            fileCover =  Util.storageImgToString(storage.getFileCover());
             vttSrc = storage.getVttSrc();
             createdDt = sdf.format(storage.getCreatedDt());
