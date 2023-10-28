@@ -66,48 +66,70 @@ public class StorageService {
 
     public StorageDto.getStorageList getVideoList(SearchItem searchItem) {
 
+        System.out.println("1번" + new Date());
+
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+
+        System.out.println("2번" + new Date());
 
         QStorage storage = QStorage.storage;
         BooleanBuilder builder = new BooleanBuilder();
 
+        System.out.println("3번" + new Date());
+
+
         if (Objects.nonNull(searchItem.getSearchText()) && !searchItem.getSearchText().isEmpty()) {
             builder.and(storage.fileName.contains(searchItem.getSearchText()));
         }
+
         if (Objects.nonNull(searchItem.getType()) && !searchItem.getType().isEmpty()) {
             builder.and(storage.fileType.eq(searchItem.getType()));
         }
 
-        OrderSpecifier<Double> randomSort = Expressions.numberTemplate(Double.class, "function('rand')").asc();
+        System.out.println("4번" + new Date());
 
         JPAQuery<Storage> query = queryFactory
                 .selectFrom(storage).distinct()
                 .from(storage)
                 .where(builder);
 
+        System.out.println("5번" + new Date());
+
         if (searchItem.getLimit() != 0) {
             query.offset(searchItem.getOffset());
             query.limit(searchItem.getLimit());
         }
+
+        System.out.println("6번" + new Date());
+
+
         if (Objects.nonNull(searchItem.getSort()) && searchItem.getSort().equals("random")) {
             query.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc());
         } else {
             storage.fileName.asc().nullsLast();
         }
+
+        System.out.println("7번" + new Date());
+
+
         List<StorageDto.StorageInfo> list = query.fetch().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
 
-        if (searchItem.getWithCover()) {
-            list.stream().forEach(
-                    f -> f.setFileCover(Util.storageImgToString(f.getFileCover()))
-            );
-        } else {
-            list.stream().forEach(f -> f.setFileCover(null));
-        }
+
+        System.out.println("8번" + new Date());
+//        if (searchItem.getWithCover()) {
+//            list.stream().forEach(
+//                    f -> f.setFileCover(Util.storageImgToString(f.getFileCover()))
+//            );
+//        } else {
+//            list.stream().forEach(f -> f.setFileCover(null));
+//        }
 
         Long totalCount = queryFactory
                 .select(storage.count())
                 .from(storage)
                 .fetchOne();
+
+        System.out.println("9번" + new Date());
 
         return StorageDto.getStorageList.builder()
                 .statusCode(200)
