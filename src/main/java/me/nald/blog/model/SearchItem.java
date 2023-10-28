@@ -13,6 +13,7 @@ public class SearchItem {
     private String type;
     private String searchText;
     private String sort;
+    private Boolean withCover;
 
 
 }

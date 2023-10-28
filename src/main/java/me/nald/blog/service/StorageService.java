@@ -1,8 +1,10 @@
 package me.nald.blog.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import me.nald.blog.exception.Errors;
 import me.nald.blog.model.SearchItem;
 import me.nald.blog.repository.StorageRepository;
 import me.nald.blog.util.FileUtils;
+import me.nald.blog.util.Util;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
@@ -30,12 +33,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
 import javax.persistence.EntityManager;
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
@@ -44,11 +45,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static me.nald.blog.exception.ErrorSpec.DuplicatedId;
 
 @Service
 @Transactional(readOnly = true)
@@ -80,18 +78,31 @@ public class StorageService {
             builder.and(storage.fileType.eq(searchItem.getType()));
         }
 
+        OrderSpecifier<Double> randomSort = Expressions.numberTemplate(Double.class, "function('rand')").asc();
+
         JPAQuery<Storage> query = queryFactory
                 .selectFrom(storage).distinct()
                 .from(storage)
-                .where(builder)
-                .orderBy(storage.fileName.asc().nullsLast());
+                .where(builder);
 
         if (searchItem.getLimit() != 0) {
             query.offset(searchItem.getOffset());
             query.limit(searchItem.getLimit());
         }
-
+        if (Objects.nonNull(searchItem.getSort()) && searchItem.getSort().equals("random")) {
+            query.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc());
+        } else {
+            storage.fileName.asc().nullsLast();
+        }
         List<StorageDto.StorageInfo> list = query.fetch().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
+
+        if (searchItem.getWithCover()) {
+            list.stream().forEach(
+                    f -> f.setFileCover(Util.storageImgToString(f.getFileCover()))
+            );
+        } else {
+            list.stream().forEach(f -> f.setFileCover(null));
+        }
 
         Long totalCount = queryFactory
                 .select(storage.count())
@@ -297,7 +308,7 @@ public class StorageService {
 
     public ResponseEntity<Resource> downloads(Long videoId) {
         Storage storage = storageRepository.getById(videoId);
-        if(storage.getFileDownload().isN()){
+        if (storage.getFileDownload().isN()) {
             throw Errors.of(AccessDeniedException);
         }
         Path filePath = Paths.get(blogProperties.getCommonPath() + "/movie" + storage.getDownloadSrc());
@@ -368,19 +379,19 @@ public class StorageService {
                     MultipartFile multipartFileVtt = info.getFileVtt();
                     //TODO 확장자 .vtt하드코딩해놨음;
                     storageInfo.setVttSrc(uploadPath + saveFileName + getMultiFileExt(multipartFileVtt));
-                    Path path = Paths.get(movieDir + uploadPath + saveFileName+".vtt").toAbsolutePath();
+                    Path path = Paths.get(movieDir + uploadPath + saveFileName + ".vtt").toAbsolutePath();
                     multipartFileVtt.transferTo(path.toFile());
                 }
                 if (info.getFile() != null) {
                     storageInfo.setDownloadSrc(uploadPath + saveFileName + getMultiFileExt(info.getFile()));
-                        FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
-                        InputStream readStream = info.getFile().getInputStream();
-                        byte[] readBytes = new byte[4096];
-                        OutputStream writeStream = Files.newOutputStream(Paths.get(movieDir + storageInfo.getDownloadSrc()));
-                        while (readStream.read(readBytes) > 0) {
-                            writeStream.write(readBytes);
-                        }
-                        writeStream.close();
+                    FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
+                    InputStream readStream = info.getFile().getInputStream();
+                    byte[] readBytes = new byte[4096];
+                    OutputStream writeStream = Files.newOutputStream(Paths.get(movieDir + storageInfo.getDownloadSrc()));
+                    while (readStream.read(readBytes) > 0) {
+                        writeStream.write(readBytes);
+                    }
+                    writeStream.close();
                 }
 
                 if (info.getFileCover() != null) {
