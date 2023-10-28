@@ -3,17 +3,17 @@ package me.nald.blog.controller;
 import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
+import me.nald.blog.data.dto.StorageDto;
 import me.nald.blog.data.model.StorageRequest;
 import me.nald.blog.model.SearchItem;
 import me.nald.blog.service.StorageService;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
+import java.util.Date;
 import java.util.concurrent.Callable;
 
 @AllArgsConstructor
@@ -26,7 +26,11 @@ public class StorageController {
 
     @GetMapping("/videoList")
     public Callable<Object> getVideoList(SearchItem searchItem) {
-        return () -> storageService.getVideoList(searchItem);
+
+       StorageDto.getStorageList a =  storageService.getVideoList(searchItem);
+
+        System.out.println("10번 반환직전" + new Date());
+        return () -> a;
     }
 
     // 단 건 비디오 상세정보
