@@ -92,7 +92,7 @@ public class CommonService {
     public Response.CommonRes getBlogList() {
 
         List<String> inputList = new ArrayList<>();
-        inputList.add("{src: 'gitbook.png', header: 'CURRENT BLOG', title: 'GITBOOK', text: 'blog',  href: 'https://blog.nald.me'}");
+        inputList.add("{src: 'gitbook.png', header: 'CURRENT BLOG', title: 'GITBOOK', text: 'blog',  href: 'https://daylog.nald.me'}");
         inputList.add("{src: 'github.png', header: 'Configuration Tool', title: 'GITHUB',  text: 'github',  href: 'https://github.com/naldPark'}");
         inputList.add("{src: 'naverblog.png', header: 'BLOG (Deprecated)', title: 'NAVER BLOG',  text: 'naver',  href: 'https://blog.naver.com/8734747'}");
 
