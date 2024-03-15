@@ -18,8 +18,18 @@ spec:
       containers:
       - name: main-backend
         image: nas.nald.me:35003/docker/main/backend:__DOCKER_IMG_VER__
+        command:
+          - /bin/sh
+          - /tmp/api/bootstrap.sh
         ports:
         - containerPort: 8000
+        volumeMounts:
+          - mountPath: /tmp/api
+            name: api
+          - mountPath: /nfs
+            name: nfs
+          - mountPath: /usr/local/bin/kubectl
+            name: kubectl
         env:
           - name: DB_HOST
             valueFrom:
@@ -113,6 +123,21 @@ spec:
                 key: DOCKER_REPO_URI
       imagePullSecrets:
         - name: regcred
+      nodeSelector:
+        kubernetes.io/hostname: nald3
+        kubernetes.io/os: linux
+      volumes:
+        - hostPath:
+            path: /usr/bin/kubectl
+            type: ""
+          name: kubectl
+        - configMap:
+            defaultMode: 420
+            name: main-backend
+          name: api
+        - name: nfs
+          persistentVolumeClaim:
+            claimName: main-backend-pvc
 
 
 ---
