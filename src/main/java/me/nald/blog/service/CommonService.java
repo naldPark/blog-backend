@@ -111,7 +111,7 @@ public class CommonService {
                 //Front
                 "{ color: 'white', backgroundColor: '#4fc08d', name: 'vue', src: 'vue.svg' }",
                 "{ color: 'white', backgroundColor: '#DD0031', name: 'angular', src: 'angular.svg' }",
-                "{ color: '#0A7390', backgroundColor: '#1A1C1D', name: 'react(x)', src: 'react.svg' }",
+                "{ color: '#0A7390', backgroundColor: '#1A1C1D', name: 'react', src: 'react.svg' }",
                 "{ color: 'white', backgroundColor: '#009639', name: 'nginx', src: 'nginx.svg' }",
                 "{ color: 'white', backgroundColor: '#007ACC', name: 'typescript', src: 'typescript.svg' }",
 
