@@ -126,6 +126,7 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: nald3
         kubernetes.io/os: linux
+      serviceAccount: blogsa
       volumes:
         - hostPath:
             path: /usr/bin/kubectl
