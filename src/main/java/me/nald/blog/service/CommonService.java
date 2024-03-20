@@ -112,21 +112,18 @@ public class CommonService {
                 "{ color: 'white', backgroundColor: '#4fc08d', name: 'vue', src: 'vue.svg' }",
                 "{ color: 'white', backgroundColor: '#DD0031', name: 'angular', src: 'angular.svg' }",
                 "{ color: '#0A7390', backgroundColor: '#1A1C1D', name: 'react', src: 'react.svg' }",
-                "{ color: 'white', backgroundColor: '#009639', name: 'nginx', src: 'nginx.svg' }",
                 "{ color: 'white', backgroundColor: '#007ACC', name: 'typescript', src: 'typescript.svg' }",
 
                 //Backend
                 "{ color: 'red', backgroundColor: '#F2F4F9', name: 'java', src: 'java.svg' }",
                 "{ color: 'white', backgroundColor: '#6DB33F', name: 'springBoot', src: 'springboot.svg' }",
                 "{ color: 'green', backgroundColor: '#F2F4F9', name: 'JPA', src: 'jpa.svg' }",
-                "{ color: 'black', backgroundColor: '#F2F4F9', name: 'tomcat', src: 'tomcat.svg' }",
 
                 // DB
-                "{ color: 'white', backgroundColor: '#000000', name: 'mybatis', src: 'mybatis.svg' }",
                 "{ color: 'white', backgroundColor: '#2300f', name: 'mysql', src: 'mysql.svg' }",
                 "{ color: 'white', backgroundColor: '#003545', name: 'mariadb', src: 'mariadb.svg' }",
                 "{ color: 'white', backgroundColor: '#000000', name: 'redis(x)', src: 'redis.svg' }",
-                "{ color: 'white', backgroundColor: '#47A248', name: 'mongodb(x)', src: 'mongodb.svg' }",
+                "{ color: 'white', backgroundColor: '#47A248', name: 'mongodb', src: 'mongodb.svg' }",
 
                 //Infra
                 "{ color: 'white', backgroundColor: '#326CE5', name: 'kubernetes', src: 'kubernetes.svg' }",
@@ -141,7 +138,6 @@ public class CommonService {
                 "{ color: 'black', backgroundColor: '#3D4245', name: 'kafka(x)', src: 'kafka.svg' }",
                 "{ color: 'black', backgroundColor: '#FFFFFF', name: 'ansible(x)', src: 'ansible.svg' }",
                 "{ color: 'white', backgroundColor: '#212425', name: 'terraform(x)', src: 'terraform.svg' }",
-                "{ color: 'white', backgroundColor: '#0C2232', name: 'sonarqube(x)', src: 'sonarqube.svg' }",
 
                 //etc
                 "{ color: 'black', backgroundColor: '#FCC624', name: 'linux', src: 'linux.svg' }"
