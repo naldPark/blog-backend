@@ -123,6 +123,7 @@ spec:
                 key: DOCKER_REPO_URI
       imagePullSecrets:
         - name: regcred
+        - name: regcred-dns
       nodeSelector:
         kubernetes.io/hostname: nald3
         kubernetes.io/os: linux
