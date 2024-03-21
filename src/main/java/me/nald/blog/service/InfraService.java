@@ -76,7 +76,6 @@ public class InfraService {
                 "{ key: 103, parent: 0, name: 'Backend',  isGroup: true }",
                 "{ key: 4, parent: 1, name: 'Jenkins', icon: 'jenkins', group: 101 }",
                 "{ key: 5, parent: 1, name: 'Argocd', icon: 'argocd', group: 101 }",
-                "{ key: 6, parent: 3, name: 'Maven', icon: 'maven',  group: 103 }",
                 "{ key: 7, parent: 3, name: 'Java', icon: 'java', asd: 'backend language', group: 103 }",
                 "{ key: 8, parent: 2, name: 'Vue', icon: 'vue',  group: 102 }",
                 "{ key: 9, parent: 3, name: 'JPA', icon: 'jpa', asd: 'JPA', group: 103 }",
