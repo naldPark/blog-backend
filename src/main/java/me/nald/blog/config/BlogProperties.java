@@ -1,16 +1,19 @@
 package me.nald.blog.config;
 
+import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Setter
-@Getter
-@Component
+@Data
+@Configuration
 @ConfigurationProperties(prefix = "nald")
 public class BlogProperties {
 
+//    @Value("${jwt.public.key}")
+//    private String jwtPublicKey;
+//    이렇게 개별로 처리해도 될듯
+    
     private long tokenExpiredTime;
     private String privateKey;
     private String publicKey;

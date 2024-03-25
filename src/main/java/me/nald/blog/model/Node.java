@@ -26,7 +26,7 @@ public class Node {
         V1ObjectMeta meta = node.getMetadata();
         name = meta.getName();
         labels = meta.getLabels();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
         createdDt = dateFormat.format(meta.getCreationTimestamp().toDate());
         HashMap<String, Long> data = new HashMap<>();
         node.getStatus().getCapacity().forEach((strKey, strValue)->{

@@ -56,13 +56,8 @@ public class StorageService {
     @Autowired
     EntityManager em;
 
-    private static BlogProperties blogProperties;
+    private final BlogProperties blogProperties;
     private final StorageRepository storageRepository;
-
-    @Autowired
-    public void setBlogProperties(BlogProperties blogProperties) {
-        this.blogProperties = blogProperties;
-    }
 
     public StorageDto.getStorageList getVideoList(SearchItem searchItem) {
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);

@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service("kubeAdaptor")
 @Slf4j
+@RequiredArgsConstructor
 public class KubernetesAdaptor {
 
     static final int CONVERT_TYPE_BYTE = 0;
@@ -57,11 +58,6 @@ public class KubernetesAdaptor {
     private String dockerSecretPassword;
     @Value("${docker.email}")
     private String dockerEmail;
-
-    @Autowired
-    public KubernetesAdaptor() {
-        // Do nothing
-    }
 
     //agentwith가 3가지로 주입가능한데 나는 그냥 resource하위에있는 config로 불러오기
     public static Agent agentWith(String... k8sConfig) {

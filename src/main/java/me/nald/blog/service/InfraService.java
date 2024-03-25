@@ -117,7 +117,6 @@ public class InfraService {
 
         V1NamespaceList test =  kubeAdaptor.agentWith().listNamespace(null);
 
-        System.out.println("아뚠테스트e="+test);
 
         Set set = resourceValue.entrySet();
         Iterator iterator = set.iterator();

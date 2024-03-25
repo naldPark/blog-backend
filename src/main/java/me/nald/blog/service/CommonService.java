@@ -32,13 +32,9 @@ import static me.nald.blog.exception.ErrorSpec.TooManyRequests;
 @RequiredArgsConstructor
 public class CommonService {
 
-    private static BlogProperties blogProperties;
+    private final BlogProperties blogProperties;
     private final AccountStore accountStore;
 
-    @Autowired
-    public void setBlogProperties(BlogProperties blogProperties) {
-        this.blogProperties = blogProperties;
-    }
 
     public Response.CommonRes sendMail(ContactRequest contactRequest) {
 
@@ -91,6 +87,9 @@ public class CommonService {
 
     public Response.CommonRes getBlogList() {
 
+
+
+
         List<String> inputList = new ArrayList<>();
         inputList.add("{src: 'gitbook.png', header: 'CURRENT BLOG', title: 'GITBOOK', text: 'blog',  href: 'https://daylog.nald.me'}");
         inputList.add("{src: 'github.png', header: 'Configuration Tool', title: 'GITHUB',  text: 'github',  href: 'https://github.com/naldPark'}");
@@ -106,6 +105,7 @@ public class CommonService {
 
 
     public Response.CommonRes getBadgeList() {
+
         List<String> badgeList = Arrays.asList(
 
                 //Front
