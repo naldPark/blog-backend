@@ -110,8 +110,8 @@ public class CommonService {
 
                 //Front
                 "{ color: 'white', backgroundColor: '#4fc08d', name: 'vue', src: 'vue.svg' }",
-                "{ color: 'white', backgroundColor: '#DD0031', name: 'angular', src: 'angular.svg' }",
                 "{ color: '#0A7390', backgroundColor: '#1A1C1D', name: 'react', src: 'react.svg' }",
+                "{ color: 'white', backgroundColor: '#DD0031', name: 'angular', src: 'angular.svg' }",
                 "{ color: 'white', backgroundColor: '#007ACC', name: 'typescript', src: 'typescript.svg' }",
 
                 //Backend
@@ -122,7 +122,7 @@ public class CommonService {
                 // DB
                 "{ color: 'white', backgroundColor: '#2300f', name: 'mysql', src: 'mysql.svg' }",
                 "{ color: 'white', backgroundColor: '#003545', name: 'mariadb', src: 'mariadb.svg' }",
-                "{ color: 'white', backgroundColor: '#000000', name: 'redis(x)', src: 'redis.svg' }",
+                "{ color: 'white', backgroundColor: '#000000', name: 'redis', src: 'redis.svg' }",
                 "{ color: 'white', backgroundColor: '#47A248', name: 'mongodb', src: 'mongodb.svg' }",
 
                 //Infra
@@ -135,7 +135,6 @@ public class CommonService {
                 "{ color: 'black', backgroundColor: '#F2F4F9', name: 'grafana(△)', src: 'grafana.svg' }",
                 "{ color: 'white', backgroundColor: '#005571', name: 'elastic-search(x)', src: 'elastic-search.svg' }",
 
-                "{ color: 'black', backgroundColor: '#3D4245', name: 'kafka(x)', src: 'kafka.svg' }",
                 "{ color: 'black', backgroundColor: '#FFFFFF', name: 'ansible(x)', src: 'ansible.svg' }",
                 "{ color: 'white', backgroundColor: '#212425', name: 'terraform(x)', src: 'terraform.svg' }",
 
