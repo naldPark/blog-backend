@@ -120,7 +120,7 @@ public class CommonService {
                 "{ color: 'green', backgroundColor: '#F2F4F9', name: 'JPA', src: 'jpa.svg' }",
 
                 // DB
-                "{ color: 'white', backgroundColor: '#2300f', name: 'mysql', src: 'mysql.svg' }",
+                "{ color: 'white', backgroundColor: '#005e86', name: 'mysql', src: 'mysql.svg' }",
                 "{ color: 'white', backgroundColor: '#003545', name: 'mariadb', src: 'mariadb.svg' }",
                 "{ color: 'white', backgroundColor: '#000000', name: 'redis', src: 'redis.svg' }",
                 "{ color: 'white', backgroundColor: '#47A248', name: 'mongodb', src: 'mongodb.svg' }",
