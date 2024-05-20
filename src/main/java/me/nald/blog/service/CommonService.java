@@ -109,8 +109,9 @@ public class CommonService {
         List<String> badgeList = Arrays.asList(
 
                 //Front
-                "{ color: 'white', backgroundColor: '#4fc08d', name: 'vue', src: 'vue.svg' }",
+
                 "{ color: '#0A7390', backgroundColor: '#1A1C1D', name: 'react', src: 'react.svg' }",
+                "{ color: 'white', backgroundColor: '#4fc08d', name: 'vue', src: 'vue.svg' }",
                 "{ color: 'white', backgroundColor: '#DD0031', name: 'angular', src: 'angular.svg' }",
                 "{ color: 'white', backgroundColor: '#007ACC', name: 'typescript', src: 'typescript.svg' }",
 
@@ -131,12 +132,12 @@ public class CommonService {
                 "{ color: 'white', backgroundColor: '#FF9900', name: 'aws', src: 'aws.svg' }",
                 "{ color: 'white', backgroundColor: '#D24939', name: 'jenkins', src: 'jenkins.svg' }",
                 "{ color: 'white', backgroundColor: '#2A0E4E', name: 'argoCD', src: 'argocd.svg' }",
-                "{ color: 'orange', backgroundColor: '#000000', name: 'prometheus(△)', src: 'prometheus.svg' }",
-                "{ color: 'black', backgroundColor: '#F2F4F9', name: 'grafana(△)', src: 'grafana.svg' }",
-                "{ color: 'white', backgroundColor: '#005571', name: 'elastic-search(x)', src: 'elastic-search.svg' }",
+                "{ color: 'orange', backgroundColor: '#000000', name: 'prometheus', src: 'prometheus.svg' }",
+                "{ color: 'black', backgroundColor: '#F2F4F9', name: 'grafana', src: 'grafana.svg' }",
+//                "{ color: 'white', backgroundColor: '#005571', name: 'elastic-search(x)', src: 'elastic-search.svg' }",
 
-                "{ color: 'black', backgroundColor: '#FFFFFF', name: 'ansible(x)', src: 'ansible.svg' }",
-                "{ color: 'white', backgroundColor: '#212425', name: 'terraform(x)', src: 'terraform.svg' }",
+//                "{ color: 'black', backgroundColor: '#FFFFFF', name: 'ansible(x)', src: 'ansible.svg' }",
+//                "{ color: 'white', backgroundColor: '#212425', name: 'terraform(x)', src: 'terraform.svg' }",
 
                 //etc
                 "{ color: 'black', backgroundColor: '#FCC624', name: 'linux', src: 'linux.svg' }"
