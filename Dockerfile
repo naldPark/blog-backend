@@ -1,4 +1,4 @@
-FROM 192.168.0.24:35003/docker/settings/openjdk:8-alpine
+FROM 192.168.0.24:35003/docker/settings/openjdk:11-alpine
 
 ARG JAR_FILE
 ENV TARGET_JAR_FILE ${JAR_FILE}
