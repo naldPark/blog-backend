@@ -1,4 +1,4 @@
-FROM 192.168.0.24:35003/docker/settings/openjdk:11-alpine
+FROM 192.168.0.24:35003/docker/settings/alpine:3.20
 
 ARG JAR_FILE
 ENV TARGET_JAR_FILE ${JAR_FILE}
@@ -9,7 +9,9 @@ ENV VER=1.0
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 
-RUN apk add openssh && \
+RUN apk update && \
+    apk add --no-cache openjdk11 && \
+    apk add openssh && \
 #    apk add zip && \
     apk add curl && \
     apk add ffmpeg && \
