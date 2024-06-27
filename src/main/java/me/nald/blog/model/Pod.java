@@ -26,7 +26,6 @@ public class Pod {
         V1ObjectMeta meta = pod.getMetadata();
         name = meta.getName();
         namespace = meta.getNamespace();
-//        labels = meta.getLabels();
         age = Util.dataToAge(meta.getCreationTimestamp().toDate());
         runningTime = meta.getCreationTimestamp().toDate();
         containers = pod.getSpec().getContainers().size();

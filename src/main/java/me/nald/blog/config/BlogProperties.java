@@ -26,5 +26,6 @@ public class BlogProperties {
     private String contactPassword;
     private String commonPath;
     private String ffmpegPath;
+    private String tomcatTempFilePath;
 
 }

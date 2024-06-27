@@ -1,22 +1,7 @@
 package me.nald.blog.data.dto;
 
 import lombok.*;
-import me.nald.blog.config.BlogProperties;
-import me.nald.blog.data.persistence.entity.Account;
 import me.nald.blog.data.persistence.entity.Storage;
-import me.nald.blog.data.vo.YN;
-import me.nald.blog.util.FileUtils;
-import me.nald.blog.util.Util;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.List;

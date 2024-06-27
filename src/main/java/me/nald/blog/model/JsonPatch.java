@@ -12,12 +12,6 @@ public class JsonPatch<T> {
         this.op = op;
     }
 
-    /*
-    private JsonPatch<T> withOp(String op) {
-        this.op = op;
-        return this;
-    }
-    */
 
     private JsonPatch<T> withPath(String path) {
         this.path = path;

@@ -56,19 +56,6 @@ public class Util {
         this.blogProperties = blogProperties;
     }
 
-    public static String getUUID() {
-        String uuid = UUID.randomUUID().toString().replace("-", "");
-        while (Character.isDigit(uuid.charAt(0))) {
-            uuid = UUID.randomUUID().toString().replace("-", "");
-        }
-        String[] splits = uuid.split("(?<=\\G.{" + 4 + "})");
-        return String.join("-", splits);
-    }
-
-    public static String getUUIDWithoutDash() {
-        return UUID.randomUUID().toString().replace("-", "");
-    }
-
 
     public static String getJWTToken(Account user) {
         String jwt = "";
@@ -132,10 +119,6 @@ public class Util {
         return sha;
     }
 
-    public static HashMap stringToHashMap(String data) {
-        return new Gson().fromJson(data.toString(), HashMap.class);
-    }
-
     public static List<HashMap<String, Object>> stringListToHashMapList(List<String> list) {
 
         List<HashMap<String, Object>> mapList = new ArrayList<>();
@@ -167,9 +150,6 @@ public class Util {
             } else {
                 throw Errors.of(AccessDeniedException, "Expired token");
             }
-//        } catch (Exception e) {
-//            throw Errors.of(AccessDeniedException, "Token parsing error");
-//        }
     }
 
     static RSAPublicKey rsaPublicKey;
@@ -202,17 +182,6 @@ public class Util {
         return null;
     }
 
-    public static String storageImgToString(String path) {
-        try {
-            String movieDir = blogProperties.getCommonPath() + "/movie";
-            byte[] bytes = Files.readAllBytes(Paths.get(movieDir +path));
-            String fileExtName = path.substring(path.lastIndexOf(".") + 1);
-            String base64EncodedImageBytes = Base64.getEncoder().encodeToString(bytes);
-            return  "data:image/"+fileExtName+";base64, "+base64EncodedImageBytes;
-        } catch (IOException e) {
-            return  null;
-        }
-    }
 
     public static String dataToAge(Date date) {
         SimpleDateFormat sformat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);

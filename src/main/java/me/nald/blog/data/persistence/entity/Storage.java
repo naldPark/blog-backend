@@ -49,7 +49,7 @@ public class Storage {
 
 //    @Lob
 //    @Column(name = "file_cover", nullable = false, columnDefinition="LONGTEXT")
-    @Column(name = "file_cover", nullable = false)
+    @Column(name = "file_cover")
     private String fileCover;
 
     @Enumerated(EnumType.STRING)

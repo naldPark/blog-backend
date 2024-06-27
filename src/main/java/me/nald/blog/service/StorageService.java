@@ -2,14 +2,13 @@ package me.nald.blog.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
 import static me.nald.blog.exception.ErrorSpec.*;
+import static me.nald.blog.util.FileUtils.extractFilenamePrefix;
 
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.StorageDto;
@@ -21,12 +20,12 @@ import me.nald.blog.exception.Errors;
 import me.nald.blog.model.SearchItem;
 import me.nald.blog.repository.StorageRepository;
 import me.nald.blog.util.FileUtils;
-import me.nald.blog.util.Util;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.job.FFmpegJob;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -36,10 +35,13 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.persistence.EntityManager;
+import javax.validation.constraints.NotBlank;
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -168,31 +170,6 @@ public class StorageService {
 //                        .setVideoCodec("libx264") //비디오 코덱
 //                        .setVideoBitRate(1464800) //비트레이트
 //                        .setVideoFrameRate(30) //프레임
-
-
-//                        // 1080 화질 옵션
-//                        .addExtraArgs("-b:v:0", "5000k")
-//                        .addExtraArgs("-maxrate:v:0", "5000k")
-//                        .addExtraArgs("-bufsize:v:0", "10000k")
-//                        .addExtraArgs("-s:v:0", "1920x1080")
-//                        .addExtraArgs("-crf:v:0", "15")
-//                        .addExtraArgs("-b:a:0", "128k")
-//
-//                        // 720 화질 옵션
-//                        .addExtraArgs("-b:v:1", "2500k")
-//                        .addExtraArgs("-maxrate:v:1", "2500k")
-//                        .addExtraArgs("-bufsize:v:1", "5000k")
-//                        .addExtraArgs("-s:v:1", "1280x720")
-//                        .addExtraArgs("-crf:v:1", "22")
-//                        .addExtraArgs("-b:a:1", "96k")
-//
-//                        // 480 화질 옵션
-//                        .addExtraArgs("-b:v:2", "1000k")
-//                        .addExtraArgs("-maxrate:v:2", "1000k")
-//                        .addExtraArgs("-bufsize:v:2", "2000k")
-//                        .addExtraArgs("-s:v:2", "854x480")
-//                        .addExtraArgs("-crf:v:2", "28")
-//                        .addExtraArgs("-b:a:2", "64k")
 
                         .done();
 
@@ -326,12 +303,21 @@ public class StorageService {
         }
     }
 
+    public File multipartFileToFile(MultipartFile multipartFile) throws IOException {
+        File file = new File(multipartFile.getOriginalFilename());
+        multipartFile.transferTo(file);
+        return file;
+    }
+
+
     @Transactional
     public Map<String, Object> uploadVideo(StorageRequest info) throws IOException {
         String movieDir = blogProperties.getCommonPath() + "/movie";
         HashMap<String, String> phoneticSymbol = new ObjectMapper()
                 .readValue(new ClassPathResource("phoneticSymbol.json").getInputStream(), HashMap.class);
 
+
+        /** when filename is Korean, translate to English  */
         String nameToEng = "";
         for (String fileChar : info.getFileName().split("")) {
             if (Pattern.matches("^[0-9a-zA-Z]*$", fileChar)) {
@@ -365,27 +351,50 @@ public class StorageService {
                     storageInfo.setVttSrc(uploadPath + saveFileName + getMultiFileExt(multipartFileVtt));
                     Path path = Paths.get(movieDir + uploadPath + saveFileName + ".vtt").toAbsolutePath();
                     multipartFileVtt.transferTo(path.toFile());
+                    Files.delete(path);
                 }
                 if (info.getFile() != null) {
                     storageInfo.setDownloadSrc(uploadPath + saveFileName + getMultiFileExt(info.getFile()));
                     FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
-                    InputStream readStream = info.getFile().getInputStream();
-                    byte[] readBytes = new byte[4096];
-                    OutputStream writeStream = Files.newOutputStream(Paths.get(movieDir + storageInfo.getDownloadSrc()));
-                    while (readStream.read(readBytes) > 0) {
-                        writeStream.write(readBytes);
+                    try (
+                            FileOutputStream fos = new FileOutputStream(movieDir + storageInfo.getDownloadSrc());
+                            InputStream is = info.getFile().getInputStream();
+
+                    ) {
+                        int readCount = 0;
+                        byte[] buffer = new byte[4096];
+                        while ((readCount = is.read(buffer)) != -1) {
+                            fos.write(buffer, 0, readCount);
+                        }
+                    } catch (Exception ex) {
+                        throw new RuntimeException("file Save Error");
                     }
-                    writeStream.close();
+
+                    multipartFileToFile(info.getFile()).delete();
+
+                    CommonsMultipartFile commonsMultipartFile = (CommonsMultipartFile) info.getFile();
+                    DiskFileItem diskFileItem = (DiskFileItem) commonsMultipartFile.getFileItem();
+                    String tempFilePath = diskFileItem.getStoreLocation().getPath();
+                    String tempFilenamePrefix = extractFilenamePrefix(tempFilePath);
+                    // stream으로 나눠받은 tmp파일 모두 삭제
+                    try {
+                        FileUtils.deleteFilesStartingWith(tempFilenamePrefix);
+                        System.out.println("모든 파일 삭제 완료.");
+                    } catch (IOException e) {
+                        System.err.println("파일 삭제 중 오류 발생: " + e.getMessage());
+                    }
                 }
 
                 if (info.getFileCover() != null) {
-                    String[] imageInfo = info.getFileCover().split(",");
-                    String extension = imageInfo[0].replace("data:image/", "").replace(";base64", "");
-                    byte[] data = DatatypeConverter.parseBase64Binary(imageInfo[1]);
-                    storageInfo.setFileCover(uploadPath + saveFileName + "." + extension);
+                    //이거는 s3에 업로드하는 방식으로 변경해야함
+//                    String[] imageInfo = info.getFileCover().split(",");
+//                    String extension = imageInfo[0].replace("data:image/", "").replace(";base64", "");
+//
+//                    storageInfo.setFileCover(uploadPath + saveFileName + "." + extension);
                     File file = new File(movieDir + storageInfo.getFileCover());
-                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-                    outputStream.write(data);
+//                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
+//                    outputStream.write(data);
+                    file.delete();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

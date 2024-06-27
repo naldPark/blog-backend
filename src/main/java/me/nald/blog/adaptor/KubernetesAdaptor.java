@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.model.Cluster;
-import me.nald.blog.util.KubeConfigValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
@@ -533,7 +532,6 @@ public class KubernetesAdaptor {
                 KubeConfig kubeConfig;
                 try (InputStream inputStream = new ByteArrayInputStream(k8sConfig.getBytes())) {
                     kubeConfig = KubeConfig.loadKubeConfig(new InputStreamReader(inputStream, StandardCharsets.UTF_8.name()));
-                    KubeConfigValidator.validate(kubeConfig);
                 } catch (IOException | YAMLException | ClassCastException e) {
                     log.error("apiClient", e);
                     throw new RuntimeException(e);
@@ -625,21 +623,6 @@ public class KubernetesAdaptor {
             return coreV1Api().listNamespacedPod(convertNamespaceName(namespace), STR_FALSE, true, "", "", labelSelector, null, "", null, 0, false);
         }
 
-        private V1Pod readErrorPod(String namespace, String name) {
-            V1Pod pod = null;
-            try {
-                V1PodList list = coreV1Api().listNamespacedPod(convertNamespaceName(namespace), STR_FALSE, true, "", "", null, null, "", null, 0, false);
-                for (V1Pod p : list.getItems()) {
-                    if (p.getMetadata().getName().startsWith(name)) {
-                        pod = p;
-                    }
-                }
-            } catch (ApiException e) {
-                e.printStackTrace();
-            }
-            return pod;
-        }
-
         public Map<String, List<Float>> getClusterResource() throws ApiException, IOException {
             HashMap<String, List<Float>> result = new HashMap<>();
 
@@ -676,52 +659,6 @@ public class KubernetesAdaptor {
             return result;
         }
 
-        private boolean isNodeTypeWithResource(String type, V1Node node) {
-            return (type.equals(K8S_RESOURCE_TYPE_CPU) && node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_CPU_NODE_SERVICE_TYPE))
-                    || (type.equals(K8S_EXTENDED_RESOURCE_TYPE_GPU) && node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_GPU_NODE_SERVICE_TYPE))
-                    || (type.equals(K8S_RESOURCE_TYPE_MEMORY) && (node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_CPU_NODE_SERVICE_TYPE)
-                    || node.getMetadata().getLabels().get(K8S_LABEL_KEY_SERVICE_TYPE).equals(K8S_GPU_NODE_SERVICE_TYPE)));
-        }
-
-        private Map<String, List<Object>> getResourcelimitsOfPods(String namespace, long cId, String podyType, String type) throws IOException {
-            HashMap<String, List<Object>> dataMap = new LinkedHashMap<>();
-            String key = null;
-            String fileName = getKubeConfigFileName(getKubeConfigFilePath(), cId);
-
-            String cmd = String.format("kubectl top pod -n %s --kubeconfig=%s", convertNamespaceName(namespace), fileName);
-            Process process = Runtime.getRuntime().exec(cmd);
-
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line = null;
-                while ((line = br.readLine()) != null) {
-                    if (line.indexOf(podyType) == 0) {
-                        String[] splitData = line.split("\\s+");
-                        key = line.substring(0, line.indexOf(" "));
-                        List<Object> dataList = dataMap.get(key);
-                        if (dataList == null) {
-                            dataList = new ArrayList<>();
-                            dataMap.put(key, dataList);
-                        }
-                        if (type.equals(K8S_RESOURCE_TYPE_CPU)) {
-                            dataList.add("NA");
-                            dataList.add(String.valueOf(convertToFloat(splitData[1], true, false)));
-                        } else if (type.equals(K8S_RESOURCE_TYPE_MEMORY)) {
-                            dataList.add("NA");
-                            dataList.add(String.valueOf(convertToFloat(splitData[2], false, true)));
-                        } else if (type.equals(K8S_EXTENDED_RESOURCE_TYPE_GPU)) {
-                            dataList.add("NA");
-                            dataList.add("0");
-                        } else {
-                            log.error("error : Type is unknown");
-                        }
-                    }
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return dataMap;
-        }
 
         private String addDataToDataMap(String line, Map<String, List<String>> dataMap, String key) {
             String[] splitData = line.split(":");

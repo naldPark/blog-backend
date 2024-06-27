@@ -91,6 +91,7 @@ public class StorageController {
                                         @RequestPart(value = "fileVtt", required = false) MultipartFile fileVtt,
                                         HttpServletRequest request) {
         info.setFile(file);
+
         info.setFileVtt(fileVtt);
         return () -> storageService.uploadVideo(info);
     }

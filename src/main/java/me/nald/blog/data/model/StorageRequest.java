@@ -1,10 +1,8 @@
 package me.nald.blog.data.model;
 
 import lombok.*;
-import me.nald.blog.data.vo.YN;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
 
 @Data
@@ -25,7 +23,7 @@ public class StorageRequest {
     private Boolean fileDownload;
     @NotBlank
     private MultipartFile file;
-    private String fileCover;
+    private MultipartFile fileCover;
     private MultipartFile fileVtt;
 
 

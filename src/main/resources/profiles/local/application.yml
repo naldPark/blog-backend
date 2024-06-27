@@ -11,6 +11,7 @@ nald:
   contact-password: ${CONTACT_PASSWORD}
   common-path: /nfs
   ffmpeg-path: /usr/bin
+  tomcat-temp-file-path: /tomcat/temp
 
 server:
   port: 8000

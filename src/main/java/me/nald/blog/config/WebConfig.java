@@ -17,10 +17,10 @@ public class WebConfig {
     public CommonsMultipartResolver multipartResolver() {
         CommonsMultipartResolver resolver = new CommonsMultipartResolver();
         resolver.setDefaultEncoding("utf-8");
-        resolver.setMaxUploadSize(10737418240L); // 10GB
-        resolver.setMaxInMemorySize(1048576); // 1MB
+        resolver.setMaxUploadSize(-1); // 10GB
+        resolver.setMaxInMemorySize(-1); // 1MB
         try {
-            resolver.setUploadTempDir(new FileSystemResource(blogProperties.getCommonPath() +"/tomcat/temp"));
+            resolver.setUploadTempDir(new FileSystemResource(blogProperties.getCommonPath() +blogProperties.getTomcatTempFilePath()));
         } catch (IOException e) {
             e.printStackTrace();
         }
