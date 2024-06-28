@@ -13,6 +13,7 @@ import java.io.IOException;
 public class WebConfig {
     private final BlogProperties blogProperties;
 
+    // multipart 관련 config 설정
     @Bean
     public CommonsMultipartResolver multipartResolver() {
         CommonsMultipartResolver resolver = new CommonsMultipartResolver();
@@ -20,6 +21,7 @@ public class WebConfig {
         resolver.setMaxUploadSize(-1); // 10GB
         resolver.setMaxInMemorySize(-1); // 1MB
         try {
+            // tomcat에서 임시 파일 저장소 지정
             resolver.setUploadTempDir(new FileSystemResource(blogProperties.getCommonPath() +blogProperties.getTomcatTempFilePath()));
         } catch (IOException e) {
             e.printStackTrace();
