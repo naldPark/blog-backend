@@ -118,7 +118,6 @@ public class CommonService {
                 //Backend
                 "{ color: 'red', backgroundColor: '#F2F4F9', name: 'java', src: 'java.svg' }",
                 "{ color: 'white', backgroundColor: '#6DB33F', name: 'springBoot', src: 'springboot.svg' }",
-                "{ color: 'green', backgroundColor: '#F2F4F9', name: 'JPA', src: 'jpa.svg' }",
 
                 // DB
                 "{ color: 'white', backgroundColor: '#005e86', name: 'mysql', src: 'mysql.svg' }",
