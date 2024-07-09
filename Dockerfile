@@ -1,4 +1,4 @@
-FROM 192.168.0.24:35003/docker/settings/alpine:3.20
+FROM nas.nald.me:35003/docker/settings/alpine:3.20
 
 ARG JAR_FILE
 ENV TARGET_JAR_FILE ${JAR_FILE}
