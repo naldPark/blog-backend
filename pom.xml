@@ -21,7 +21,7 @@
 		<logback.version>1.2.9</logback.version>
 		<dockerUser></dockerUser>
 		<dockerPassword></dockerPassword>
-		<dockerRegistry>192.168.0.24:35003/docker/main/backend</dockerRegistry>
+		<dockerRegistry>nas.nald.me:35003/docker/main/backend</dockerRegistry>
 		<docker-tag-version>latest</docker-tag-version>
 	</properties>
 
