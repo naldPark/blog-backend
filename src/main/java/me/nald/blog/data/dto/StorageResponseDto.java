@@ -1,16 +1,12 @@
 package me.nald.blog.data.dto;
 
 import lombok.*;
-import me.nald.blog.data.persistence.entity.Storage;
+import me.nald.blog.data.entity.Storage;
+
 import java.text.SimpleDateFormat;
-import java.util.Base64;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
-import static java.util.stream.Collectors.toList;
-
-public class StorageDto {
+public class StorageResponseDto {
 
 
     @Getter
@@ -18,11 +14,11 @@ public class StorageDto {
     public static class getStorageList {
 
         int statusCode;
-        List<StorageDto.StorageInfo> list;
+        List<StorageResponseDto.StorageInfo> list;
         Long total;
 
         @Builder
-        public getStorageList(int statusCode, List<StorageDto.StorageInfo> list, Long total) {
+        public getStorageList(int statusCode, List<StorageResponseDto.StorageInfo> list, Long total) {
             this.statusCode = statusCode;
             this.list = list;
             this.total = total;

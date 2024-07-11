@@ -1,9 +1,11 @@
-package me.nald.blog.data.persistence.entity;
+package me.nald.blog.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
+
 import javax.persistence.*;
+
 import static javax.persistence.FetchType.LAZY;
 
 @Entity

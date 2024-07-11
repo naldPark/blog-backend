@@ -1,4 +1,4 @@
-package me.nald.blog.data.persistence.entity;
+package me.nald.blog.data.entity;
 
 
 import lombok.Getter;
@@ -29,7 +29,7 @@ public class Storage {
     private String downloadSrc;
 
     @Column(name = "status", nullable = false)
-    private Storage.Status status;   //업로드 진행
+    private Status status;   //업로드 진행
 
     @Column(name = "file_src")
     private String fileSrc;
@@ -78,7 +78,7 @@ public class Storage {
                                         String fileCover,
                                         String fileDesc,
                                         String vttSrc,
-                                        Storage.Status status,
+                                        Status status,
                                         YN fileAuth,
                                         YN fileDownload) {
         Storage storage = new Storage();

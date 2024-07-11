@@ -1,9 +1,8 @@
-package me.nald.blog.model;
+package me.nald.blog.data.vo;
 
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.util.Pair;
 
 @Slf4j
 @Data

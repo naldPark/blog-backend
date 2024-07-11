@@ -1,4 +1,4 @@
-package me.nald.blog.model;
+package me.nald.blog.data.vo;
 
 public class JsonPatch<T> {
 

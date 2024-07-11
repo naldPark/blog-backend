@@ -1,4 +1,4 @@
-package me.nald.blog.data.model;
+package me.nald.blog.data.dto;
 
 import com.sun.istack.NotNull;
 import lombok.*;
@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContactRequest {
+public class ContactRequestDto {
 
     @NotNull
     private String title;

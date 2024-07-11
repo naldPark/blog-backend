@@ -13,15 +13,13 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
-import me.nald.blog.model.Cluster;
+import me.nald.blog.data.vo.Cluster;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.yaml.snakeyaml.error.YAMLException;
-
-import static me.nald.blog.util.Constants.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +29,8 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static me.nald.blog.util.Constants.*;
 
 @Service("kubeAdaptor")
 @Slf4j
@@ -194,16 +194,16 @@ public class KubernetesAdaptor {
             this.type = type;
             format.setTimeZone(TimeZone.getTimeZone("UTC"));
             if (type == NODE_SUMMARY) {
-                summaryCpu.put("usage", new Long(0));
-                summaryCpu.put("requests", new Long(0));
-                summaryCpu.put("limits", new Long(0));
-                summaryCpu.put("capacity", new Long(0));
-                summaryMemory.put("usage", new Long(0));
-                summaryMemory.put("requests", new Long(0));
-                summaryMemory.put("limits", new Long(0));
-                summaryMemory.put("capacity", new Long(0));
-                summaryPod.put("usage", new Long(0));
-                summaryPod.put("capacity", new Long(0));
+                summaryCpu.put("usage", 0);
+                summaryCpu.put("requests", 0);
+                summaryCpu.put("limits", 0);
+                summaryCpu.put("capacity", 0);
+                summaryMemory.put("usage",0);
+                summaryMemory.put("requests", 0);
+                summaryMemory.put("limits", 0);
+                summaryMemory.put("capacity", 0);
+                summaryPod.put("usage", 0);
+                summaryPod.put("capacity", 0);
             }
         }
 

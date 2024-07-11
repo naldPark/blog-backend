@@ -1,15 +1,13 @@
-package me.nald.blog.data.persistence.entity;
+package me.nald.blog.data.entity;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.NoArgsConstructor;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import lombok.Setter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
 @Embeddable
 @Getter

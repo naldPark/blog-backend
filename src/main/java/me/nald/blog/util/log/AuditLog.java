@@ -1,4 +1,4 @@
-package me.nald.blog.model;
+package me.nald.blog.util.log;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -9,8 +9,6 @@ import me.nald.blog.util.HttpServletRequestUtil;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Setter

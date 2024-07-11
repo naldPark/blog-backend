@@ -1,9 +1,11 @@
-package me.nald.blog.model;
+package me.nald.blog.data.vo;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import io.kubernetes.client.custom.Quantity;
-import io.kubernetes.client.openapi.models.*;
-import lombok.*;
+import io.kubernetes.client.openapi.models.V1Node;
+import io.kubernetes.client.openapi.models.V1NodeCondition;
+import io.kubernetes.client.openapi.models.V1ObjectMeta;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;

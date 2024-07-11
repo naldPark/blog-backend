@@ -3,28 +3,22 @@ package me.nald.blog.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 import me.nald.blog.config.BlogProperties;
-import me.nald.blog.data.dto.AccountDto;
-import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.vo.AccountVO;
 import me.nald.blog.exception.Errors;
-import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Component;
-import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,19 +31,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-import static me.nald.blog.exception.ErrorSpec.*;
-import static me.nald.blog.exception.ErrorSpec.PermissionDenied;
-import static me.nald.blog.util.Constants.*;
+import static me.nald.blog.exception.ErrorSpec.AccessDeniedException;
+import static me.nald.blog.util.Constants.AUTHORITY;
+import static me.nald.blog.util.Constants.USER_ID;
 
 @Component
 @AllArgsConstructor
-public class Util {
+public class CommonUtils {
 
     private static BlogProperties blogProperties;
 
-    private static final Logger log = LoggerFactory.getLogger(Util.class);
+    private static final Logger log = LoggerFactory.getLogger(CommonUtils.class);
 
     @Autowired
     public void setBlogProperties(BlogProperties blogProperties) {
@@ -141,7 +134,7 @@ public class Util {
             if (body.getLong("exp") * 1000 > System.currentTimeMillis()) {
                 AccountVO jwtInfo  =  AccountVO.jsonToObj(body);
                 String userId = body.getString(USER_ID);
-                if (!Util.verifyToken(tokenStr, userId, blogProperties.getPublicKey())) {
+                if (!CommonUtils.verifyToken(tokenStr, userId, blogProperties.getPublicKey())) {
                     throw Errors.of(AccessDeniedException, "Invalid token");
                 }
                 request.setAttribute(AUTHORITY, body.getInt(AUTHORITY));

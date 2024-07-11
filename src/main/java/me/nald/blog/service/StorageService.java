@@ -6,18 +6,14 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-
-import static me.nald.blog.exception.ErrorSpec.*;
-import static me.nald.blog.util.FileUtils.extractFilenamePrefix;
-
 import me.nald.blog.config.BlogProperties;
-import me.nald.blog.data.dto.StorageDto;
-import me.nald.blog.data.model.StorageRequest;
-import me.nald.blog.data.persistence.entity.QStorage;
-import me.nald.blog.data.persistence.entity.Storage;
+import me.nald.blog.data.dto.StorageResponseDto;
+import me.nald.blog.data.dto.StorageRequestDto;
+import me.nald.blog.data.entity.QStorage;
+import me.nald.blog.data.entity.Storage;
+import me.nald.blog.data.vo.SearchItem;
 import me.nald.blog.data.vo.YN;
 import me.nald.blog.exception.Errors;
-import me.nald.blog.model.SearchItem;
 import me.nald.blog.repository.StorageRepository;
 import me.nald.blog.util.FileUtils;
 import net.bramp.ffmpeg.FFmpeg;
@@ -38,17 +34,21 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.persistence.EntityManager;
-import javax.validation.constraints.NotBlank;
-import javax.xml.bind.DatatypeConverter;
 import java.io.*;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static me.nald.blog.exception.ErrorSpec.AccessDeniedException;
+import static me.nald.blog.exception.ErrorSpec.AlreadyExists;
+import static me.nald.blog.util.FileUtils.extractFilenamePrefix;
 
 @Service
 @Transactional(readOnly = true)
@@ -61,7 +61,7 @@ public class StorageService {
     private final BlogProperties blogProperties;
     private final StorageRepository storageRepository;
 
-    public StorageDto.getStorageList getVideoList(SearchItem searchItem) {
+    public StorageResponseDto.getStorageList getVideoList(SearchItem searchItem) {
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QStorage storage = QStorage.storage;
         BooleanBuilder builder = new BooleanBuilder();
@@ -88,14 +88,14 @@ public class StorageService {
             storage.fileName.asc().nullsLast();
         }
 
-        List<StorageDto.StorageInfo> list = query.fetch().stream().map(StorageDto.StorageInfo::new).collect(Collectors.toList());
+        List<StorageResponseDto.StorageInfo> list = query.fetch().stream().map(StorageResponseDto.StorageInfo::new).collect(Collectors.toList());
 
         Long totalCount = queryFactory
                 .select(storage.count())
                 .from(storage)
                 .fetchOne();
 
-        return StorageDto.getStorageList.builder()
+        return StorageResponseDto.getStorageList.builder()
                 .statusCode(200)
                 .list(list)
                 .total(totalCount)
@@ -105,7 +105,7 @@ public class StorageService {
     public Map<String, Object> getVideoDetail(Long videoId) {
         HashMap<String, Object> map = new HashMap<>();
         Storage storage = storageRepository.getById(videoId);
-        StorageDto.StorageInfo res = new StorageDto.StorageInfo(storage);
+        StorageResponseDto.StorageInfo res = new StorageResponseDto.StorageInfo(storage);
         map.put("statusCode", 200);
         map.put("data", res);
         return map;
@@ -311,7 +311,7 @@ public class StorageService {
 
 
     @Transactional
-    public Map<String, Object> uploadVideo(StorageRequest info) throws IOException {
+    public Map<String, Object> uploadVideo(StorageRequestDto info) throws IOException {
         String movieDir = blogProperties.getCommonPath() + "/movie";
         HashMap<String, String> phoneticSymbol = new ObjectMapper()
                 .readValue(new ClassPathResource("phoneticSymbol.json").getInputStream(), HashMap.class);

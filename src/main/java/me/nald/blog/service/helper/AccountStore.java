@@ -1,4 +1,4 @@
-package me.nald.blog.service.store;
+package me.nald.blog.service.helper;
 
 
 import lombok.AllArgsConstructor;

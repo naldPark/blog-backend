@@ -1,8 +1,7 @@
 package me.nald.blog.repository;
 
 
-import me.nald.blog.data.persistence.entity.Account;
-import me.nald.blog.data.persistence.entity.AccountLog;
+import me.nald.blog.data.entity.AccountLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 

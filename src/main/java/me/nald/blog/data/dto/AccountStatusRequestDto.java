@@ -1,4 +1,4 @@
-package me.nald.blog.data.model;
+package me.nald.blog.data.dto;
 
 import lombok.*;
 
@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountStatusRequest {
+public class AccountStatusRequestDto {
 
     private List<String> userIds;
     private int status;

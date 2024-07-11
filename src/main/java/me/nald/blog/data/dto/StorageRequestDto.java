@@ -1,4 +1,4 @@
-package me.nald.blog.data.model;
+package me.nald.blog.data.dto;
 
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StorageRequest {
+public class StorageRequestDto {
 
     @NotBlank
     private String fileName;

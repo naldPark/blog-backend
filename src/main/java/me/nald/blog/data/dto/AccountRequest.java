@@ -1,4 +1,4 @@
-package me.nald.blog.data.model;
+package me.nald.blog.data.dto;
 
 import lombok.*;
 

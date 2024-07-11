@@ -2,10 +2,7 @@
 package me.nald.blog.data.vo;
 
 import lombok.*;
-import me.nald.blog.data.persistence.entity.Account;
 import org.json.JSONObject;
-
-import java.util.Optional;
 
 import static me.nald.blog.util.Constants.*;
 

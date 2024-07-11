@@ -86,13 +86,13 @@
         </layout>
     </appender>
 
-    <logger name="me.nald.blog.model.LogItem" level="trace">
+    <logger name="me.nald.blog.util.log.LogItem" level="trace">
         <appender-ref ref="accessAppender"/>
         <appender-ref ref="errorAppender"/>
         <appender-ref ref="STDOUT_DEBUG"/>
     </logger>
 
-    <logger name="me.nald.blog.model.AuditLog" level="trace">
+    <logger name="me.nald.blog.util.log.AuditLog" level="trace">
         <appender-ref ref="fileAppender"/>
     </logger>
 

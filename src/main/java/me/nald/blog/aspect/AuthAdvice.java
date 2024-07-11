@@ -2,12 +2,12 @@ package me.nald.blog.aspect;
 
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.annotation.*;
-import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.vo.AccountVO;
 import me.nald.blog.data.vo.YN;
 import me.nald.blog.exception.Errors;
 import me.nald.blog.service.AccountService;
-import me.nald.blog.util.Util;
+import me.nald.blog.util.CommonUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -54,7 +54,7 @@ public class AuthAdvice {
         if (Objects.nonNull(withoutJwtCallable)) {
             request.setAttribute(ANONYMOUS_YN, YN.Y.name());
         } else {
-            AccountVO jwt = Util.extractUserIdFromJwt(request);
+            AccountVO jwt = CommonUtils.extractUserIdFromJwt(request);
             Account user = accountService.findMemberByAccountId(jwt.getAccountId());
 
             RequireAuthAll requireAuthAll = method.getDeclaredAnnotation(RequireAuthAll.class);

@@ -2,10 +2,10 @@ package me.nald.blog.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.nald.blog.data.persistence.entity.Account;
-import me.nald.blog.data.persistence.entity.Password;
+import me.nald.blog.data.entity.Account;
+import me.nald.blog.data.entity.Password;
 import me.nald.blog.repository.AccountRepository;
-import me.nald.blog.util.Util;
+import me.nald.blog.util.CommonUtils;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +26,7 @@ public class AppInitializr {
     public ApplicationRunner initAccount() {
         return args -> {
             if (accountRepository.findAll().isEmpty()) {
-                String initPw = Util.encryptSHA256(blogProperties.getDefaultAccountPassword());
+                String initPw = CommonUtils.encryptSHA256(blogProperties.getDefaultAccountPassword());
                 Password password = Password.builder()
                         .password(initPw)
                         .build();

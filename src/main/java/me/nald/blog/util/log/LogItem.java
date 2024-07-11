@@ -1,4 +1,4 @@
-package me.nald.blog.model;
+package me.nald.blog.util.log;
 
 
 import lombok.Data;

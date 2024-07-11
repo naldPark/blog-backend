@@ -4,10 +4,8 @@ import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.RequireAuthAll;
 import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
-import me.nald.blog.data.dto.AccountDto;
-import me.nald.blog.data.model.AccountRequest;
-import me.nald.blog.data.model.AccountStatusRequest;
-import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.data.dto.AccountRequest;
+import me.nald.blog.data.dto.AccountStatusRequestDto;
 import me.nald.blog.service.AccountService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
-
-import static java.util.Arrays.asList;
 
 @AllArgsConstructor
 @RestController
@@ -49,7 +43,7 @@ public class AccountController {
 
     @RequireAuthSuper
     @PutMapping(value = "/changeStatus")
-    public Callable<Object> changeStatus(HttpServletRequest request, @RequestBody AccountStatusRequest accountStatusRequest) {
+    public Callable<Object> changeStatus(HttpServletRequest request, @RequestBody AccountStatusRequestDto accountStatusRequest) {
         return () -> accountService.changeStatus(accountStatusRequest);
     }
 

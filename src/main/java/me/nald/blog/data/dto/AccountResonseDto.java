@@ -1,16 +1,13 @@
 package me.nald.blog.data.dto;
 
 import lombok.*;
-import me.nald.blog.data.persistence.entity.Account;
-import me.nald.blog.data.persistence.entity.Storage;
+import me.nald.blog.data.entity.Account;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class AccountDto {
+public class AccountResonseDto {
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)

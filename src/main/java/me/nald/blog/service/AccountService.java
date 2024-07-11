@@ -2,23 +2,20 @@ package me.nald.blog.service;
 
 
 import lombok.RequiredArgsConstructor;
-import me.nald.blog.data.dto.AccountDto;
-import me.nald.blog.data.dto.StorageDto;
-import me.nald.blog.data.model.AccountRequest;
-import me.nald.blog.data.model.AccountStatusRequest;
-import me.nald.blog.data.persistence.entity.Account;
-import me.nald.blog.data.persistence.entity.AccountLog;
-import me.nald.blog.data.persistence.entity.Password;
-import me.nald.blog.data.vo.YN;
+import me.nald.blog.data.dto.AccountResonseDto;
+import me.nald.blog.data.dto.AccountRequest;
+import me.nald.blog.data.dto.AccountStatusRequestDto;
+import me.nald.blog.data.entity.Account;
+import me.nald.blog.data.entity.AccountLog;
+import me.nald.blog.data.entity.Password;
 import me.nald.blog.exception.ErrorException;
 import me.nald.blog.exception.ErrorSpec;
 import me.nald.blog.exception.Errors;
 import me.nald.blog.repository.AccountLogRepository;
 import me.nald.blog.repository.AccountRepository;
-import me.nald.blog.response.CommonResponse;
 import me.nald.blog.response.Response;
 import me.nald.blog.util.HttpServletRequestUtil;
-import me.nald.blog.util.Util;
+import me.nald.blog.util.CommonUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -28,11 +25,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static me.nald.blog.exception.ErrorSpec.*;
+import static me.nald.blog.exception.ErrorSpec.DuplicatedId;
+import static me.nald.blog.exception.ErrorSpec.UserNotFound;
 
 @Service
 @Transactional(readOnly = true)
@@ -54,7 +51,7 @@ public class AccountService {
     public Response.CommonRes getUserList() {
 
         HashMap<String, Object> data = new HashMap<>();
-        List<AccountDto.UserInfo> list = accountRepository.findAll().stream().map(AccountDto.UserInfo::new).collect(Collectors.toList());
+        List<AccountResonseDto.UserInfo> list = accountRepository.findAll().stream().map(AccountResonseDto.UserInfo::new).collect(Collectors.toList());
         data.put("list", list);
         data.put("total", list.size());
         Response.CommonRes result = Response.CommonRes.builder()
@@ -98,7 +95,7 @@ public class AccountService {
             statusCode = 200;
             user.setLoginFailCnt(0);
             user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
-            data.put("access_token", Util.getJWTToken(user));
+            data.put("access_token", CommonUtils.getJWTToken(user));
             data.put("message", "succeeded");
             data.put("accountId", user.getAccountId());
             data.put("accountName", user.getAccountName());
@@ -208,7 +205,7 @@ public class AccountService {
 
 
     @Transactional
-    public Response.CommonRes changeStatus(AccountStatusRequest accountStatusRequest) {
+    public Response.CommonRes changeStatus(AccountStatusRequestDto accountStatusRequest) {
         int statusCode = 200;
         HashMap<String, Object> data = new HashMap<>();
 

@@ -1,6 +1,6 @@
 package me.nald.blog.annotation;
 
-import me.nald.blog.data.persistence.entity.Account;
+import me.nald.blog.data.entity.Account;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,12 +1,14 @@
-package me.nald.blog.data.persistence.entity;
+package me.nald.blog.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 import static javax.persistence.FetchType.LAZY;
 

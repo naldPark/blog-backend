@@ -1,28 +1,22 @@
 package me.nald.blog.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.*;
 import lombok.RequiredArgsConstructor;
 import me.nald.blog.config.BlogProperties;
-import me.nald.blog.data.dto.AccountDto;
-import me.nald.blog.data.model.ContactRequest;
+import me.nald.blog.data.dto.ContactRequestDto;
 import me.nald.blog.exception.Errors;
 import me.nald.blog.response.Response;
-import me.nald.blog.service.store.AccountStore;
-import me.nald.blog.util.Util;
-import org.springframework.beans.factory.annotation.Autowired;
+import me.nald.blog.service.helper.AccountStore;
+import me.nald.blog.util.CommonUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.*;
-import java.util.stream.Collectors;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
 import static me.nald.blog.exception.ErrorSpec.TooManyRequests;
 
@@ -36,7 +30,7 @@ public class CommonService {
     private final AccountStore accountStore;
 
 
-    public Response.CommonRes sendMail(ContactRequest contactRequest) {
+    public Response.CommonRes sendMail(ContactRequestDto contactRequest) {
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         if(!accountStore.checkMailSentCount(request)){
@@ -97,7 +91,7 @@ public class CommonService {
 
         Response.CommonRes result = Response.CommonRes.builder()
                 .statusCode(200)
-                .data(Util.stringListToHashMapList(inputList))
+                .data(CommonUtils.stringListToHashMapList(inputList))
                 .build();
 
         return result;
@@ -146,7 +140,7 @@ public class CommonService {
         );
         return Response.CommonRes.builder()
                 .statusCode(200)
-                .data(Util.stringListToHashMapList(badgeList))
+                .data(CommonUtils.stringListToHashMapList(badgeList))
                 .build();
 
     }

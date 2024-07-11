@@ -3,12 +3,13 @@ package me.nald.blog.controller;
 import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
-import me.nald.blog.data.dto.StorageDto;
-import me.nald.blog.data.model.StorageRequest;
-import me.nald.blog.model.SearchItem;
+import me.nald.blog.data.dto.StorageResponseDto;
+import me.nald.blog.data.dto.StorageRequestDto;
+import me.nald.blog.data.vo.SearchItem;
 import me.nald.blog.service.StorageService;
 import org.springframework.core.io.Resource;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,7 +28,7 @@ public class StorageController {
     @GetMapping("/videoList")
     public Callable<Object> getVideoList(SearchItem searchItem) {
 
-       StorageDto.getStorageList a =  storageService.getVideoList(searchItem);
+       StorageResponseDto.getStorageList a =  storageService.getVideoList(searchItem);
 
         System.out.println("10번 반환직전" + new Date());
         return () -> a;
@@ -86,7 +87,7 @@ public class StorageController {
     // 업로드
     @RequireAuthSuper
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, value = "/uploadLocal")
-    public Callable<Object> uploadVideo(@RequestPart StorageRequest info,
+    public Callable<Object> uploadVideo(@RequestPart StorageRequestDto info,
                                         @RequestPart(value = "file", required = true) MultipartFile file,
                                         @RequestPart(value = "fileVtt", required = false) MultipartFile fileVtt,
                                         HttpServletRequest request) {
