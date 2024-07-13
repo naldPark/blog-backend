@@ -19,6 +19,12 @@ eclipse-launch-profiles
 Thumbs.db
 
 
+
 Logs/
+
+# 보안이슈
 src/main/resources/profiles/local/application-local.yml
 src/main/resources/k8s-config
+
+# querydsl 자동생성방지
+src/main/generated

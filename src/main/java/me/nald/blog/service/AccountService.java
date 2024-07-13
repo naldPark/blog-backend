@@ -2,8 +2,9 @@ package me.nald.blog.service;
 
 
 import lombok.RequiredArgsConstructor;
-import me.nald.blog.data.dto.AccountResonseDto;
+import me.nald.blog.data.dto.AccountDtoTest;
 import me.nald.blog.data.dto.AccountRequest;
+import me.nald.blog.data.dto.AccountResonseDto;
 import me.nald.blog.data.dto.AccountStatusRequestDto;
 import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.entity.AccountLog;
@@ -12,10 +13,11 @@ import me.nald.blog.exception.ErrorException;
 import me.nald.blog.exception.ErrorSpec;
 import me.nald.blog.exception.Errors;
 import me.nald.blog.repository.AccountLogRepository;
+import me.nald.blog.repository.AccountQueryRepository;
 import me.nald.blog.repository.AccountRepository;
 import me.nald.blog.response.Response;
-import me.nald.blog.util.HttpServletRequestUtil;
 import me.nald.blog.util.CommonUtils;
+import me.nald.blog.util.HttpServletRequestUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -37,6 +39,7 @@ import static me.nald.blog.exception.ErrorSpec.UserNotFound;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final AccountQueryRepository accountQueryRepository;
     private final AccountLogRepository accountLogRepository;
 
     public List<Account> findMembers() {
@@ -47,6 +50,11 @@ public class AccountService {
 
         return accountRepository.findByAccountId(accountId);
     }
+
+    public List<AccountDtoTest> getTest() {
+       return  accountQueryRepository.findByTest();
+    }
+
 
     public Response.CommonRes getUserList() {
 

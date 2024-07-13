@@ -53,11 +53,11 @@ public class Account {
     private int loginFailCnt;
 
     @JsonIgnoreProperties("account")
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY) //oneToMany는 LAZY붙이지 않아도 LAZY가 default
     private List<AccountLog> accountLogs = new ArrayList<>();
 
     @JsonIgnoreProperties("account")
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY) //oneToMany는 LAZY붙이지 않아도 LAZY가 default
     private List<Sandbox> sandbox = new ArrayList<>();
 
     public static Account createAccount(String accountId,

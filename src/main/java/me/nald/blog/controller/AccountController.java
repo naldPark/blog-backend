@@ -1,7 +1,6 @@
 package me.nald.blog.controller;
 
 import lombok.AllArgsConstructor;
-import me.nald.blog.annotation.RequireAuthAll;
 import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountRequest;
@@ -22,6 +21,11 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    @WithoutJwtCallable
+    @GetMapping("/test")
+    public Callable<Object> getTest(HttpServletRequest request) {
+        return () -> accountService.getTest();
+    }
 
     @RequireAuthAll
     @GetMapping("/list")
