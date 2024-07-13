@@ -1,6 +1,7 @@
 package me.nald.blog.controller;
 
 import lombok.AllArgsConstructor;
+import me.nald.blog.annotation.RequireAuthAll;
 import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountRequest;
