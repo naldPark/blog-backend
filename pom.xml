@@ -218,6 +218,8 @@
 							<outputDirectory>target/generated-sources/java</outputDirectory>
 							<processor>com.querydsl.apt.jpa.JPAAnnotationProcessor</processor>
 							<options>
+<!--								generated관련 에러 날경우 추가-->
+<!--								<querydsl.generatedAnnotationClass>javax.annotation.Generated</querydsl.generatedAnnotationClass>-->
 								<querydsl.entityAccessors>true</querydsl.entityAccessors>
 							</options>
 						</configuration>

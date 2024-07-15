@@ -26,6 +26,12 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      maximum-pool-size: 3
+      connection-test-query: SELECT 1
+      maxLifeTime: 3300000
+      connection-timeout: 30000
+      idle-timeout: 600000
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher  #swagger
