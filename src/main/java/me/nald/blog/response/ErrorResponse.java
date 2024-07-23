@@ -5,8 +5,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.exception.Errors;
 import org.springframework.http.HttpStatus;
-
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Data
 @Slf4j

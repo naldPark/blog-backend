@@ -1,5 +1,7 @@
 package me.nald.blog.controller;
 
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.RequireAuthAll;
 import me.nald.blog.annotation.RequireAuthSuper;
@@ -9,10 +11,7 @@ import me.nald.blog.data.dto.AccountStatusRequestDto;
 import me.nald.blog.service.AccountService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.concurrent.Callable;
 
 @AllArgsConstructor
@@ -54,7 +53,7 @@ public class AccountController {
 
     @RequireAuthSuper
     @PostMapping("/createUser")
-    public Callable<Object> createUser(@Valid  @RequestBody AccountRequest accountRequest) {
+    public Callable<Object> createUser(@Valid @RequestBody AccountRequest accountRequest) {
         return () -> accountService.createUser(accountRequest);
     }
 

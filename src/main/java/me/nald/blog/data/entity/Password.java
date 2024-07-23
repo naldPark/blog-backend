@@ -1,13 +1,12 @@
 package me.nald.blog.data.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
 
 @Embeddable
 @Getter

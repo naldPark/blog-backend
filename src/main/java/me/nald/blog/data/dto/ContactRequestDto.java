@@ -1,6 +1,6 @@
 package me.nald.blog.data.dto;
 
-import com.sun.istack.NotNull;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 

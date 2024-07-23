@@ -15,7 +15,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import static me.nald.blog.exception.ErrorSpec.TooManyRequests;

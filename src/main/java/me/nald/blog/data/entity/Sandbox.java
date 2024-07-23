@@ -1,12 +1,10 @@
 package me.nald.blog.data.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-
-import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
@@ -28,7 +26,7 @@ public class Sandbox {
     private Boolean isDefault;
 
     @JsonBackReference
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
 

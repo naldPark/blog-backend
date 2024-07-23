@@ -5,6 +5,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.StorageResponseDto;
@@ -31,9 +32,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-
-import javax.persistence.EntityManager;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,14 +53,15 @@ import static me.nald.blog.util.FileUtils.extractFilenamePrefix;
 @RequiredArgsConstructor
 public class StorageService {
 
-    @Autowired
-    EntityManager em;
+//    @Autowired
+//    EntityManager em;
+private final JPAQueryFactory queryFactory;
 
     private final BlogProperties blogProperties;
     private final StorageRepository storageRepository;
 
     public StorageResponseDto.getStorageList getVideoList(SearchItem searchItem) {
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+//        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QStorage storage = QStorage.storage;
         BooleanBuilder builder = new BooleanBuilder();
         if (Objects.nonNull(searchItem.getSearchText()) && !searchItem.getSearchText().isEmpty()) {
@@ -372,17 +371,17 @@ public class StorageService {
 
                     multipartFileToFile(info.getFile()).delete();
 
-                    CommonsMultipartFile commonsMultipartFile = (CommonsMultipartFile) info.getFile();
-                    DiskFileItem diskFileItem = (DiskFileItem) commonsMultipartFile.getFileItem();
-                    String tempFilePath = diskFileItem.getStoreLocation().getPath();
-                    String tempFilenamePrefix = extractFilenamePrefix(tempFilePath);
+                    MultipartFile commonsMultipartFile =  info.getFile();
+//                    DiskFileItem diskFileItem = (DiskFileItem) commonsMultipartFile.getFileItem();
+//                    String tempFilePath = diskFileItem.getStoreLocation().getPath();
+//                    String tempFilenamePrefix = extractFilenamePrefix(tempFilePath);
                     // stream으로 나눠받은 tmp파일 모두 삭제
-                    try {
-                        FileUtils.deleteFilesStartingWith(tempFilenamePrefix);
-                        System.out.println("모든 파일 삭제 완료.");
-                    } catch (IOException e) {
-                        System.err.println("파일 삭제 중 오류 발생: " + e.getMessage());
-                    }
+//                    try {
+//                        FileUtils.deleteFilesStartingWith(tempFilenamePrefix);
+//                        System.out.println("모든 파일 삭제 완료.");
+//                    } catch (IOException e) {
+//                        System.err.println("파일 삭제 중 오류 발생: " + e.getMessage());
+//                    }
                 }
 
                 if (info.getFileCover() != null) {

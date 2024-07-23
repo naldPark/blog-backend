@@ -1,9 +1,8 @@
 package me.nald.blog.data.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.validation.constraints.NotBlank;
 
 @Data
 @Setter
