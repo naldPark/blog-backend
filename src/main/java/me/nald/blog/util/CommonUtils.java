@@ -67,8 +67,6 @@ public class CommonUtils {
       long expiredTimeMillis = 1000 * 60L * 60L * timeValue;
       Date now = new Date();
       Date expirationDate = new Date(now.getTime() + expiredTimeMillis);
-
-
       Map<String, Object> payloads = new HashMap<>();
       Algorithm algorithm = Algorithm.RSA256(toPublicKey(publicKey), toPrivateKey(privateKey));
       payloads.put("user_name", user.getAccountName());
