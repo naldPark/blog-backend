@@ -1,20 +1,3 @@
-nald:
-  token-expired-time: 2
-  private-key: ${PRIVATE_KEY}
-  public-key: ${PUBLIC_KEY}
-  default-account-id: ${DEFAULT_ACCOUNT_ID}
-  default-account-name: ${DEFAULT_ACCOUNT_NAME}
-  default-account-password: ${DEFAULT_ACCOUNT_PASSWORD}
-  contact-host: ${CONTACT_HOST}
-  contact-email: ${CONTACT_EMAIL}
-  contact-user: ${CONTACT_USER}
-  contact-password: ${CONTACT_PASSWORD}
-  common-path: /nfs
-  ffmpeg-path: /usr/bin
-  tomcat-temp-file-path: /tomcat/temp
-
-server:
-  port: 8000
 
 spring:
   servlet:
