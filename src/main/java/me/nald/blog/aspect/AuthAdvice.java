@@ -19,6 +19,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Objects;
 
 import static me.nald.blog.exception.ErrorSpec.AccessDeniedException;
@@ -40,7 +42,7 @@ public class AuthAdvice {
 
 
     @Before("Pointcuts.allController()")
-    public void checkBeforeController(JoinPoint jp) {
+    public void checkBeforeController(JoinPoint jp) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
