@@ -1,7 +1,6 @@
 package me.nald.blog.exception;
 
 
-import io.sentry.Sentry;
 import me.nald.blog.response.ErrorResponse;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
@@ -16,13 +15,11 @@ public class ErrorHandler {
     public ErrorResponse handleAllExceptions(HttpServletRequest request,
                                              Exception exception) {
         exception.printStackTrace();
-        Sentry.captureException(exception);
         return ErrorResponse.of(request, exception);
     }
 
     @ExceptionHandler(BindException.class)
     public String processValidationError(HttpServletRequest request, BindException exception) {
-        Sentry.captureException(exception);
         // TODO define error response
         BindingResult bindingResult = exception.getBindingResult();
 

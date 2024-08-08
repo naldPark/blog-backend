@@ -46,6 +46,22 @@ spring:
           physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
           use-new-id-generator-mappings: false
           default_batch_fetch_size: 1000
+nald:
+  token-expired-time: 2
+  private-key: ${PRIVATE_KEY}
+  public-key: ${PUBLIC_KEY}
+  default-account-id: ${DEFAULT_ACCOUNT_ID}
+  default-account-name: ${DEFAULT_ACCOUNT_NAME}
+  default-account-password: ${DEFAULT_ACCOUNT_PASSWORD}
+  contact-host: ${CONTACT_HOST}
+  contact-email: ${CONTACT_EMAIL}
+  contact-user: ${CONTACT_USER:nald}
+  contact-password: ${CONTACT_PASSWORD}
+  common-path: /nfs
+  ffmpeg-path: /usr/bin
+  tomcat-temp-file-path: /tomcat/temp
+server:
+  port: 8000
 docker:
   endpoint: ${DOCKER_REPO_ENDPOINT}
   username: ${DOCKER_REPO_USERNAME}
@@ -53,7 +69,6 @@ docker:
   password: ${DOCKER_REPO_PASSWORD}
   email: ${DOCKER_REPO_EMAIL}
   repository-uri: ${DOCKER_REPO_URI}
-
 logging:
   level:
     org.hibernate.SQL: debug
