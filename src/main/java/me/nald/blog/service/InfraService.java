@@ -107,7 +107,9 @@ public class InfraService {
                 e.printStackTrace();
             }
         }
-        V1PodList podList = kubeAdaptor.agentWith().listNamespacePod(K8S_SANDBOX_NAMESPACE, "app="+objectName);
+        Map<String,String> labelSelector =new HashMap<>();
+        labelSelector.put("app",objectName);
+        V1PodList podList = kubeAdaptor.agentWith().listNamespacePod(K8S_SANDBOX_NAMESPACE, labelSelector);
         String serviceName = kubeAdaptor.agentWith().createNamespacedService(objectName);
 
         return new ResponseObject();
