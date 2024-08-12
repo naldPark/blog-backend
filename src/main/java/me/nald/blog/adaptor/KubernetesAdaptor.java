@@ -24,17 +24,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static me.nald.blog.util.Constants.*;
+
 @Service("kubeAdaptor")
 @Slf4j
 @RequiredArgsConstructor
 public class KubernetesAdaptor {
-
-  private static final String K8S_NAMESPACE_PREFIX = "namespace-prefix-";
-  private static final String K8S_SANDBOX_NAMESPACE = "sandbox-namespace";
-  private static final String K8S_SANDBOX_DEFAULT_LABEL = "default-label";
-  private static final String K8S_IMAGE_PULL_SECRET_NAME = "image-pull-secret";
-  private static final String STR_FALSE = "false";
-
   private static Agent defaultAgent;
   private static BlogProperties blogProperties;
 
@@ -154,8 +149,6 @@ public class KubernetesAdaptor {
     private final int type;
     private Map<String, List<String>> dataMap;
     private String key;
-
-    private static final String[] LIST_NODE_COLUMN = {"name", "usageCpu", "percentCpu", "usageMemory", "percentMemory"};
 
     public KubectlDetail(int type, List<Map<String, Object>> result) {
       this.type = type;

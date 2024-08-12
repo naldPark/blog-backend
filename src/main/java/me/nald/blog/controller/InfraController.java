@@ -3,6 +3,7 @@ package me.nald.blog.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.annotation.RequireAuthBiz;
+import me.nald.blog.response.ResponseObject;
 import me.nald.blog.service.InfraService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,25 +19,25 @@ public class InfraController {
     private final InfraService infraService;
 
     @GetMapping("/diagramList")
-    public Callable<Object> getDiagramList() {
+    public Callable<ResponseObject> getDiagramList() {
         return () -> infraService.getDiagramList();
     }
 
     @RequireAuthBiz
     @GetMapping("/clusterInfo")
-    public Callable<Object> clusterInfo() {
+    public Callable<ResponseObject> clusterInfo() {
         return () -> infraService.getClusterInfo();
     }
 
     @RequireAuthBiz
     @GetMapping("/clusterResource")
-    public Callable<Object> getClusterResource() {
+    public Callable<ResponseObject> getClusterResource() {
         return () -> infraService.getClusterInfo();
     }
 
     @RequireAuthBiz
     @GetMapping("/sandboxAccessPoint")
-    public Callable<Object> getSandboxAccessPoint() {
+    public Callable<ResponseObject> getSandboxAccessPoint() {
         return () -> infraService.getSandboxAccessPoint();
     }
 

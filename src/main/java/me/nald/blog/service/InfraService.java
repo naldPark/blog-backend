@@ -1,7 +1,6 @@
 package me.nald.blog.service;
 
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.models.V1NamespaceList;
 import io.kubernetes.client.openapi.models.V1Node;
 import io.kubernetes.client.openapi.models.V1Pod;
 import io.kubernetes.client.openapi.models.V1PodList;
@@ -14,9 +13,7 @@ import me.nald.blog.data.vo.Node;
 import me.nald.blog.data.vo.Pod;
 import me.nald.blog.repository.AccountRepository;
 import me.nald.blog.repository.SandboxRepository;
-import me.nald.blog.response.CommonResponse;
-import me.nald.blog.response.Response;
-import me.nald.blog.response.ServerResourceResponse;
+import me.nald.blog.response.ResponseObject;
 import me.nald.blog.util.CommonUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -37,9 +34,8 @@ public class InfraService {
     private final AccountRepository accountRepository;
 
 
-    public CommonResponse getClusterInfo() throws Exception {
 
-        CommonResponse commonResponse = CommonResponse.of();
+    public ResponseObject getClusterInfo() throws Exception {
 
         List<V1Node> nodesList = kubeAdaptor.agentWith().listNode("").getItems();
         List<Map<String, Object>> nodeUsageSummary = kubeAdaptor.agentWith().getNodeSummary();
@@ -52,13 +48,17 @@ public class InfraService {
 
         List<V1Pod> podsList = kubeAdaptor.agentWith().listPodForAllNamespaces().getItems();
         List<Pod> podResult = podsList.stream().map(Pod::new).collect(Collectors.toList());
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("nodeResult", nodeResult);
+        data.put("podResult", podResult);
 
-        commonResponse.addData("nodeResult", nodeResult);
-        commonResponse.addData("podResult",podResult);
-        return commonResponse;
+        ResponseObject result = new ResponseObject();
+        result.putData(data);
+
+        return result;
     }
 
-    public Response.CommonRes getDiagramList() {
+    public ResponseObject getDiagramList() {
 
         List<String> diagramList = Arrays.asList(
                 "{ key: 0, name: 'Nald', icon: 'nald', description: 'nald.me' }",
@@ -86,14 +86,13 @@ public class InfraService {
                 "{ key: 22, parent: 1, name: 'Github', icon: 'git', group: 101 }",
                 "{ key: 23, parent: 1, name: 'Helm', icon: 'helm',  group: 101 }"
         );
-        return Response.CommonRes.builder()
-                .statusCode(200)
-                .data(CommonUtils.stringListToHashMapList(diagramList))
-                .build();
+        ResponseObject result = new ResponseObject();
+        result.putData(CommonUtils.stringListToHashMapList(diagramList));
+
+        return result;
     }
 
-    public CommonResponse getSandboxAccessPoint() throws ApiException {
-        CommonResponse commonResponse = CommonResponse.of();
+    public ResponseObject getSandboxAccessPoint() throws ApiException {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         Account user = accountRepository.findByAccountId((String) request.getAttribute(USER_ID));
         String objectName = user.getAccountId()+"-sandbox";
@@ -111,7 +110,6 @@ public class InfraService {
         V1PodList podList = kubeAdaptor.agentWith().listNamespacePod(K8S_SANDBOX_NAMESPACE, "app="+objectName);
         String serviceName = kubeAdaptor.agentWith().createNamespacedService(objectName);
 
-        System.out.println("서비스 네임"+ serviceName);
-        return commonResponse;
+        return new ResponseObject();
     }
 }

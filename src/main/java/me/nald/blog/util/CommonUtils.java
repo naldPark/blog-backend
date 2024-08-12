@@ -3,19 +3,17 @@ package me.nald.blog.util;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
-//import io.jsonwebtoken.Jwts;
-//import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.vo.AccountVO;
-import me.nald.blog.exception.Errors;
+import me.nald.blog.exception.AuthException;
+import me.nald.blog.response.ResponseCode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,8 +31,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import static me.nald.blog.exception.ErrorSpec.AccessDeniedException;
 import static me.nald.blog.util.Constants.AUTHORITY;
 import static me.nald.blog.util.Constants.USER_ID;
 
@@ -44,7 +40,7 @@ public class CommonUtils {
 
   private static BlogProperties blogProperties;
 
-  private static final Logger log = LoggerFactory.getLogger(CommonUtils.class);
+  private static final Logger log = LogManager.getLogger(CommonUtils.class);
 
   @Autowired
   public void setBlogProperties(BlogProperties blogProperties) {
@@ -146,13 +142,13 @@ public class CommonUtils {
       AccountVO jwtInfo = AccountVO.jsonToObj(body);
       String userId = body.getString(USER_ID);
       if (!CommonUtils.verifyToken(jwtToken, userId, blogProperties.getPublicKey())) {
-        throw Errors.of(AccessDeniedException, "Invalid token");
+        new AuthException(log, ResponseCode.INVALID_AUTH_TOKEN);
       }
       request.setAttribute(AUTHORITY, body.getInt(AUTHORITY));
       request.setAttribute(USER_ID, body.getString(USER_ID));
       return jwtInfo;
     } else {
-      throw Errors.of(AccessDeniedException, "Expired token");
+      throw new AuthException(log, ResponseCode.EXPIRED_AUTH_TOKEN);
     }
   }
 

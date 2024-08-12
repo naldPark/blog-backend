@@ -6,10 +6,12 @@ import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.ContactRequestDto;
-import me.nald.blog.exception.Errors;
-import me.nald.blog.response.Response;
+import me.nald.blog.exception.NotAllowedMethodException;
+import me.nald.blog.response.ResponseCode;
+import me.nald.blog.response.ResponseObject;
 import me.nald.blog.service.helper.AccountStore;
 import me.nald.blog.util.CommonUtils;
 import org.springframework.stereotype.Service;
@@ -23,10 +25,10 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static me.nald.blog.exception.ErrorSpec.TooManyRequests;
 
 
 @Service
+@Log4j2
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CommonService {
@@ -35,11 +37,11 @@ public class CommonService {
     private final AccountStore accountStore;
 
 
-    public Response.CommonRes sendMail(ContactRequestDto contactRequest) {
+    public ResponseObject sendMail(ContactRequestDto contactRequest) {
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         if(!accountStore.checkMailSentCount(request)){
-            throw Errors.of(TooManyRequests, "only 5 times available per day");
+            new NotAllowedMethodException(log, ResponseCode.TOO_MANY_MAIL_SEND_REQUESTS);
         }
         Properties props = new Properties();
         HashMap<String, Object> data = new HashMap<>();
@@ -71,34 +73,27 @@ public class CommonService {
 //            throw new ServiceUnavailableException(log, ResponseCode.MAIL_SEND_FAIL_ERROR);
         }
 
-        Response.CommonRes result = Response.CommonRes.builder()
-                .statusCode(200)
-                .data(data)
-                .build();
+        ResponseObject result = new ResponseObject();
+        result.putData(data);
 
         return result;
     }
 
-    public Response.CommonRes getBlogList() {
-
-
-
+    public ResponseObject getBlogList() {
 
         List<String> inputList = new ArrayList<>();
         inputList.add("{src: 'gitbook.png', header: 'CURRENT BLOG', title: 'GITBOOK', text: 'blog',  href: 'https://daylog.nald.me'}");
         inputList.add("{src: 'github.png', header: 'Configuration Tool', title: 'GITHUB',  text: 'github',  href: 'https://github.com/naldPark'}");
         inputList.add("{src: 'naverblog.png', header: 'BLOG (Deprecated)', title: 'NAVER BLOG',  text: 'naver',  href: 'https://blog.naver.com/8734747'}");
 
-        Response.CommonRes result = Response.CommonRes.builder()
-                .statusCode(200)
-                .data(CommonUtils.stringListToHashMapList(inputList))
-                .build();
+        ResponseObject result = new ResponseObject();
+        result.putData(CommonUtils.stringListToHashMapList(inputList));
 
         return result;
     }
 
 
-    public Response.CommonRes getBadgeList() {
+    public ResponseObject getBadgeList() {
 
         List<String> badgeList = Arrays.asList(
 
@@ -127,17 +122,18 @@ public class CommonService {
                 "{ color: 'white', backgroundColor: '#2A0E4E', name: 'argoCD', src: 'argocd.svg' }",
                 "{ color: 'orange', backgroundColor: '#000000', name: 'prometheus', src: 'prometheus.svg' }",
                 "{ color: 'black', backgroundColor: '#F2F4F9', name: 'grafana', src: 'grafana.svg' }",
-                
+
                 //etc
                 "{ color: 'black', backgroundColor: '#FCC624', name: 'linux', src: 'linux.svg' }"
 
 
 
         );
-        return Response.CommonRes.builder()
-                .statusCode(200)
-                .data(CommonUtils.stringListToHashMapList(badgeList))
-                .build();
+
+        ResponseObject result = new ResponseObject();
+        result.putData(CommonUtils.stringListToHashMapList(badgeList));
+
+        return result;
 
     }
 

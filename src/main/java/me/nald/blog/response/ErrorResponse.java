@@ -1,73 +1,31 @@
 package me.nald.blog.response;
 
-
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import me.nald.blog.exception.Errors;
+import me.nald.blog.exception.ExceptionBase;
 import org.springframework.http.HttpStatus;
-import jakarta.servlet.http.HttpServletRequest;
 
-@Data
-@Slf4j
-public class ErrorResponse extends Response {
+import java.util.HashMap;
 
-    private String error;
-    private String spec;
-    private String message;
-    private String stackTrace;
 
-    private ErrorResponse() {
-        this(HttpStatus.BAD_REQUEST);
-    }
-
-    private ErrorResponse(HttpStatus httpStatus) {
+public class ErrorResponse extends HashMap<String, Object> {
+    public ErrorResponse(ExceptionBase exception) {
         super();
-        this.setStatus(Status.FAIL);
-        this.setStatusCode(httpStatus.value());
-    }
-
-    public ErrorResponse error(String error) {
-        setError(error);
-        return this;
-    }
-
-    public ErrorResponse message(String message) {
-        setMessage(message);
-        return this;
-    }
-
-    public ErrorResponse stackTrace(String stackTrace) {
-        setStackTrace(stackTrace);
-        return this;
-    }
-
-    public ErrorResponse statusCode(HttpStatus httpStatus) {
-        return statusCode(httpStatus.value());
-    }
-
-    @Override
-    public ErrorResponse statusCode(int statusCode) {
-        setStatusCode(statusCode);
-        return this;
-    }
-
-    public static ErrorResponse of(HttpServletRequest request,
-                                   Exception e) {
-
-        ErrorResponse errorResponse = new ErrorResponse()
-                .error(e.getClass().getSimpleName())
-                .message(e.getMessage())
-                .statusCode(isCommonException(e) ? ((Errors.CommonException) e).getHttpStatus() : HttpStatus.BAD_REQUEST);
-
-        if (isCommonException(e)) {
-            Errors.CommonException ce = (Errors.CommonException) e;
-            errorResponse.setSpec(ce.getName());
-            errorResponse.statusCode(ce.getHttpStatus());
+        this.put("error", true);
+        this.put("http_status_code", exception.getStatusCode());
+        this.put("error_code", exception.getErrorCode());
+        this.put("error_message", exception.getErrorMessage());
+        this.put("code", exception.getI18nCode());
+        String message = exception.getAdditionalMessage();
+        if (message!=null && !message.isEmpty()) {
+            this.put("message", message);
         }
-        return errorResponse;
     }
 
-    private static boolean isCommonException(Exception e) {
-        return e instanceof Errors.CommonException;
+    public ErrorResponse() {
+        super();
+        this.put("error", true);
+        this.put("http_status_code", HttpStatus.SERVICE_UNAVAILABLE.value());
+        this.put("error_code", ResponseCode.UNKNOWN_ERROR.getCode());
+        this.put("error_message", ResponseCode.UNKNOWN_ERROR.getMessage());
+        this.put("code", ResponseCode.UNKNOWN_ERROR.getI18nCode());
     }
 }

@@ -8,10 +8,12 @@ import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountRequest;
 import me.nald.blog.data.dto.AccountStatusRequestDto;
+import me.nald.blog.response.ResponseObject;
 import me.nald.blog.service.AccountService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.concurrent.Callable;
 
 @AllArgsConstructor
@@ -19,47 +21,42 @@ import java.util.concurrent.Callable;
 @RequestMapping("")
 public class AccountController {
 
-    private final AccountService accountService;
+  private final AccountService accountService;
 
-    @WithoutJwtCallable
-    @GetMapping("/test")
-    public Callable<Object> getTest(HttpServletRequest request) {
-        return () -> accountService.getTest();
-    }
+  @RequireAuthAll
+  @GetMapping("/list")
+  public Callable<ResponseObject> getUserList() {
+    ResponseObject responseObject = new ResponseObject();
+    responseObject.putData(accountService.getUserList());
+    return () -> responseObject;
+  }
 
-    @RequireAuthAll
-    @GetMapping("/list")
-    public Callable<Object> getUserList(HttpServletRequest request) {
-        return () -> accountService.getUserList();
-    }
+  @WithoutJwtCallable
+  @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public Callable<ResponseObject> checkUser( @RequestBody AccountRequest accountRequest) {
+    return () -> accountService.getLogin(accountRequest);
+  }
 
-    @WithoutJwtCallable
-    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Callable<Object> checkUser(HttpServletRequest request, @RequestBody AccountRequest accountRequest) {
-        HttpSession httpSession = request.getSession();
-        return () -> accountService.getLogin(accountRequest);
-    }
+  @PutMapping(value = "/editPassword")
+  public Callable<ResponseObject> editPassword(@RequestBody AccountRequest accountRequest) {
+    return () -> accountService.editPassword(accountRequest);
+  }
 
-    @PutMapping(value = "/editPassword")
-    public Callable<Object> editPassword(HttpServletRequest request,  @RequestBody AccountRequest accountRequest) {
-        return () -> accountService.editPassword(accountRequest);
-    }
+  @RequireAuthSuper
+  @PutMapping(value = "/changeStatus")
+  public Callable<ResponseObject> changeStatus( @RequestBody AccountStatusRequestDto accountStatusRequest) {
+    return () -> accountService.changeStatus(accountStatusRequest);
+  }
 
-    @RequireAuthSuper
-    @PutMapping(value = "/changeStatus")
-    public Callable<Object> changeStatus(HttpServletRequest request, @RequestBody AccountStatusRequestDto accountStatusRequest) {
-        return () -> accountService.changeStatus(accountStatusRequest);
-    }
+  @RequireAuthSuper
+  @PostMapping("/createUser")
+  public Callable<ResponseObject> createUser(@Valid @RequestBody AccountRequest accountRequest) {
+    return () -> accountService.createUser(accountRequest);
+  }
 
-    @RequireAuthSuper
-    @PostMapping("/createUser")
-    public Callable<Object> createUser(@Valid @RequestBody AccountRequest accountRequest) {
-        return () -> accountService.createUser(accountRequest);
-    }
-
-    @RequireAuthSuper
-    @PutMapping("/editUser")
-    public Callable<Object> editUser(@RequestBody AccountRequest accountRequest) {
-        return () -> accountService.editUser(accountRequest);
-    }
+  @RequireAuthSuper
+  @PutMapping("/editUser")
+  public Callable<ResponseObject> editUser(@RequestBody AccountRequest accountRequest) {
+    return () -> accountService.editUser(accountRequest);
+  }
 }

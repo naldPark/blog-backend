@@ -36,21 +36,17 @@ public class Constants {
     public static final String STR_TRUE = "true";
     public static final String STR_FALSE = "false";
     public static final String K8S_SANDBOX_NAMESPACE = "sandbox";
-    public static final String K8S_SANDBOX_DEFAULT_LABEL = "default-sandbox";
-    public static final String K8S_IMAGE_PULL_SECRET_NAME = "regcred";
-    public static final String K8S_CPU_NODE_SERVICE_TYPE = "cpu";
-    public static final String K8S_GPU_NODE_SERVICE_TYPE = "gpu";
-    public static final String K8S_NAMESPACE_PREFIX = "";
-    public static final String K8S_LABEL_KEY_SERVICE_TYPE = "servicetype";
-    public static final String K8S_RESOURCE_TYPE_CPU = "cpu";
-    public static final String K8S_RESOURCE_TYPE_MEMORY = "memory";
-    public static final String K8S_EXTENDED_RESOURCE_TYPE_GPU = "gpu";
-    public static final String K8S_EXTENDED_RESOURCE_TYPE_NVIDIA_GPU = "nvidia.com/gpu";
-    public static final String K8S_RESOURCE_REQUESTS = "requests";
-    public static final String RESOURCE_QUOTA_NAME = "resource-quota-limit-mem-cpu";
-    public static final String RESOURCE_QUOTA_FIELD_SELECTOR  = "metadata.name=" + RESOURCE_QUOTA_NAME;
-    public static final String KUBE_CONFIG_WINDOWS_PATH = "..\\.kube2";
-    public static final String KUBE_CONFIG_LINUX_PATH = "/tmp/.kube";
+    public static final String KEY_SUCCESS = "success";
+    public static final String KEY_CODE = "code";
+    public static final String HTTP_STATUS_CODE = "http_status_code";
+
+    public static final String K8S_NAMESPACE_PREFIX = "namespace-prefix-";
+    public static final String K8S_SANDBOX_DEFAULT_LABEL = "default-label";
+    public static final String K8S_IMAGE_PULL_SECRET_NAME = "image-pull-secret";
+
+    public static final String EXCEPTION = "exception";
+    public static final String[] LIST_NODE_COLUMN = {"name", "usageCpu", "percentCpu", "usageMemory", "percentMemory"};
+
 
 
 }

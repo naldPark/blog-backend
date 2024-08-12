@@ -29,7 +29,6 @@ public class LogAdvice {
         writeBeforeLog(jp, "Controller");
     }
 
-
     @Before("Pointcuts.allService()")
     public void writeBeforeService(JoinPoint jp) {
         writeBeforeLog(jp, "Service");
