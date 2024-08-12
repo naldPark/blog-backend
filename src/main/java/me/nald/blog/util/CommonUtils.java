@@ -29,6 +29,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import static me.nald.blog.util.Constants.AUTHORITY;
@@ -162,7 +163,7 @@ public class CommonUtils {
     return result;
   }
 
-  public static String dataToAge(Date date) {
+  public static String dataToAge(LocalDate date) {
     SimpleDateFormat sformat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
     String dateToString = sformat.format(date);
     sformat.setTimeZone(TimeZone.getTimeZone("UTC"));

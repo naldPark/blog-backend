@@ -29,7 +29,7 @@ public class Node {
         name = meta.getName();
         labels = meta.getLabels();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-        createdDt = dateFormat.format(meta.getCreationTimestamp().toDate());
+        createdDt = dateFormat.format(meta.getCreationTimestamp().toLocalDate());
         HashMap<String, Long> data = new HashMap<>();
         node.getStatus().getCapacity().forEach((strKey, strValue)->{
             data.put(strKey,strValue.getNumber().longValue());

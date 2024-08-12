@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -53,11 +50,10 @@ public class KubernetesAdaptor {
   }
 
   private static ApiClient createApiClient() throws IOException {
-    ClassPathResource k8sConfig = new ClassPathResource("k8s-config");
-    InputStream configStream = k8sConfig.exists() ? k8sConfig.getInputStream()
-            : Files.newInputStream(Paths.get(blogProperties.getCommonPath() + "/k8s-config.yml"));
-
-    ApiClient apiClient = Config.fromConfig(configStream);
+//    ClassPathResource classPathResource  = new ClassPathResource("k8s-config");
+//    ApiClient apiClient = Config.fromConfig(new InputStreamReader(classPathResource.getInputStream()));
+    String configFilePath = blogProperties.getCommonPath() + "/k8s-config.yml";
+    ApiClient apiClient = Config.fromConfig(new FileReader(configFilePath));
     apiClient.setReadTimeout(60_000);
     return apiClient;
   }
@@ -109,8 +105,9 @@ public class KubernetesAdaptor {
               .metadata(new V1ObjectMeta().name(name))
               .spec(deploymentSpec);
 
-      return appsV1Api().createNamespacedDeployment(K8S_SANDBOX_NAMESPACE, newDeployment, STR_FALSE, null, null)
+      return appsV1Api().createNamespacedDeployment(K8S_SANDBOX_NAMESPACE, newDeployment, STR_FALSE, null, null, null)
               .getMetadata().getName();
+
     }
 
     public String createNamespacedService(String name) throws ApiException {
@@ -118,7 +115,7 @@ public class KubernetesAdaptor {
       V1ServiceSpec spec = new V1ServiceSpec().ports(List.of(new V1ServicePort().port(8088))).selector(selector).type("ClusterIP");
       V1Service service = new V1Service().kind("Service").metadata(new V1ObjectMeta().name(name)).spec(spec);
 
-      return coreV1Api().createNamespacedService(K8S_SANDBOX_NAMESPACE, service, STR_FALSE, null, null)
+      return coreV1Api().createNamespacedService(K8S_SANDBOX_NAMESPACE, service, STR_FALSE, null, null ,null)
               .getMetadata().getName();
     }
 

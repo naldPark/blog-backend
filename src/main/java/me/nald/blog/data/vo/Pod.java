@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.nald.blog.util.CommonUtils;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public class Pod {
     String namespace;
     Map<String, String> labels;
     String age;
-    Date runningTime;
+    LocalDate runningTime;
     int containers;
     String status;
     String nodeName;
@@ -26,8 +27,8 @@ public class Pod {
         V1ObjectMeta meta = pod.getMetadata();
         name = meta.getName();
         namespace = meta.getNamespace();
-        age = CommonUtils.dataToAge(meta.getCreationTimestamp().toDate());
-        runningTime = meta.getCreationTimestamp().toDate();
+        age = CommonUtils.dataToAge(meta.getCreationTimestamp().toLocalDate());
+        runningTime = meta.getCreationTimestamp().toLocalDate();
         containers = pod.getSpec().getContainers().size();
         status = pod.getStatus().getPhase();
         nodeName = pod.getSpec().getNodeName();
