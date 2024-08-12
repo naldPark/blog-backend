@@ -27,11 +27,10 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import static me.nald.blog.util.Constants.AUTHORITY;
 import static me.nald.blog.util.Constants.USER_ID;
 
@@ -163,26 +162,28 @@ public class CommonUtils {
     return result;
   }
 
-  public static String dataToAge(LocalDate date) {
-    SimpleDateFormat sformat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-    String dateToString = sformat.format(date);
-    sformat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    Long runningTime = null;
-    try {
-      runningTime = Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTimeInMillis() - sformat.parse(dateToString).getTime();
-    } catch (ParseException e) {
-      e.printStackTrace();
+  public static String dataToAge(LocalDateTime date) {
+
+    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+
+    // date와 현재 시간 사이의 차이 계산
+    long days = ChronoUnit.DAYS.between(date, now);
+    long hours = ChronoUnit.HOURS.between(date, now);
+    long minutes = ChronoUnit.MINUTES.between(date, now);
+    long seconds = ChronoUnit.SECONDS.between(date, now);
+
+    // 결과를 결정
+    String result;
+    if (days > 0) {
+      result = String.format("%dd", days);
+    } else if (hours > 0) {
+      result = String.format("%dh", hours);
+    } else if (minutes > 0) {
+      result = String.format("%dm", minutes);
+    } else {
+      result = String.format("%ds", seconds);
     }
-    String result = "";
-    if (TimeUnit.MILLISECONDS.toDays(runningTime) > 0) {
-      result = String.format("%dd", TimeUnit.MILLISECONDS.toDays(runningTime));
-    } else if (TimeUnit.MILLISECONDS.toHours(runningTime) > 0) {
-      result = String.format("%dh", TimeUnit.MILLISECONDS.toHours(runningTime));
-    } else if (TimeUnit.MILLISECONDS.toMinutes(runningTime) > 0) {
-      result = String.format("%dm", TimeUnit.MILLISECONDS.toMinutes(runningTime));
-    } else if (TimeUnit.MILLISECONDS.toSeconds(runningTime) > 0) {
-      result = String.format("%ds", TimeUnit.MILLISECONDS.toSeconds(runningTime));
-    }
+
     return result;
   }
 

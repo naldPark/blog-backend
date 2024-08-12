@@ -40,7 +40,7 @@ public class InfraService {
         List<V1Node> nodesList = kubeAdaptor.agentWith().listNode("").getItems();
         List<Map<String, Object>> nodeUsageSummary = kubeAdaptor.agentWith().getNodeSummary();
         List<Node> nodeResult = new ArrayList<>();
-        
+
         for (V1Node node : nodesList) {
             Map<String, Object> nodeUsage= nodeUsageSummary.stream().filter(s -> s.get("name").equals(node.getMetadata().getName())).findAny().get();
             nodeResult.add(new Node(node, nodeUsage));

@@ -6,10 +6,13 @@ import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.*;
+import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.Config;
+import io.kubernetes.client.util.KubeConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
+import org.aspectj.weaver.loadtime.Agent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -52,8 +55,26 @@ public class KubernetesAdaptor {
   private static ApiClient createApiClient() throws IOException {
 //    ClassPathResource classPathResource  = new ClassPathResource("k8s-config");
 //    ApiClient apiClient = Config.fromConfig(new InputStreamReader(classPathResource.getInputStream()));
-    String configFilePath = blogProperties.getCommonPath() + "/k8s-config.yml";
-    ApiClient apiClient = Config.fromConfig(new FileReader(configFilePath));
+
+//      ClassPathResource k8sConfig = new ClassPathResource("k8s-config");
+//      InputStream configStream = k8sConfig.exists() ? k8sConfig.getInputStream()
+//              : Files.newInputStream(Paths.get(blogProperties.getCommonPath() + "/k8s-config.yml"));
+//    ApiClient apiClient = Config.fromConfig(configStream);
+//    apiClient.setReadTimeout(60_000);
+//    return apiClient;
+
+    String kubeConfigPath = blogProperties.getCommonPath() + "/k8s-config";
+
+    // loading the out-of-cluster config, a kubeconfig from file-system
+    File file = new File(kubeConfigPath);
+    KubeConfig config = KubeConfig.loadKubeConfig(new FileReader(file));
+    config.setFile(file);
+//    ApiClient client = buildClient(config).build();
+    ApiClient apiClient =
+            ClientBuilder.kubeconfig(KubeConfig.loadKubeConfig(new FileReader(kubeConfigPath))).build();
+
+    // set the global default api-client to the in-cluster one from above
+    Configuration.setDefaultApiClient(apiClient);
     apiClient.setReadTimeout(60_000);
     return apiClient;
   }
@@ -83,12 +104,16 @@ public class KubernetesAdaptor {
     }
 
     public V1NodeList listNode(String fieldSelector) throws ApiException {
-      return coreV1Api().listNode(STR_FALSE, null, null, null, fieldSelector, null, null, null, null, false);
+      return coreV1Api().listNode().execute();
     }
 
     public String createNamespacedDeployment(String name) throws ApiException {
-      V1DeploymentList deployments = appsV1Api()
-              .listNamespacedDeployment(K8S_SANDBOX_NAMESPACE, STR_FALSE, true, "", "", "app=" + K8S_SANDBOX_DEFAULT_LABEL, null, "", null, 0, false);
+
+//      var deployments = appsV1Api()
+//              .listNamespacedDeployment(K8S_SANDBOX_NAMESPACE);
+      V1DeploymentList deployments = appsV1Api().listNamespacedDeployment(K8S_SANDBOX_NAMESPACE)
+              .pretty(STR_FALSE)
+              .execute();
       V1Deployment defaultDeployment = deployments.getItems().stream()
               .filter(d -> d.getMetadata().getName().equals(K8S_SANDBOX_DEFAULT_LABEL))
               .findFirst()
@@ -104,9 +129,10 @@ public class KubernetesAdaptor {
       V1Deployment newDeployment = new V1Deployment().kind("Deployment")
               .metadata(new V1ObjectMeta().name(name))
               .spec(deploymentSpec);
-
-      return appsV1Api().createNamespacedDeployment(K8S_SANDBOX_NAMESPACE, newDeployment, STR_FALSE, null, null, null)
-              .getMetadata().getName();
+      V1Deployment result = appsV1Api().createNamespacedDeployment(K8S_SANDBOX_NAMESPACE, newDeployment)
+              .execute();
+      System.out.println(result);
+      return result.getMetadata().getName();
 
     }
 
@@ -115,16 +141,16 @@ public class KubernetesAdaptor {
       V1ServiceSpec spec = new V1ServiceSpec().ports(List.of(new V1ServicePort().port(8088))).selector(selector).type("ClusterIP");
       V1Service service = new V1Service().kind("Service").metadata(new V1ObjectMeta().name(name)).spec(spec);
 
-      return coreV1Api().createNamespacedService(K8S_SANDBOX_NAMESPACE, service, STR_FALSE, null, null ,null)
+      return coreV1Api().createNamespacedService(K8S_SANDBOX_NAMESPACE, service).execute()
               .getMetadata().getName();
     }
 
     public V1PodList listPodForAllNamespaces() throws ApiException {
-      return coreV1Api().listPodForAllNamespaces(null, null, "", null, null, null, null, null, null, false);
+      return coreV1Api().listPodForAllNamespaces().execute();
     }
 
     public V1PodList listNamespacePod(String namespace, String labelSelector) throws ApiException {
-      return coreV1Api().listNamespacedPod(convertNamespaceName(namespace), STR_FALSE, true, "", "", labelSelector, null, "", null, 0, false);
+      return coreV1Api().listNamespacedPod(convertNamespaceName(namespace)).execute();
     }
 
     private void executeCommand(String cmd, KubectlDetail result) throws IOException {

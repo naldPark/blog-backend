@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -28,8 +29,8 @@ public class Node {
         V1ObjectMeta meta = node.getMetadata();
         name = meta.getName();
         labels = meta.getLabels();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-        createdDt = dateFormat.format(meta.getCreationTimestamp().toLocalDate());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd"); // 원하는 형식으로 조정
+        createdDt = meta.getCreationTimestamp().toLocalDate().format(formatter);
         HashMap<String, Long> data = new HashMap<>();
         node.getStatus().getCapacity().forEach((strKey, strValue)->{
             data.put(strKey,strValue.getNumber().longValue());
