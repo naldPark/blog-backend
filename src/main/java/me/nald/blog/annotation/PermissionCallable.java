@@ -1,6 +1,7 @@
 package me.nald.blog.annotation;
 
-import me.nald.blog.data.entity.Account;
+
+import me.nald.blog.data.vo.Authority;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,7 +10,9 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface RequireAuthBiz {
+public @interface PermissionCallable {
+  Authority authority();
 
-    Account.Authority value() default Account.Authority.BIZ;
+  String key() default "";
+  Class<?> value() default Void.class;
 }

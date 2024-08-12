@@ -63,31 +63,31 @@ public class AuthAdvice {
       AccountVO jwt = CommonUtils.extractUserIdFromJwt(request);
       Account user = accountService.findMemberByAccountId(jwt.getAccountId());
 
-      RequireAuthAll requireAuthAll = method.getDeclaredAnnotation(RequireAuthAll.class);
-      RequireAuthBuddy requireAuthBuddy = method.getDeclaredAnnotation(RequireAuthBuddy.class);
-      RequireAuthBiz requireAuthBiz = method.getDeclaredAnnotation(RequireAuthBiz.class);
-      RequireAuthSuper requireAuthSuper = method.getDeclaredAnnotation(RequireAuthSuper.class);
-      if (Objects.nonNull(requireAuthSuper)) {
-        if (requireAuthSuper.value().ordinal() < jwt.getAuthority()) {
-          new AuthException(logger, ResponseCode.ACCESS_DENIED);
-        }
-      }
-      if (Objects.nonNull(requireAuthAll)) {
-        if (requireAuthAll.value().ordinal() < jwt.getAuthority()) {
-          new AuthException(logger, ResponseCode.ACCESS_DENIED);
-        }
-      }
-      if (Objects.nonNull(requireAuthBuddy)) {
-        if (requireAuthBuddy.value().ordinal() < jwt.getAuthority()) {
-          new AuthException(logger, ResponseCode.ACCESS_DENIED);
-        }
-      }
-      if (Objects.nonNull(requireAuthBiz)) {
-        if (jwt.getAuthority() != 2
-                && requireAuthBiz.value().ordinal() < jwt.getAuthority()) {
-          new AuthException(logger, ResponseCode.ACCESS_DENIED);
-        }
-      }
+//      RequireAuthAll requireAuthAll = method.getDeclaredAnnotation(RequireAuthAll.class);
+//      RequireAuthBuddy requireAuthBuddy = method.getDeclaredAnnotation(RequireAuthBuddy.class);
+//      RequireAuthBiz requireAuthBiz = method.getDeclaredAnnotation(RequireAuthBiz.class);
+//      RequireAuthSuper requireAuthSuper = method.getDeclaredAnnotation(RequireAuthSuper.class);
+//      if (Objects.nonNull(requireAuthSuper)) {
+//        if (requireAuthSuper.value().ordinal() < jwt.getAuthority()) {
+//          new AuthException(logger, ResponseCode.ACCESS_DENIED);
+//        }
+//      }
+//      if (Objects.nonNull(requireAuthAll)) {
+//        if (requireAuthAll.value().ordinal() < jwt.getAuthority()) {
+//          new AuthException(logger, ResponseCode.ACCESS_DENIED);
+//        }
+//      }
+//      if (Objects.nonNull(requireAuthBuddy)) {
+//        if (requireAuthBuddy.value().ordinal() < jwt.getAuthority()) {
+//          new AuthException(logger, ResponseCode.ACCESS_DENIED);
+//        }
+//      }
+//      if (Objects.nonNull(requireAuthBiz)) {
+//        if (jwt.getAuthority() != 2
+//                && requireAuthBiz.value().ordinal() < jwt.getAuthority()) {
+//          new AuthException(logger, ResponseCode.ACCESS_DENIED);
+//        }
+//      }
 
       if (user != null) {
         request.setAttribute(USER_ID, user.getAccountId());

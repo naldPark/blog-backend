@@ -1,9 +1,7 @@
 package me.nald.blog.controller;
 
 import lombok.AllArgsConstructor;
-import me.nald.blog.annotation.RequireAuthSuper;
 import me.nald.blog.annotation.WithoutJwtCallable;
-import me.nald.blog.data.dto.StorageResponseDto;
 import me.nald.blog.data.dto.StorageRequestDto;
 import me.nald.blog.data.vo.SearchItem;
 import me.nald.blog.response.ResponseObject;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Date;
 import java.util.concurrent.Callable;
 
 @AllArgsConstructor
@@ -64,7 +61,6 @@ public class StorageController {
   }
 
   // 파일 타입 변환
-  @RequireAuthSuper
   @GetMapping("/convertVideoHls/{videoId}")
   public void convertVideoHls(@PathVariable Long videoId) {
     storageService.requestConvertVideoHls(videoId);
@@ -77,7 +73,6 @@ public class StorageController {
   }
 
   // 다운로드 파일
-  @RequireAuthSuper
   @GetMapping("/download/{videoId}")
   public ResponseEntity<Resource> downloads(@PathVariable Long videoId) {
     return storageService.downloads(videoId);
@@ -85,7 +80,6 @@ public class StorageController {
 
 
   // 업로드
-  @RequireAuthSuper
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, value = "/uploadLocal")
   public Callable<ResponseObject> uploadVideo(@RequestPart StorageRequestDto info,
                                               @RequestPart(value = "file", required = true) MultipartFile file,

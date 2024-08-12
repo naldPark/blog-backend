@@ -1,18 +1,16 @@
 package me.nald.blog.controller;
 
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import me.nald.blog.annotation.RequireAuthAll;
-import me.nald.blog.annotation.RequireAuthSuper;
+import me.nald.blog.annotation.PermissionCallable;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.AccountRequest;
 import me.nald.blog.data.dto.AccountStatusRequestDto;
+import me.nald.blog.data.vo.Authority;
 import me.nald.blog.response.ResponseObject;
 import me.nald.blog.service.AccountService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.concurrent.Callable;
 
@@ -23,7 +21,6 @@ public class AccountController {
 
   private final AccountService accountService;
 
-  @RequireAuthAll
   @GetMapping("/list")
   public Callable<ResponseObject> getUserList() {
     ResponseObject responseObject = new ResponseObject();
@@ -42,19 +39,19 @@ public class AccountController {
     return () -> accountService.editPassword(accountRequest);
   }
 
-  @RequireAuthSuper
+  @PermissionCallable(authority = Authority.SUPER)
   @PutMapping(value = "/changeStatus")
   public Callable<ResponseObject> changeStatus( @RequestBody AccountStatusRequestDto accountStatusRequest) {
     return () -> accountService.changeStatus(accountStatusRequest);
   }
 
-  @RequireAuthSuper
+  @PermissionCallable(authority = Authority.SUPER)
   @PostMapping("/createUser")
   public Callable<ResponseObject> createUser(@Valid @RequestBody AccountRequest accountRequest) {
     return () -> accountService.createUser(accountRequest);
   }
 
-  @RequireAuthSuper
+  @PermissionCallable(authority = Authority.SUPER)
   @PutMapping("/editUser")
   public Callable<ResponseObject> editUser(@RequestBody AccountRequest accountRequest) {
     return () -> accountService.editUser(accountRequest);
