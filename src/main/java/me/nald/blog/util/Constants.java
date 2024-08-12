@@ -9,19 +9,7 @@ import java.text.SimpleDateFormat;
 
 public class Constants {
 
-    private static BlogProperties blogProperties;
 
-    @Autowired
-    public void setBlogProperties(BlogProperties blogProperties) {
-        this.blogProperties = blogProperties;
-    }
-
-    public static final String REQ_HEADER_LANG = "language";
-    public static final String DEFAULT_ACCOUNT_ID = blogProperties.getDefaultAccountId();
-    public static final String DEFAULT_ACCOUNT_PASSWORD = blogProperties.getDefaultAccountPassword();
-    public static final String DEFAULT_ACCOUNT_NAME = blogProperties.getDefaultAccountPassword();
-    public static final String DEFAULT_ACCOUNT_EMAIL = "noreply@nald.me";
-    public static final String STORAGE_FILE_PATH = "/nfs/movie/";
     public static final String ANONYMOUS_YN = "isAnonymous";
     public static final String USER_ID = "user_id";
     public static final String USER_NAME = "user_name";
@@ -36,9 +24,7 @@ public class Constants {
     public static final String STR_TRUE = "true";
     public static final String STR_FALSE = "false";
     public static final String K8S_SANDBOX_NAMESPACE = "sandbox";
-    public static final String KEY_SUCCESS = "success";
-    public static final String KEY_CODE = "code";
-    public static final String HTTP_STATUS_CODE = "http_status_code";
+    public static final String STATUS_CODE = "status_code";
 
     public static final String K8S_NAMESPACE_PREFIX = "namespace-prefix-";
     public static final String K8S_SANDBOX_DEFAULT_LABEL = "default-label";
