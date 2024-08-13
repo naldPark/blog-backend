@@ -9,7 +9,7 @@ import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.vo.AccountVo;
 import me.nald.blog.data.vo.YN;
-import me.nald.blog.exception.AuthException;
+import me.nald.blog.exception.UnauthorizedException;
 import me.nald.blog.response.ResponseCode;
 import me.nald.blog.service.AccountService;
 import me.nald.blog.util.CommonUtils;
@@ -51,7 +51,7 @@ public class AuthAdvice {
     Account user = accountService.findMemberByAccountId(jwt.getAccountId());
 
     if (user == null) {
-      throw new AuthException(log, ResponseCode.ACCESS_DENIED);
+      throw new UnauthorizedException(log, ResponseCode.ACCESS_DENIED);
     }
 
     request.setAttribute(USER_ID, user.getAccountId());
@@ -60,7 +60,7 @@ public class AuthAdvice {
     if (method.isAnnotationPresent(PermissionCallable.class)) {
       PermissionCallable permission = method.getAnnotation(PermissionCallable.class);
       if (permission.authority().getNum() < jwt.getAuthority()) {
-        throw new AuthException(log, ResponseCode.ACCESS_DENIED);
+        throw new UnauthorizedException(log, ResponseCode.ACCESS_DENIED);
       }
     }
   }

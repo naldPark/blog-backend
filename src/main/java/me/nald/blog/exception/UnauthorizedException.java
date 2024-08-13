@@ -6,25 +6,26 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-public class AuthException extends ExceptionBase {
+public class UnauthorizedException extends ExceptionBase {
+  //401
 
-  public AuthException(Logger l) {
+  public UnauthorizedException(Logger l) {
     logger = l;
     errorCode = ResponseCode.UNKNOWN_AUTH_ERROR;
   }
 
-  public AuthException(Logger l, ResponseCode responseCode) {
+  public UnauthorizedException(Logger l, ResponseCode responseCode) {
     logger = l;
     errorCode = responseCode;
   }
 
-  public AuthException(Logger l, String message) {
+  public UnauthorizedException(Logger l, String message) {
     logger = l;
     errorCode = ResponseCode.UNKNOWN_AUTH_ERROR;
     this.additionalMessage = message;
   }
 
-  public AuthException(Logger l, ResponseCode responseCode, String message) {
+  public UnauthorizedException(Logger l, ResponseCode responseCode, String message) {
     logger = l;
     errorCode = responseCode;
     this.additionalMessage = message;

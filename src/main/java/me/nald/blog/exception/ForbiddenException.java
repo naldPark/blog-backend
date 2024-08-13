@@ -6,25 +6,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.FORBIDDEN)
-public class PermissionDeniedException extends ExceptionBase {
-
-  public PermissionDeniedException(Logger l) {
+public class ForbiddenException extends ExceptionBase {
+  //403
+  public ForbiddenException(Logger l) {
     logger = l;
     errorCode = ResponseCode.NOT_ALLOWED;
   }
 
-  public PermissionDeniedException(Logger l, ResponseCode responseCode) {
+  public ForbiddenException(Logger l, ResponseCode responseCode) {
     logger = l;
     errorCode = responseCode;
   }
 
-  public PermissionDeniedException(Logger l, String message) {
+  public ForbiddenException(Logger l, String message) {
     logger = l;
     errorCode = ResponseCode.NOT_ALLOWED;
     this.additionalMessage = message;
   }
 
-  public PermissionDeniedException(Logger l, ResponseCode responseCode, String message) {
+  public ForbiddenException(Logger l, ResponseCode responseCode, String message) {
     logger = l;
     errorCode = responseCode;
     this.additionalMessage = message;

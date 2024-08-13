@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class ExceptionResolver {
 
   @ExceptionHandler({
-          AuthException.class
+          UnauthorizedException.class
   })
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
   @ResponseBody
@@ -39,7 +39,7 @@ public class ExceptionResolver {
     if (exception instanceof ExceptionBase) {
       e = (ExceptionBase) exception;
     } else {
-      e = new AuthException(log);
+      e = new UnauthorizedException(log);
       LogUtils.warnLog(log, request, exception);
     }
     response = new ErrorResponse(e);
@@ -49,7 +49,7 @@ public class ExceptionResolver {
   }
 
   @ExceptionHandler({
-          InvalidParameterException.class,
+          BadRequestException.class,
           MissingServletRequestParameterException.class,
           MissingRequestHeaderException.class,
           HttpMessageNotReadableException.class,
@@ -68,10 +68,10 @@ public class ExceptionResolver {
       String message = ex.getBindingResult().getFieldErrors().stream()
               .map(f -> String.format("%s %s", f.getDefaultMessage(), f.getField()))
               .collect(Collectors.joining(", "));
-      e = new InvalidParameterException(log, message);
+      e = new BadRequestException(log, message);
 
     } else {
-      e = new InvalidParameterException(log, exception.getClass().getSimpleName());
+      e = new BadRequestException(log, exception.getClass().getSimpleName());
     }
     response = new ErrorResponse(e);
     LogUtils.errorLog(e.logger, request, e);
@@ -101,7 +101,7 @@ public class ExceptionResolver {
   }
 
   @ExceptionHandler({
-          PermissionDeniedException.class
+          ForbiddenException.class
   })
   @ResponseStatus(HttpStatus.FORBIDDEN)
   @ResponseBody
@@ -111,7 +111,7 @@ public class ExceptionResolver {
     if (exception instanceof ExceptionBase) {
       e = (ExceptionBase) exception;
     } else {
-      e = new PermissionDeniedException(log, exception.getClass().getSimpleName());
+      e = new ForbiddenException(log, exception.getClass().getSimpleName());
     }
     response = new ErrorResponse(e);
     LogUtils.errorLog(e.logger, request, e);
@@ -120,7 +120,7 @@ public class ExceptionResolver {
   }
 
   @ExceptionHandler({
-          NotAllowedMethodException.class,
+          MethodNotAllowedException.class,
           HttpRequestMethodNotSupportedException.class
   })
   @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
@@ -131,7 +131,7 @@ public class ExceptionResolver {
     if (exception instanceof ExceptionBase) {
       e = (ExceptionBase) exception;
     } else {
-      e = new NotAllowedMethodException(log, exception.getClass().getSimpleName());
+      e = new MethodNotAllowedException(log, exception.getClass().getSimpleName());
     }
     response = new ErrorResponse(e);
     LogUtils.errorLog(e.logger, request, e);

@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("")
+@RequestMapping("user")
 public class AccountController {
 
   private final AccountService accountService;

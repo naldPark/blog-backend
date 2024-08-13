@@ -6,19 +6,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.slf4j.Logger;
 @ResponseStatus(value = HttpStatus.METHOD_NOT_ALLOWED)
-public class NotAllowedMethodException extends ExceptionBase {
+public class MethodNotAllowedException extends ExceptionBase {
 
-  public NotAllowedMethodException(Logger l) {
+  public MethodNotAllowedException(Logger l) {
     logger = l;
     errorCode = ResponseCode.METHOD_NOT_ALLOWED;
   }
 
-  public NotAllowedMethodException(Logger l, ResponseCode responseCode) {
+  public MethodNotAllowedException(Logger l, ResponseCode responseCode) {
     logger = l;
     errorCode = responseCode;
   }
 
-  public NotAllowedMethodException(Logger l, String message) {
+  public MethodNotAllowedException(Logger l, String message) {
     logger = l;
     errorCode = ResponseCode.METHOD_NOT_ALLOWED;
     this.additionalMessage = message;

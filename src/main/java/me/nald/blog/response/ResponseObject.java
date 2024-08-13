@@ -15,6 +15,7 @@ public class ResponseObject extends HashMap<String, Object> {
 
   public ResponseObject() {
     super();
+    this.put(Constants.KEY_SUCCESS, true);
     this.put(Constants.STATUS_CODE, 200);
   }
 

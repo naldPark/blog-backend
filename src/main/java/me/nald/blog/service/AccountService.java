@@ -11,8 +11,8 @@ import me.nald.blog.data.dto.AccountStatusRequestDto;
 import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.entity.AccountLog;
 import me.nald.blog.data.entity.Password;
-import me.nald.blog.exception.InvalidParameterException;
-import me.nald.blog.exception.NotAllowedMethodException;
+import me.nald.blog.exception.BadRequestException;
+import me.nald.blog.exception.MethodNotAllowedException;
 import me.nald.blog.exception.NotFoundException;
 import me.nald.blog.repository.AccountLogRepository;
 import me.nald.blog.repository.AccountQueryRepository;
@@ -75,7 +75,7 @@ public class AccountService {
 
     Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() ->
             new NotFoundException(log, ResponseCode.USER_NOT_FOUND));
-    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new InvalidParameterException(log, ResponseCode.PASSWORD_NOT_MATCH));
+    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new BadRequestException(log, ResponseCode.PASSWORD_NOT_MATCH));
 
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
 
@@ -123,7 +123,7 @@ public class AccountService {
   public ResponseObject editPassword(AccountRequest accountInfo) {
     Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() ->
             new NotFoundException(log, ResponseCode.USER_NOT_FOUND));
-    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new InvalidParameterException(log, ResponseCode.PASSWORD_NOT_MATCH));
+    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new BadRequestException(log, ResponseCode.PASSWORD_NOT_MATCH));
 
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
     Password password = Password.builder()
@@ -139,7 +139,7 @@ public class AccountService {
   public ResponseObject createUser(AccountRequest accountInfo) {
     Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() ->
             new NotFoundException(log, ResponseCode.INVALID_PARAMETER));
-    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new InvalidParameterException(log, ResponseCode.INVALID_PARAMETER));
+    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new BadRequestException(log, ResponseCode.INVALID_PARAMETER));
 
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
 
@@ -157,7 +157,7 @@ public class AccountService {
       );
       accountRepository.save(account);
     } else {
-      throw new NotAllowedMethodException(log, ResponseCode.ID_DUPLICATE);
+      throw new MethodNotAllowedException(log, ResponseCode.ID_DUPLICATE);
     }
     return new ResponseObject();
   }

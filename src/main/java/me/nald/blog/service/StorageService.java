@@ -14,7 +14,7 @@ import me.nald.blog.data.entity.QStorage;
 import me.nald.blog.data.entity.Storage;
 import me.nald.blog.data.vo.SearchItem;
 import me.nald.blog.data.vo.YN;
-import me.nald.blog.exception.AuthException;
+import me.nald.blog.exception.UnauthorizedException;
 import me.nald.blog.exception.NotFoundException;
 import me.nald.blog.repository.StorageRepository;
 import me.nald.blog.response.ResponseCode;
@@ -267,7 +267,7 @@ public class StorageService {
   public ResponseEntity<Resource> downloads(Long videoId) {
     Storage storage = storageRepository.getReferenceById(videoId);
     if (storage.getFileDownload().isN()) {
-      throw new AuthException(log, ResponseCode.ACCESS_DENIED);
+      throw new UnauthorizedException(log, ResponseCode.ACCESS_DENIED);
     }
     Path filePath = Paths.get(blogProperties.getCommonPath() + "/movie" + storage.getDownloadSrc());
     try {

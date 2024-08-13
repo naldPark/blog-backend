@@ -1,10 +1,5 @@
 package me.nald.blog.util;
 
-import lombok.AllArgsConstructor;
-import me.nald.blog.config.BlogProperties;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.text.SimpleDateFormat;
 
 public class Constants {
@@ -20,10 +15,9 @@ public class Constants {
     public static final String LOG_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:dd";
     public static final String LOG_DELIMITER = "\t";
 
-    // K8S Config
-    public static final String STR_TRUE = "true";
-    public static final String STR_FALSE = "false";
     public static final String K8S_SANDBOX_NAMESPACE = "sandbox";
+
+    public static final String ERROR = "error";
     public static final String STATUS_CODE = "status_code";
 
     public static final String K8S_NAMESPACE_PREFIX = "namespace-prefix-";
@@ -34,5 +28,5 @@ public class Constants {
     public static final String[] LIST_NODE_COLUMN = {"name", "usageCpu", "percentCpu", "usageMemory", "percentMemory"};
 
 
-
+    public static final String KEY_SUCCESS = "success";
 }

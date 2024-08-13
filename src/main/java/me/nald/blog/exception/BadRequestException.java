@@ -6,25 +6,25 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-public class InvalidParameterException extends ExceptionBase {
+public class BadRequestException extends ExceptionBase {
 
-  public InvalidParameterException(Logger l) {
+  public BadRequestException(Logger l) {
     logger = l;
     errorCode = ResponseCode.INVALID_PARAMETER;
   }
 
-  public InvalidParameterException(Logger l, String message) {
+  public BadRequestException(Logger l, String message) {
     logger = l;
     errorCode = ResponseCode.INVALID_PARAMETER;
     this.additionalMessage = message;
   }
 
-  public InvalidParameterException(Logger l, ResponseCode responseCode) {
+  public BadRequestException(Logger l, ResponseCode responseCode) {
     logger = l;
     errorCode = responseCode;
   }
 
-  public InvalidParameterException(Logger l, ResponseCode responseCode, String message) {
+  public BadRequestException(Logger l, ResponseCode responseCode, String message) {
     logger = l;
     errorCode = responseCode;
     this.additionalMessage = message;

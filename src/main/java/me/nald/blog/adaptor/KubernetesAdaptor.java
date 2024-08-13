@@ -79,7 +79,6 @@ public class KubernetesAdaptor {
 
     public String createNamespacedDeployment(String name) throws ApiException {
       V1DeploymentList deployments = appsV1Api().listNamespacedDeployment(K8S_SANDBOX_NAMESPACE)
-              .pretty(STR_FALSE)
               .execute();
       V1Deployment defaultDeployment = deployments.getItems().stream()
               .filter(d -> d.getMetadata().getName().equals(K8S_SANDBOX_DEFAULT_LABEL))

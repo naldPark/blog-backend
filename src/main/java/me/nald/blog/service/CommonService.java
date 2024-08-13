@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.ContactRequestDto;
 import me.nald.blog.data.entity.Badge;
-import me.nald.blog.exception.NotAllowedMethodException;
+import me.nald.blog.exception.MethodNotAllowedException;
 import me.nald.blog.repository.BadgeRepository;
 import me.nald.blog.response.ResponseCode;
 import me.nald.blog.response.ResponseObject;
@@ -45,7 +45,7 @@ public class CommonService {
 
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         if(!accountStore.checkMailSentCount(request)){
-            new NotAllowedMethodException(log, ResponseCode.TOO_MANY_MAIL_SEND_REQUESTS);
+            new MethodNotAllowedException(log, ResponseCode.TOO_MANY_MAIL_SEND_REQUESTS);
         }
         Properties props = new Properties();
         HashMap<String, Object> data = new HashMap<>();

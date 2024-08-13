@@ -10,11 +10,12 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static me.nald.blog.util.Constants.LIST_NODE_COLUMN;
+
 @Slf4j
 public class KubeUtils {
   public static final int NODE = 0;
   public static final int NODE_USAGE = 3;
-  private static final String[] LIST_NODE_COLUMN = {"name", "CPU(cores)", "percentCpu", "MEMORY(bytes)", "percentMemory"};
   private final List<Map<String, Object>> result;
   private final int type;
   private Map<String, List<String>> dataMap;
