@@ -1,6 +1,6 @@
 //package me.nald.blog.config;
 //
-//import lombok.extern.slf4j.Slf4j;
+//import lombok.extern.log4j.Log4j2;
 //import net.bramp.ffmpeg.FFmpeg;
 //import net.bramp.ffmpeg.FFprobe;
 //import org.springframework.beans.factory.annotation.Value;

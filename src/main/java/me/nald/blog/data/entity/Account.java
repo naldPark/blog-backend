@@ -22,10 +22,10 @@ public class Account {
   @Column(name = "account_seq")
   private Long seq;
 
-  @Column(name = "account_id")
+  @Column
   private String accountId;
 
-  @Column(name = "account_name")
+  @Column
   private String accountName;
 
   private String email;
@@ -34,21 +34,22 @@ public class Account {
   private Password password;
 
   //0 : active, 1: locked, 2: deleted
-  @Column(name = "status", nullable = false, length = 20)
+  @Column(nullable = false, length = 20)
   private int status;
 
   //0 : super, 1: all, 2: buddy, 3: biz, 4: viewer
-  @Column(name = "authority", nullable = false, length = 50)
+  @Column(nullable = false, length = 50)
   private int authority;
 
-  @Column(name = "created_dt", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+  /** yml에 있는 physical-strategy설정에 의해 colume이름은 create_dt로 표기됨 **/
+  @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
   @CreationTimestamp
   private Timestamp createdDt;
 
-  @Column(name = "recent_login_dt", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+  @Column(columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
   private Timestamp recentLoginDt;
 
-  @Column(name = "login_fail_cnt", nullable = false, length = 50)
+  @Column(nullable = false, length = 50)
   @ColumnDefault("0")
   private int loginFailCnt;
 

@@ -1,11 +1,12 @@
 package me.nald.blog.util.log;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.util.Constants;
 import org.springframework.util.StringUtils;
-import jakarta.servlet.http.HttpServletRequest;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;

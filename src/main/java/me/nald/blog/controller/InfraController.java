@@ -1,7 +1,6 @@
 package me.nald.blog.controller;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.response.ResponseObject;
 import me.nald.blog.service.InfraService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +12,6 @@ import java.util.concurrent.Callable;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/infra")
-@Slf4j
 public class InfraController {
     private final InfraService infraService;
 

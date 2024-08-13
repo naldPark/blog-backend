@@ -4,20 +4,18 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.google.gson.Gson;
-import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.vo.AccountVo;
 import me.nald.blog.exception.AuthException;
 import me.nald.blog.response.ResponseCode;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.KeyFactory;
 import java.security.MessageDigest;
@@ -25,22 +23,26 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import static me.nald.blog.util.Constants.AUTHORITY;
 import static me.nald.blog.util.Constants.USER_ID;
 
 @Component
+@Slf4j
 @AllArgsConstructor
 public class CommonUtils {
 
   private static BlogProperties blogProperties;
 
-  private static final Logger log = LogManager.getLogger(CommonUtils.class);
+  private static final Gson gson = new Gson();
 
   @Autowired
   public void setBlogProperties(BlogProperties blogProperties) {
@@ -89,20 +91,26 @@ public class CommonUtils {
     return jwt;
   }
 
-  private static RSAPrivateKey toPrivateKey(String stringPrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+  private static Object toKey(String stringKey, boolean isPrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
     KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-    byte[] bytePrivateKey = Base64.getDecoder().decode(stringPrivateKey.getBytes());
-    PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(bytePrivateKey);
-    RSAPrivateKey privateKey = (RSAPrivateKey) keyFactory.generatePrivate(privateKeySpec);
-    return privateKey;
+    byte[] keyBytes = Base64.getDecoder().decode(stringKey);
+
+    KeySpec keySpec;
+    if (isPrivateKey) {
+      keySpec = new PKCS8EncodedKeySpec(keyBytes);
+      return keyFactory.generatePrivate(keySpec);
+    } else {
+      keySpec = new X509EncodedKeySpec(keyBytes);
+      return keyFactory.generatePublic(keySpec);
+    }
   }
 
-  private static RSAPublicKey toPublicKey(String stringPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
-    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-    byte[] publicKeyBytes = Base64.getDecoder().decode(stringPublicKey);
-    X509EncodedKeySpec keySpecPublic = new X509EncodedKeySpec(publicKeyBytes);
-    RSAPublicKey publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpecPublic);
-    return publicKey;
+  public static RSAPrivateKey toPrivateKey(String stringPrivateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    return (RSAPrivateKey) toKey(stringPrivateKey, true);
+  }
+
+  public static RSAPublicKey toPublicKey(String stringPublicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    return (RSAPublicKey) toKey(stringPublicKey, false);
   }
 
   public static String encryptSHA256(String str) {
@@ -122,14 +130,10 @@ public class CommonUtils {
   }
 
   public static List<HashMap<String, Object>> stringListToHashMapList(List<String> list) {
-
-    List<HashMap<String, Object>> mapList = new ArrayList<>();
-    JsonParser parser = new JsonParser();
-    list.stream().forEach(f -> {
-              mapList.add(new Gson().fromJson(parser.parse(f).getAsJsonObject().toString(), HashMap.class));
-            }
-    );
-    return mapList;
+    return list.stream()
+            .map(jsonString -> gson.fromJson(jsonString, new TypeToken<HashMap<String, Object>>() {
+            }))
+            .collect(Collectors.toList());
   }
 
   public static AccountVo extractUserIdFromJwt(HttpServletRequest request) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -163,28 +167,18 @@ public class CommonUtils {
   }
 
   public static String dataToAge(LocalDateTime date) {
-
     LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+    long seconds = Duration.between(date, now).getSeconds();
 
-    // date와 현재 시간 사이의 차이 계산
-    long days = ChronoUnit.DAYS.between(date, now);
-    long hours = ChronoUnit.HOURS.between(date, now);
-    long minutes = ChronoUnit.MINUTES.between(date, now);
-    long seconds = ChronoUnit.SECONDS.between(date, now);
-
-    // 결과를 결정
-    String result;
-    if (days > 0) {
-      result = String.format("%dd", days);
-    } else if (hours > 0) {
-      result = String.format("%dh", hours);
-    } else if (minutes > 0) {
-      result = String.format("%dm", minutes);
-    } else {
-      result = String.format("%ds", seconds);
-    }
-
-    return result;
+    return switch ((seconds >= 86_400) ? 1 :
+            (seconds >= 3_600) ? 2 :
+                    (seconds >= 60) ? 3 : 4) {
+      case 1 -> String.format("%dd", seconds / 86_400);
+      /** underbar는 자릿수를 구분하기 위한 기호 **/
+      case 2 -> String.format("%dh", seconds / 3_600);
+      case 3 -> String.format("%dm", seconds / 60);
+      case 4 -> String.format("%ds", seconds);
+      default -> throw new IllegalStateException("Unexpected value: " + seconds);
+    };
   }
-
 }

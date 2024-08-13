@@ -1,7 +1,6 @@
 package me.nald.blog.controller;
 
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.annotation.PermissionCallable;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.ContactRequestDto;
@@ -15,7 +14,6 @@ import java.util.concurrent.Callable;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/common")
-@Slf4j
 public class CommonController {
 
     private final CommonService commonService;

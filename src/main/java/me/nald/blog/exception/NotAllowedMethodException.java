@@ -1,10 +1,10 @@
 package me.nald.blog.exception;
 
 import me.nald.blog.response.ResponseCode;
-import org.apache.logging.log4j.Logger;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
+import org.slf4j.Logger;
 @ResponseStatus(value = HttpStatus.METHOD_NOT_ALLOWED)
 public class NotAllowedMethodException extends ExceptionBase {
 

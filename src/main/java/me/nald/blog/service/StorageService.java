@@ -6,10 +6,10 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
-import me.nald.blog.data.dto.StorageResponseDto;
 import me.nald.blog.data.dto.StorageRequestDto;
+import me.nald.blog.data.dto.StorageResponseDto;
 import me.nald.blog.data.entity.QStorage;
 import me.nald.blog.data.entity.Storage;
 import me.nald.blog.data.vo.SearchItem;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-@Log4j2
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class StorageService {

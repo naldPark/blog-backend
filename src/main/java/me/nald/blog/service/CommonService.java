@@ -5,11 +5,14 @@ import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.ContactRequestDto;
+import me.nald.blog.data.entity.Badge;
 import me.nald.blog.exception.NotAllowedMethodException;
+import me.nald.blog.repository.BadgeRepository;
 import me.nald.blog.response.ResponseCode;
 import me.nald.blog.response.ResponseObject;
 import me.nald.blog.service.helper.AccountStore;
@@ -19,23 +22,24 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
 
 
 
 @Service
-@Log4j2
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CommonService {
 
     private final BlogProperties blogProperties;
     private final AccountStore accountStore;
-
+    private final BadgeRepository badgeRepository;
 
     public ResponseObject sendMail(ContactRequestDto contactRequest) {
 
@@ -94,45 +98,9 @@ public class CommonService {
 
 
     public ResponseObject getBadgeList() {
-
-        List<String> badgeList = Arrays.asList(
-
-                //Front
-
-                "{ color: '#0A7390', backgroundColor: '#1A1C1D', name: 'react', src: 'react.svg' }",
-                "{ color: 'white', backgroundColor: '#4fc08d', name: 'vue', src: 'vue.svg' }",
-                "{ color: 'white', backgroundColor: '#DD0031', name: 'angular', src: 'angular.svg' }",
-                "{ color: 'white', backgroundColor: '#007ACC', name: 'typescript', src: 'typescript.svg' }",
-
-                //Backend
-                "{ color: 'red', backgroundColor: '#F2F4F9', name: 'java', src: 'java.svg' }",
-                "{ color: 'white', backgroundColor: '#6DB33F', name: 'springBoot', src: 'springboot.svg' }",
-
-                // DB
-                "{ color: 'white', backgroundColor: '#005e86', name: 'mysql', src: 'mysql.svg' }",
-                "{ color: 'white', backgroundColor: '#003545', name: 'mariadb', src: 'mariadb.svg' }",
-                "{ color: 'white', backgroundColor: '#000000', name: 'redis', src: 'redis.svg' }",
-                "{ color: 'white', backgroundColor: '#47A248', name: 'mongodb', src: 'mongodb.svg' }",
-
-                //Infra
-                "{ color: 'white', backgroundColor: '#326CE5', name: 'kubernetes', src: 'kubernetes.svg' }",
-                "{ color: 'white', backgroundColor: '#2496ED', name: 'docker', src: 'docker.svg' }",
-                "{ color: 'white', backgroundColor: '#FF9900', name: 'aws', src: 'aws.svg' }",
-                "{ color: 'white', backgroundColor: '#D24939', name: 'jenkins', src: 'jenkins.svg' }",
-                "{ color: 'white', backgroundColor: '#2A0E4E', name: 'argoCD', src: 'argocd.svg' }",
-                "{ color: 'orange', backgroundColor: '#000000', name: 'prometheus', src: 'prometheus.svg' }",
-                "{ color: 'black', backgroundColor: '#F2F4F9', name: 'grafana', src: 'grafana.svg' }",
-
-                //etc
-                "{ color: 'black', backgroundColor: '#FCC624', name: 'linux', src: 'linux.svg' }"
-
-
-
-        );
-
+        List<Badge> badgeList = badgeRepository.findAll();
         ResponseObject result = new ResponseObject();
-        result.putData(CommonUtils.stringListToHashMapList(badgeList));
-
+        result.putData(badgeList);
         return result;
 
     }

@@ -1,7 +1,7 @@
 package me.nald.blog.exception;
 
 import me.nald.blog.response.ResponseCode;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public abstract class ExceptionBase extends RuntimeException {
   public abstract int getStatusCode();

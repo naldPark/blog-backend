@@ -2,7 +2,7 @@ package me.nald.blog.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import me.nald.blog.exception.ExceptionBase;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class LogUtils {
     public static String clientIP(HttpServletRequest request) {

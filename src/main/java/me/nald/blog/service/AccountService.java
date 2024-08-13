@@ -1,6 +1,7 @@
 package me.nald.blog.service;
 
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.data.dto.AccountDtoTest;
@@ -20,13 +21,10 @@ import me.nald.blog.response.ResponseCode;
 import me.nald.blog.response.ResponseObject;
 import me.nald.blog.util.CommonUtils;
 import me.nald.blog.util.HttpServletRequestUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -35,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AccountService {
@@ -43,8 +42,6 @@ public class AccountService {
   private final AccountQueryRepository accountQueryRepository;
   private final AccountLogRepository accountLogRepository;
 
-
-  private static final Logger logger = LogManager.getLogger(AccountService.class);
 
   public List<Account> findMembers() {
     return accountRepository.findAll();
@@ -77,8 +74,8 @@ public class AccountService {
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
     Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() ->
-            new NotFoundException(logger, ResponseCode.USER_NOT_FOUND));
-    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new InvalidParameterException(logger, ResponseCode.PASSWORD_NOT_MATCH));
+            new NotFoundException(log, ResponseCode.USER_NOT_FOUND));
+    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new InvalidParameterException(log, ResponseCode.PASSWORD_NOT_MATCH));
 
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
 
@@ -88,7 +85,7 @@ public class AccountService {
     String ipAddr = HttpServletRequestUtil.getRemoteIP(request);
     boolean isLocal = ipAddr.equals("127.0.0.1") || ipAddr.equals("localhosts");
 
-    if (user == null) throw new NotFoundException(logger, ResponseCode.USER_NOT_FOUND);
+    if (user == null) throw new NotFoundException(log, ResponseCode.USER_NOT_FOUND);
 
     if (!user.getPassword().isMatched(accountInfo.getPassword())) {
       statusCode = 401;
@@ -125,8 +122,8 @@ public class AccountService {
   @Transactional
   public ResponseObject editPassword(AccountRequest accountInfo) {
     Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() ->
-            new NotFoundException(logger, ResponseCode.USER_NOT_FOUND));
-    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new InvalidParameterException(logger, ResponseCode.PASSWORD_NOT_MATCH));
+            new NotFoundException(log, ResponseCode.USER_NOT_FOUND));
+    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new InvalidParameterException(log, ResponseCode.PASSWORD_NOT_MATCH));
 
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
     Password password = Password.builder()
@@ -141,8 +138,8 @@ public class AccountService {
   @Transactional
   public ResponseObject createUser(AccountRequest accountInfo) {
     Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() ->
-            new NotFoundException(logger, ResponseCode.INVALID_PARAMETER));
-    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new InvalidParameterException(logger, ResponseCode.INVALID_PARAMETER));
+            new NotFoundException(log, ResponseCode.INVALID_PARAMETER));
+    Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new InvalidParameterException(log, ResponseCode.INVALID_PARAMETER));
 
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
 
@@ -160,7 +157,7 @@ public class AccountService {
       );
       accountRepository.save(account);
     } else {
-      throw new NotAllowedMethodException(logger, ResponseCode.ID_DUPLICATE);
+      throw new NotAllowedMethodException(log, ResponseCode.ID_DUPLICATE);
     }
     return new ResponseObject();
   }
@@ -168,7 +165,7 @@ public class AccountService {
   @Transactional
   public ResponseObject editUser(AccountRequest accountInfo) {
     Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() ->
-            new NotFoundException(logger, ResponseCode.USER_NOT_FOUND));
+            new NotFoundException(log, ResponseCode.USER_NOT_FOUND));
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
     user.setAccountName(accountInfo.getAccountName());
     user.setEmail(accountInfo.getEmail());

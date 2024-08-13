@@ -2,7 +2,6 @@ package me.nald.blog.aspect;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.nald.blog.config.BlogProperties;
 import me.nald.blog.util.Constants;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 @Component
 @Aspect
 public class LogAdvice {
-
 
     @Before("Pointcuts.allController()")
     public void writeBeforeController(JoinPoint jp) {

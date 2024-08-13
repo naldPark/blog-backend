@@ -1,5 +1,6 @@
 package me.nald.blog.util.log;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.util.Constants;
 import me.nald.blog.util.HttpServletRequestUtil;
 import org.springframework.util.StringUtils;
-import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.Optional;
 
 @Setter
