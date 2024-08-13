@@ -3,7 +3,7 @@ package me.nald.blog.aspect;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.annotation.*;
 import me.nald.blog.data.entity.Account;
-import me.nald.blog.data.vo.AccountVO;
+import me.nald.blog.data.vo.AccountVo;
 import me.nald.blog.data.vo.YN;
 import me.nald.blog.exception.AuthException;
 import me.nald.blog.response.ResponseCode;
@@ -51,8 +51,6 @@ public class AuthAdvice {
 
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
-    System.out.println("== AuthAdvice ==");
-
     MethodSignature signature = (MethodSignature) jp.getSignature();
     Method method = signature.getMethod();
     WithoutJwtCallable withoutJwtCallable = method.getDeclaredAnnotation(WithoutJwtCallable.class);
@@ -60,35 +58,21 @@ public class AuthAdvice {
     if (Objects.nonNull(withoutJwtCallable)) {
       request.setAttribute(ANONYMOUS_YN, YN.Y.name());
     } else {
-      AccountVO jwt = CommonUtils.extractUserIdFromJwt(request);
+      AccountVo jwt = CommonUtils.extractUserIdFromJwt(request);
       Account user = accountService.findMemberByAccountId(jwt.getAccountId());
 
-//      RequireAuthAll requireAuthAll = method.getDeclaredAnnotation(RequireAuthAll.class);
-//      RequireAuthBuddy requireAuthBuddy = method.getDeclaredAnnotation(RequireAuthBuddy.class);
-//      RequireAuthBiz requireAuthBiz = method.getDeclaredAnnotation(RequireAuthBiz.class);
-//      RequireAuthSuper requireAuthSuper = method.getDeclaredAnnotation(RequireAuthSuper.class);
-//      if (Objects.nonNull(requireAuthSuper)) {
-//        if (requireAuthSuper.value().ordinal() < jwt.getAuthority()) {
-//          new AuthException(logger, ResponseCode.ACCESS_DENIED);
-//        }
-//      }
-//      if (Objects.nonNull(requireAuthAll)) {
-//        if (requireAuthAll.value().ordinal() < jwt.getAuthority()) {
-//          new AuthException(logger, ResponseCode.ACCESS_DENIED);
-//        }
-//      }
-//      if (Objects.nonNull(requireAuthBuddy)) {
-//        if (requireAuthBuddy.value().ordinal() < jwt.getAuthority()) {
-//          new AuthException(logger, ResponseCode.ACCESS_DENIED);
-//        }
-//      }
-//      if (Objects.nonNull(requireAuthBiz)) {
-//        if (jwt.getAuthority() != 2
-//                && requireAuthBiz.value().ordinal() < jwt.getAuthority()) {
-//          new AuthException(logger, ResponseCode.ACCESS_DENIED);
-//        }
-//      }
+/**
+ * getDeclaredAnnotation은 메서드에 직접적으로 존재하는 어노테이션만을 검색
+ * getMethodAnnotation은 상속된 어노테이션을 포함하여 지정된 어노테이션 타입을 검색
+ * **/
+      PermissionCallable permissionCallable = method.getDeclaredAnnotation(PermissionCallable.class);
 
+      if (Objects.nonNull(permissionCallable)) {
+        int authNumber = permissionCallable.authority().getNum();
+        if (authNumber < jwt.getAuthority()) {
+          new AuthException(logger, ResponseCode.ACCESS_DENIED);
+        }
+      }
       if (user != null) {
         request.setAttribute(USER_ID, user.getAccountId());
         request.setAttribute(AUTHORITY, user.getAuthority());

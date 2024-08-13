@@ -11,7 +11,7 @@ import static me.nald.blog.util.Constants.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountVO {
+public class AccountVo {
 
     private String accountId;
     private String accountName;
@@ -19,8 +19,8 @@ public class AccountVO {
     private String accountEmail;
 
 
-    public static AccountVO jsonToObj(JSONObject body) {
-        return AccountVO.builder()
+    public static AccountVo jsonToObj(JSONObject body) {
+        return AccountVo.builder()
                         .accountId(body.getString(USER_ID))
                         .accountName(body.getString(USER_NAME))
                         .authority(body.getInt(AUTHORITY))

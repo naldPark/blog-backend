@@ -7,40 +7,31 @@ import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.*;
 import io.kubernetes.client.util.ClientBuilder;
-import io.kubernetes.client.util.Config;
 import io.kubernetes.client.util.KubeConfig;
-import io.kubernetes.client.util.Watch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
-import org.aspectj.weaver.loadtime.Agent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import me.nald.blog.util.KubeUtils;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static me.nald.blog.util.Constants.*;
+import static me.nald.blog.util.KubeUtils.executeCommand;
 
 @Service("kubeAdaptor")
 @Slf4j
-@RequiredArgsConstructor
 public class KubernetesAdaptor {
+  private final BlogProperties blogProperties;
   private static Agent defaultAgent;
-  private static BlogProperties blogProperties;
 
-  @Autowired
-  public void setBlogProperties(BlogProperties blogProperties) {
-    KubernetesAdaptor.blogProperties = blogProperties;
-  }
-
-  public static Agent agentWith() {
+  public KubernetesAdaptor(BlogProperties blogProperties) {
+    this.blogProperties = blogProperties;
     if (defaultAgent == null) {
       try {
         ApiClient apiClient = createApiClient();
@@ -51,30 +42,20 @@ public class KubernetesAdaptor {
         throw new RuntimeException(e);
       }
     }
+  }
+
+  private ApiClient createApiClient() throws IOException {
+    String kubeConfigPath = blogProperties.getCommonPath() + "/k8s-config";
+    return ClientBuilder.kubeconfig(KubeConfig.loadKubeConfig(new FileReader(kubeConfigPath))).build();
+  }
+
+  public Agent getAgent() {
     return defaultAgent;
   }
 
-  private static ApiClient createApiClient() throws IOException {
-
-    String kubeConfigPath = blogProperties.getCommonPath() + "/k8s-config";
-    File file = new File(kubeConfigPath);
-    KubeConfig config = KubeConfig.loadKubeConfig(new FileReader(file));
-    config.setFile(file);
-    ApiClient apiClient =
-            ClientBuilder.kubeconfig(KubeConfig.loadKubeConfig(new FileReader(kubeConfigPath))).build();
-
-    Configuration.setDefaultApiClient(apiClient);
-    apiClient.setReadTimeout(60_000);
-    return apiClient;
-  }
-
-  public static String convertNamespaceName(String name) {
-    return K8S_NAMESPACE_PREFIX + name;
-  }
 
   @RequiredArgsConstructor
   public static class Agent {
-
     private final ApiClient apiClient;
 
     private CoreV1Api coreV1Api() {
@@ -87,12 +68,12 @@ public class KubernetesAdaptor {
 
     public List<Map<String, Object>> getNodeSummary() throws IOException {
       List<Map<String, Object>> result = new ArrayList<>();
-      executeCommand("kubectl get nodes", new KubectlDetail(KubectlDetail.NODE, result));
-      executeCommand("kubectl top nodes", new KubectlDetail(KubectlDetail.NODE_USAGE, result));
+      executeCommand("kubectl get nodes", new KubeUtils(KubeUtils.NODE, result));
+      executeCommand("kubectl top nodes", new KubeUtils(KubeUtils.NODE_USAGE, result));
       return result;
     }
 
-    public V1NodeList listNode(String fieldSelector) throws ApiException {
+    public V1NodeList listNodes(String fieldSelector) throws ApiException {
       return coreV1Api().listNode().execute();
     }
 
@@ -107,27 +88,38 @@ public class KubernetesAdaptor {
 
       Map<String, String> label = Map.of("app", name);
       List<V1LocalObjectReference> imagePullSecrets = List.of(new V1LocalObjectReference().name(K8S_IMAGE_PULL_SECRET_NAME));
-      V1PodSpec podSpec = new V1PodSpec().containers(defaultDeployment.getSpec().getTemplate().getSpec().getContainers())
+      V1PodSpec podSpec = new V1PodSpec()
+              .containers(defaultDeployment.getSpec().getTemplate().getSpec().getContainers())
               .imagePullSecrets(imagePullSecrets);
-      V1DeploymentSpec deploymentSpec = new V1DeploymentSpec().replicas(1)
+
+      V1DeploymentSpec deploymentSpec = new V1DeploymentSpec()
+              .replicas(1)
               .selector(new V1LabelSelector().matchLabels(label))
               .template(new V1PodTemplateSpec().metadata(new V1ObjectMeta().labels(label)).spec(podSpec));
-      V1Deployment newDeployment = new V1Deployment().kind("Deployment")
+
+      V1Deployment newDeployment = new V1Deployment()
+              .kind("Deployment")
               .metadata(new V1ObjectMeta().name(name))
               .spec(deploymentSpec);
       V1Deployment result = appsV1Api().createNamespacedDeployment(K8S_SANDBOX_NAMESPACE, newDeployment)
               .execute();
       System.out.println(result);
       return result.getMetadata().getName();
-
     }
 
     public String createNamespacedService(String name) throws ApiException {
       Map<String, String> selector = Map.of("app", name);
-      V1ServiceSpec spec = new V1ServiceSpec().ports(List.of(new V1ServicePort().port(8088))).selector(selector).type("ClusterIP");
-      V1Service service = new V1Service().kind("Service").metadata(new V1ObjectMeta().name(name)).spec(spec);
+      V1ServiceSpec spec = new V1ServiceSpec()
+              .ports(List.of(new V1ServicePort().port(8088)))
+              .selector(selector)
+              .type("ClusterIP");
 
-      return coreV1Api().createNamespacedService(K8S_SANDBOX_NAMESPACE, service).execute()
+      V1Service service = new V1Service()
+              .kind("Service")
+              .metadata(new V1ObjectMeta().name(name))
+              .spec(spec);
+
+        return coreV1Api().createNamespacedService(K8S_SANDBOX_NAMESPACE, service).execute()
               .getMetadata().getName();
     }
 
@@ -135,197 +127,22 @@ public class KubernetesAdaptor {
       return coreV1Api().listPodForAllNamespaces().execute();
     }
 
-    public V1PodList listNamespacePod(String namespace,  Map<String,String> labelSelector) throws ApiException {
-      CoreV1Api api = new CoreV1Api();
-      V1PodList podList =api.listNamespacedPod(convertNamespaceName(namespace)).execute();
+    public static String convertNamespaceName(String name) {
+      return K8S_NAMESPACE_PREFIX + name;
+    }
 
-      List<V1Pod> filteredPods = podList.getItems()
+    public V1PodList listNamespacePods(String namespace, Map<String, String> labelSelector) throws ApiException {
+      List<V1Pod> filteredPods = coreV1Api().listNamespacedPod(convertNamespaceName(namespace)).execute().getItems()
               .stream()
-              .filter((pod) -> pod.getMetadata().getLabels()==labelSelector).collect(Collectors.toList());
+              .filter(pod -> pod.getMetadata().getLabels().equals(labelSelector))
+              .collect(Collectors.toList());
+
       V1PodList filteredPodList = new V1PodList();
       filteredPodList.setItems(filteredPods);
       return filteredPodList;
     }
 
-    private void executeCommand(String cmd, KubectlDetail result) throws IOException {
-      Process process = Runtime.getRuntime().exec(cmd);
-      try (BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-          result.processLine(line);
-        }
-      }
-    }
+
   }
 
-  static class KubectlDetail {
-
-    public static final int NODE = 0;
-    public static final int NODE_USAGE = 3;
-    private final List<Map<String, Object>> result;
-    private final int type;
-    private Map<String, List<String>> dataMap;
-    private String key;
-
-    public KubectlDetail(int type, List<Map<String, Object>> result) {
-      this.type = type;
-      this.result = result;
-    }
-
-    public void processLine(String line) {
-      if (type == NODE) {
-        setDescribe(line);
-      } else if (type == NODE_USAGE) {
-        setListData(line);
-      }
-    }
-
-    private void setDescribe(String data) {
-      if (data.startsWith("Name:")) {
-        dataMap = new LinkedHashMap<>();
-      }
-
-      if (dataMap != null) {
-        if (!data.isEmpty()) {
-          String[] splitData = data.split(":");
-          if (data.charAt(0) != ' ') {
-            key = splitData[0];
-          }
-          List<String> dataList = dataMap.computeIfAbsent(key, k -> new ArrayList<>());
-          dataList.add(data);
-        }
-
-        if (data.startsWith("Events:")) {
-          processEvent();
-          dataMap.clear();
-          dataMap = null;
-        }
-      }
-    }
-
-    private void setListData(String data) {
-      if (!data.contains("NAME ")) {
-        List<String> list = getListString(data);
-        if (list.size() == LIST_NODE_COLUMN.length) {
-          Map<String, Object> dataMap = new HashMap<>();
-          for (int i = 0; i < LIST_NODE_COLUMN.length; ++i) {
-            dataMap.put(LIST_NODE_COLUMN[i], list.get(i));
-          }
-          result.add(dataMap);
-        }
-      }
-    }
-
-    private void processEvent() {
-      Map<String, Object> detail = new LinkedHashMap<>();
-      List<String> resources = Arrays.asList("cpu", "memory");
-      detail.put("name", getSingleString("Name"));
-      detail.put("role", getSingleString("Roles"));
-      detail.putAll(getResource("Allocated resources", resources));
-      detail.put("podCount", getPodCount("Non-terminated Pods"));
-      String createdAt = getSingleString("CreationTimestamp");
-      detail.put("age", getAge(createdAt));
-      detail.put("createdAt", createdAt);
-      detail.put("systemInfo", getMapData("System Info", ":"));
-      detail.put("addresses", getMapData("Addresses", ":"));
-      detail.put("capacity", getMapData("Capacity", ":"));
-      result.add(detail);
-    }
-
-    private String getAge(String createdAt) {
-      try {
-        long runningTime = System.currentTimeMillis() - new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.KOREA)
-                .parse(createdAt).getTime();
-        if (TimeUnit.MILLISECONDS.toDays(runningTime) > 0) {
-          return String.format("%dd", TimeUnit.MILLISECONDS.toDays(runningTime));
-        } else if (TimeUnit.MILLISECONDS.toHours(runningTime) > 0) {
-          return String.format("%dh", TimeUnit.MILLISECONDS.toHours(runningTime));
-        } else if (TimeUnit.MILLISECONDS.toMinutes(runningTime) > 0) {
-          return String.format("%dm", TimeUnit.MILLISECONDS.toMinutes(runningTime));
-        } else {
-          return String.format("%ds", TimeUnit.MILLISECONDS.toSeconds(runningTime));
-        }
-      } catch (Exception e) {
-        return null;
-      }
-    }
-
-    private List<String> getListString(String data) {
-      List<String> list = new ArrayList<>();
-      String[] tmpArray = data.split(" ");
-      for (String tmp : tmpArray) {
-        if (!tmp.isEmpty()) {
-          list.add(tmp);
-        }
-      }
-      return list;
-    }
-
-    private String getSingleString(String keyword) {
-      String result = null;
-      if (dataMap.get(keyword) != null) {
-        result = dataMap.get(keyword).get(0);
-        if (result.indexOf(":") + 1 < result.length()) {
-          result = result.substring(result.indexOf(":") + 1).trim();
-        } else {
-          result = null;
-        }
-      }
-      return result;
-    }
-
-    private Map<String, String> getMapData(String keyword, String split) {
-      Map<String, String> result = new LinkedHashMap<>();
-      List<String> dataList = dataMap.get(keyword);
-      if (dataList != null) {
-        String first = getSingleString(keyword);
-        if (first != null) {
-          dataList.set(0, first);
-        }
-        for (String data : dataList) {
-          String[] tmp = data.trim().split(split);
-          if (tmp.length > 1) {
-            result.put(tmp[0].trim(), tmp[1].trim());
-          }
-        }
-      }
-      return result;
-    }
-
-    private int getPodCount(String keyword) {
-      int result = 0;
-      if (dataMap.get(keyword) != null) {
-        result = dataMap.get(keyword).size() - 3;
-        if (result < 0) {
-          result = 0;
-        }
-      }
-      return result;
-    }
-
-    private Map<String, Object> getResource(String keyword, List<String> keys) {
-      Map<String, Object> result = new LinkedHashMap<>();
-      if (dataMap.get(keyword) != null) {
-        List<String> dataList = dataMap.get(keyword);
-        boolean isData = false;
-        for (String data : dataList) {
-          data = data.trim();
-          if (data.contains("--------")) {
-            isData = true;
-            continue;
-          }
-          if (isData) {
-            String key = data.substring(0, data.indexOf(" "));
-            if (keys.contains(key)) {
-              Map<String, String> map = new HashMap<>();
-              map.put("requests", data.substring(data.indexOf("  "), data.indexOf(")") + 1).trim());
-              map.put("limits", data.substring(data.indexOf(")") + 1).trim());
-              result.put(key, map);
-            }
-          }
-        }
-      }
-      return result;
-    }
-  }
 }

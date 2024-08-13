@@ -8,7 +8,7 @@ import com.google.gson.JsonParser;
 import lombok.AllArgsConstructor;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.entity.Account;
-import me.nald.blog.data.vo.AccountVO;
+import me.nald.blog.data.vo.AccountVo;
 import me.nald.blog.exception.AuthException;
 import me.nald.blog.response.ResponseCode;
 import org.apache.logging.log4j.LogManager;
@@ -132,14 +132,14 @@ public class CommonUtils {
     return mapList;
   }
 
-  public static AccountVO extractUserIdFromJwt(HttpServletRequest request) throws NoSuchAlgorithmException, InvalidKeySpecException {
+  public static AccountVo extractUserIdFromJwt(HttpServletRequest request) throws NoSuchAlgorithmException, InvalidKeySpecException {
     String jwtToken = request.getHeader("Authorization");
     String[] tmp = jwtToken.split("\\.");
     String base64EncodedBody = tmp[1];
     org.apache.commons.codec.binary.Base64 base64Url = new org.apache.commons.codec.binary.Base64(true);
     JSONObject body = new JSONObject(new String(base64Url.decode(base64EncodedBody)));
     if (body.getLong("exp") * 1000 > System.currentTimeMillis()) {
-      AccountVO jwtInfo = AccountVO.jsonToObj(body);
+      AccountVo jwtInfo = AccountVo.jsonToObj(body);
       String userId = body.getString(USER_ID);
       if (!CommonUtils.verifyToken(jwtToken, userId, blogProperties.getPublicKey())) {
         new AuthException(log, ResponseCode.INVALID_AUTH_TOKEN);

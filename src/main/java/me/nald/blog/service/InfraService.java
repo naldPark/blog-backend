@@ -37,16 +37,18 @@ public class InfraService {
 
     public ResponseObject getClusterInfo() throws Exception {
 
-        List<V1Node> nodesList = kubeAdaptor.agentWith().listNode("").getItems();
-        List<Map<String, Object>> nodeUsageSummary = kubeAdaptor.agentWith().getNodeSummary();
+        List<V1Node> nodesList = kubeAdaptor.getAgent().listNodes("").getItems();
+        List<Map<String, Object>> nodeUsageSummary = kubeAdaptor.getAgent().getNodeSummary();
         List<Node> nodeResult = new ArrayList<>();
 
         for (V1Node node : nodesList) {
-            Map<String, Object> nodeUsage= nodeUsageSummary.stream().filter(s -> s.get("name").equals(node.getMetadata().getName())).findAny().get();
-            nodeResult.add(new Node(node, nodeUsage));
+            System.out.println("node.getMetadata().getName()"+node.getMetadata().getName());
+            Optional<Map<String, Object>> nodeUsage= nodeUsageSummary.stream().filter(s -> s.get("name").equals(node.getMetadata().getName())).findAny();
+            System.out.println("nodeUsage"+nodeUsage.get());
+            nodeResult.add(new Node(node, nodeUsage.get()));
         }
 
-        List<V1Pod> podsList = kubeAdaptor.agentWith().listPodForAllNamespaces().getItems();
+        List<V1Pod> podsList = kubeAdaptor.getAgent().listPodForAllNamespaces().getItems();
         List<Pod> podResult = podsList.stream().map(Pod::new).collect(Collectors.toList());
         HashMap<String, Object> data = new HashMap<>();
         data.put("nodeResult", nodeResult);
@@ -99,7 +101,7 @@ public class InfraService {
 
         if(user.getSandbox().isEmpty()){
             try {
-                String result = kubeAdaptor.agentWith().createNamespacedDeployment(objectName);
+                String result = kubeAdaptor.getAgent().createNamespacedDeployment(objectName);
                 System.out.println("리절트는 = "+ result);
                 Sandbox sandbox = Sandbox.createSandbox(user, objectName, true);
                 sandboxRepository.save(sandbox);
@@ -109,8 +111,8 @@ public class InfraService {
         }
         Map<String,String> labelSelector =new HashMap<>();
         labelSelector.put("app",objectName);
-        V1PodList podList = kubeAdaptor.agentWith().listNamespacePod(K8S_SANDBOX_NAMESPACE, labelSelector);
-        String serviceName = kubeAdaptor.agentWith().createNamespacedService(objectName);
+        V1PodList podList = kubeAdaptor.getAgent().listNamespacePods(K8S_SANDBOX_NAMESPACE, labelSelector);
+        String serviceName = kubeAdaptor.getAgent().createNamespacedService(objectName);
 
         return new ResponseObject();
     }
