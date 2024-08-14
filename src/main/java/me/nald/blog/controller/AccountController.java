@@ -1,5 +1,6 @@
 package me.nald.blog.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.PermissionCallable;
@@ -34,6 +35,15 @@ public class AccountController {
     return () -> accountService.getLogin(accountRequest);
   }
 
+  @WithoutJwtCallable
+  @Operation(summary = "RSA PUBLIC KEY 제공", description = "RSA PUBLIC KEY 제공")
+  @GetMapping("/rsa")
+  public Callable<ResponseObject> getRsaPublicKey() {
+    ResponseObject responseObject = new ResponseObject();
+    String vo = accountService.getRsaData();
+    responseObject.putData(vo);
+    return () -> responseObject;
+  }
   @PutMapping(value = "/editPassword")
   public Callable<ResponseObject> editPassword(@RequestBody AccountRequest accountRequest) {
     return () -> accountService.editPassword(accountRequest);

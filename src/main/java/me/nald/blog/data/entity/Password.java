@@ -15,22 +15,20 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class Password {
 
     @Column(name = "password", nullable = false, length = 200)
-    private String password;
+    private String hashPassword;
 
     @Builder
     public Password(String password) {
-        this.password = new BCryptPasswordEncoder().encode(password);
+        this.hashPassword = new BCryptPasswordEncoder().encode(password);
     }
 
-    public boolean isMatched(final String rawPassword) {
-        final boolean matches = isMatches(rawPassword);
-        return matches;
-    }
-
-    private boolean isMatches(String rawPassword) {
-        return new BCryptPasswordEncoder().matches(rawPassword, this.password);
-    }
-
-
+//    public boolean isMatched(final String rawPassword) {
+//        final boolean matches = isMatches(rawPassword);
+//        return matches;
+//    }
+//
+//    private boolean isMatches(String rawPassword) {
+//        return new BCryptPasswordEncoder().matches(rawPassword, this.password);
+//    }
 
 }

@@ -12,7 +12,6 @@ import me.nald.blog.data.vo.YN;
 import me.nald.blog.exception.UnauthorizedException;
 import me.nald.blog.response.ResponseCode;
 import me.nald.blog.service.AccountService;
-import me.nald.blog.util.CommonUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -27,6 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 import static me.nald.blog.util.Constants.*;
+import static me.nald.blog.util.SecurityUtils.extractUserIdFromJwt;
 
 @Component
 @Aspect
@@ -47,7 +47,7 @@ public class AuthAdvice {
       return;
     }
 
-    AccountVo jwt = CommonUtils.extractUserIdFromJwt(request);
+    AccountVo jwt = extractUserIdFromJwt(request);
     Account user = accountService.findMemberByAccountId(jwt.getAccountId());
 
     if (user == null) {

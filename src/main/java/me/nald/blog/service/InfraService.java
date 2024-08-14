@@ -15,7 +15,6 @@ import me.nald.blog.data.vo.Pod;
 import me.nald.blog.repository.AccountRepository;
 import me.nald.blog.repository.SandboxRepository;
 import me.nald.blog.response.ResponseObject;
-import me.nald.blog.util.CommonUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -23,6 +22,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static me.nald.blog.util.CommonUtils.stringListToHashMapList;
 import static me.nald.blog.util.Constants.K8S_SANDBOX_NAMESPACE;
 import static me.nald.blog.util.Constants.USER_ID;
 
@@ -90,7 +90,7 @@ public class InfraService {
                 "{ key: 23, parent: 1, name: 'Helm', icon: 'helm',  group: 101 }"
         );
         ResponseObject result = new ResponseObject();
-        result.putData(CommonUtils.stringListToHashMapList(diagramList));
+        result.putData(stringListToHashMapList(diagramList));
 
         return result;
     }

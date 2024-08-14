@@ -4,10 +4,9 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta;
 import io.kubernetes.client.openapi.models.V1Pod;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.nald.blog.util.CommonUtils;
+import me.nald.blog.util.KubeUtils;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.Map;
 
 @Data
@@ -27,7 +26,7 @@ public class Pod {
         V1ObjectMeta meta = pod.getMetadata();
         name = meta.getName();
         namespace = meta.getNamespace();
-        age = CommonUtils.dataToAge(meta.getCreationTimestamp().toLocalDateTime());
+        age = KubeUtils.dataToAge(meta.getCreationTimestamp().toLocalDateTime());
         runningTime = meta.getCreationTimestamp().toLocalDate();
         containers = pod.getSpec().getContainers().size();
         status = pod.getStatus().getPhase();

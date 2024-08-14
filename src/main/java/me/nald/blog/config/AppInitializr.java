@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.entity.Password;
 import me.nald.blog.repository.AccountRepository;
-import me.nald.blog.util.CommonUtils;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
+
+import static me.nald.blog.util.SecurityUtils.encryptSHA256;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,7 +27,8 @@ public class AppInitializr {
     public ApplicationRunner initAccount() {
         return args -> {
             if (accountRepository.findAll().isEmpty()) {
-                String initPw = CommonUtils.encryptSHA256(blogProperties.getDefaultAccountPassword());
+                /** TODO : privateKey 암호화 **/
+                String initPw = encryptSHA256(blogProperties.getDefaultAccountPassword());
                 Password password = Password.builder()
                         .password(initPw)
                         .build();

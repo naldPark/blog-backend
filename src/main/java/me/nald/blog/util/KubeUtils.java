@@ -6,6 +6,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -154,5 +157,18 @@ public class KubeUtils {
         result.processLine(line);
       }
     }
+  }
+
+
+  public static String dataToAge(LocalDateTime date) {
+    long seconds = Duration.between(date, LocalDateTime.now(ZoneId.of("Asia/Seoul"))).getSeconds();
+
+    return switch ((seconds >= 86_400) ? 1 : (seconds >= 3_600) ? 2 : (seconds >= 60) ? 3 : 4) {
+      case 1 -> "%dd".formatted(seconds / 86_400);
+      case 2 -> "%dh".formatted(seconds / 3_600);
+      case 3 -> "%dm".formatted(seconds / 60);
+      case 4 -> "%ds".formatted(seconds);
+      default -> throw new IllegalStateException("Unexpected value: " + seconds);
+    };
   }
 }

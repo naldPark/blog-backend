@@ -3,6 +3,7 @@ package me.nald.blog.util;
 import org.springframework.util.StringUtils;
 
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -14,79 +15,79 @@ import java.util.stream.Stream;
 
 public class HttpServletRequestUtil {
 
-    public static <T> T extractFromQueryParam(HttpServletRequest request, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        Map<String, String[]> paramMap = request.getParameterMap();
+  public static <T> T extractFromQueryParam(HttpServletRequest request, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    Map<String, String[]> paramMap = request.getParameterMap();
 
-        T t = clazz.getConstructor().newInstance();
+    T t = clazz.getConstructor().newInstance();
 
-        for (Field f : clazz.getFields()) {
-            f.setAccessible(true);
-            String[] paramValues = paramMap.get(f.getName());
+    for (Field f : clazz.getFields()) {
+      f.setAccessible(true);
+      String[] paramValues = paramMap.get(f.getName());
 
-            if (Objects.isNull(paramValues) || paramValues.length == 0) {
-                continue;
-            }
+      if (Objects.isNull(paramValues) || paramValues.length == 0) {
+        continue;
+      }
 
-            f.set(t, f.getType().isArray() ? Stream.of(paramValues).map(f.getType()::cast).toArray() : f.getType().cast(paramValues[0]));
+      f.set(t, f.getType().isArray() ? Stream.of(paramValues).map(f.getType()::cast).toArray() : f.getType().cast(paramValues[0]));
 
-        }
-
-        return t;
     }
 
+    return t;
+  }
 
-    public static <T> T extractFromHeader(HttpServletRequest request, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
-        T t = clazz.getConstructor().newInstance();
+  public static <T> T extractFromHeader(HttpServletRequest request, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
 
-        for (Field f : clazz.getFields()) {
-            f.setAccessible(true);
-            String headerValue = request.getHeader(f.getName());
+    T t = clazz.getConstructor().newInstance();
 
-            if (StringUtils.isEmpty(headerValue)) {
-                continue;
-            }
+    for (Field f : clazz.getFields()) {
+      f.setAccessible(true);
+      String headerValue = request.getHeader(f.getName());
 
-            f.set(t, headerValue);
-        }
+      if (StringUtils.isEmpty(headerValue)) {
+        continue;
+      }
 
-        return t;
+      f.set(t, headerValue);
     }
 
+    return t;
+  }
 
-    public static String getBody(HttpServletRequest request) throws IOException {
-        return request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+
+  public static String getBody(HttpServletRequest request) throws IOException {
+    return request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+  }
+
+  public static String getQueryParamsAsString(HttpServletRequest request) {
+    return Optional.ofNullable(request)
+            .map(req -> req.getParameterMap().keySet()
+                    .stream()
+                    .map(key -> Stream.of(request.getParameterValues(key))
+                            .map(value -> key + "=" + value)
+                            .collect(Collectors.joining("&"))
+                    ).collect(Collectors.joining("&"))
+            )
+            .orElse("");
+  }
+
+  public static String getRemoteIP(HttpServletRequest request) {
+    String ip = request.getHeader("X-FORWARDED-FOR");
+
+    //proxy 환경일 경우
+    if (ip == null || ip.length() == 0) {
+      ip = request.getHeader("Proxy-Client-IP");
     }
 
-    public static String getQueryParamsAsString(HttpServletRequest request) {
-        return Optional.ofNullable(request)
-                .map(req -> req.getParameterMap().keySet()
-                        .stream()
-                        .map(key -> Stream.of(request.getParameterValues(key))
-                                .map(value -> key + "=" + value)
-                                .collect(Collectors.joining("&"))
-                        ).collect(Collectors.joining("&"))
-                )
-                .orElse("");
+    //웹로직 서버일 경우
+    if (ip == null || ip.length() == 0) {
+      ip = request.getHeader("WL-Proxy-Client-IP");
     }
 
-    public static String getRemoteIP(HttpServletRequest request){
-        String ip = request.getHeader("X-FORWARDED-FOR");
-
-        //proxy 환경일 경우
-        if (ip == null || ip.length() == 0) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-
-        //웹로직 서버일 경우
-        if (ip == null || ip.length() == 0) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-
-        if (ip == null || ip.length() == 0) {
-            ip = request.getRemoteAddr() ;
-        }
-
-        return ip;
+    if (ip == null || ip.length() == 0) {
+      ip = request.getRemoteAddr();
     }
+
+    return ip;
+  }
 }

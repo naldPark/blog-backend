@@ -4,6 +4,7 @@ package me.nald.blog.service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.AccountDtoTest;
 import me.nald.blog.data.dto.AccountRequest;
 import me.nald.blog.data.dto.AccountResonseDto;
@@ -12,6 +13,7 @@ import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.entity.AccountLog;
 import me.nald.blog.data.entity.Password;
 import me.nald.blog.exception.BadRequestException;
+import me.nald.blog.exception.ForbiddenException;
 import me.nald.blog.exception.MethodNotAllowedException;
 import me.nald.blog.exception.NotFoundException;
 import me.nald.blog.repository.AccountLogRepository;
@@ -19,7 +21,6 @@ import me.nald.blog.repository.AccountQueryRepository;
 import me.nald.blog.repository.AccountRepository;
 import me.nald.blog.response.ResponseCode;
 import me.nald.blog.response.ResponseObject;
-import me.nald.blog.util.CommonUtils;
 import me.nald.blog.util.HttpServletRequestUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static me.nald.blog.util.SecurityUtils.decrypt;
+import static me.nald.blog.util.SecurityUtils.getJWTToken;
+
 @Service
 @Slf4j
 @Transactional(readOnly = true)
@@ -41,7 +45,7 @@ public class AccountService {
   private final AccountRepository accountRepository;
   private final AccountQueryRepository accountQueryRepository;
   private final AccountLogRepository accountLogRepository;
-
+  private final BlogProperties blogProperties;
 
   public List<Account> findMembers() {
     return accountRepository.findAll();
@@ -68,18 +72,26 @@ public class AccountService {
 
   }
 
+  public String getRsaData() {
+    return blogProperties.getPublicKey();
+  }
+
   @Transactional
-  public ResponseObject getLogin(AccountRequest accountInfo) {
+  public ResponseObject getLogin(AccountRequest accountInfo) throws Exception {
     ResponseObject response = new ResponseObject();
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+
 
     Optional.ofNullable(accountInfo.getAccountId()).orElseThrow(() ->
             new NotFoundException(log, ResponseCode.USER_NOT_FOUND));
     Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new BadRequestException(log, ResponseCode.PASSWORD_NOT_MATCH));
 
+    String decryptedPassword = decrypt(accountInfo.getPassword());
+
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
 
-    int statusCode = 0;
+    System.out.println("userPWD@@@@"+user.getPassword().getHashPassword());
+
     HashMap<String, Object> data = new HashMap<>();
 
     String ipAddr = HttpServletRequestUtil.getRemoteIP(request);
@@ -87,34 +99,35 @@ public class AccountService {
 
     if (user == null) throw new NotFoundException(log, ResponseCode.USER_NOT_FOUND);
 
-    if (!user.getPassword().isMatched(accountInfo.getPassword())) {
-      statusCode = 401;
-      user.setLoginFailCnt(user.getLoginFailCnt() + 1);
-      data.put("error", "incorrect password failed: " + user.getLoginFailCnt());
-      if (user.getLoginFailCnt() > 4) {
-        user.setStatus(1);
-        data.put("error", "your id has been blocked");
-      }
-    } else if (user.getStatus() != 0) {
-      data.put("error", "the account is not able to login");
-    } else {
-      statusCode = 200;
-      user.setLoginFailCnt(0);
-      user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
-      data.put("access_token", CommonUtils.getJWTToken(user));
-      data.put("message", "succeeded");
-      data.put("accountId", user.getAccountId());
-      data.put("accountName", user.getAccountName());
-    }
-    if (!isLocal) {
-      if (statusCode == 200) {
-        user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
-        AccountLog accountLog = AccountLog.createLog(user, ipAddr);
-        accountLogRepository.save(accountLog);
-      }
+    if (user.getLoginFailCnt() > 4) {
+      user.setStatus(1);
       accountRepository.save(user);
+      throw new ForbiddenException(log, ResponseCode.USER_BLOCKED);
     }
 
+    if (!user.getPassword().getHashPassword().equals(decryptedPassword)) {
+      user.setLoginFailCnt(user.getLoginFailCnt() + 1);
+      accountRepository.save(user);
+      throw new BadRequestException(log, ResponseCode.PASSWORD_NOT_MATCH);
+    }
+
+    if (user.getStatus() != 0) {
+      throw new ForbiddenException(log, ResponseCode.USER_INACTIVE);
+    }
+
+    user.setLoginFailCnt(0);
+    user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
+    data.put("access_token", getJWTToken(user));
+    data.put("message", "succeeded");
+    data.put("accountId", user.getAccountId());
+    data.put("accountName", user.getAccountName());
+
+    if (!isLocal) {
+      user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
+      AccountLog accountLog = AccountLog.createLog(user, ipAddr);
+      accountLogRepository.save(accountLog);
+      accountRepository.save(user);
+    }
     response.putData(data);
     return response;
   }
