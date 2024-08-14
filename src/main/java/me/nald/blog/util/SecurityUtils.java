@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.vo.AccountVo;
+import me.nald.blog.exception.InternalServerErrorException;
 import me.nald.blog.exception.UnauthorizedException;
 import me.nald.blog.response.ResponseCode;
 import org.json.JSONObject;
@@ -145,39 +146,45 @@ public class SecurityUtils {
   }
 
 
-  public static String decryptLongData(String encryptedData, PrivateKey privateKey) throws Exception {
-    String[] chunks = encryptedData.split(":");
-    StringBuilder decryptedData = new StringBuilder();
-
-    for (String chunk : chunks) {
-      decryptedData.append(decryptRSA(chunk, privateKey));
-    }
-
-    return decryptedData.toString();
-  }
-
+  /**
+   * private key로 복호화
+   **/
   public static String decrypt(String encryptedPassword) throws Exception {
 
     PrivateKey privateKey = getPrivateKeyFromString(blogProperties.getPrivateKey());
-    String result=  decryptLongData(encryptedPassword, privateKey);
-    String hashResult=  hashPassword(result);
+
+    String[] chunks = encryptedPassword.split(":");
+
+    StringBuilder decryptedData = new StringBuilder();
+    Arrays.stream(chunks)
+            .map(chunk -> decryptRSA(chunk, privateKey))
+            .forEach(decryptedData::append);
+
+    String hashResult = hashPassword(decryptedData.toString());
     return hashResult;
   }
 
-
+  /**
+   * public key로 암호화
+   **/
   public static byte[] encryptRSA(byte[] data, PublicKey publicKey) throws Exception {
     Cipher cipher = Cipher.getInstance("RSA");
     cipher.init(Cipher.ENCRYPT_MODE, publicKey);
     return cipher.doFinal(data);
   }
 
-  public static String decryptRSA(String encryptedText, PrivateKey privateKey) throws Exception {
-    Cipher cipher = Cipher.getInstance("RSA");
-    cipher.init(Cipher.DECRYPT_MODE, privateKey);
 
-    byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
-    return new String(decryptedBytes);
+  public static String decryptRSA(String encryptedText, PrivateKey privateKey) {
+    try {
+      Cipher cipher = Cipher.getInstance("RSA");
+      cipher.init(Cipher.DECRYPT_MODE, privateKey);
+      byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
+      return new String(decryptedBytes);
+    } catch (GeneralSecurityException e) {
+      throw new InternalServerErrorException(log, ResponseCode.UNKNOWN_ERROR);
+    }
   }
+
   private static PrivateKey getPrivateKeyFromString(String key) throws Exception {
     String privateKeyPEM = key
             .replace("-----BEGIN PRIVATE KEY-----", "")
@@ -236,7 +243,7 @@ public class SecurityUtils {
     StringBuilder hexString = new StringBuilder(2 * hash.length);
     for (byte b : hash) {
       String hex = Integer.toHexString(0xff & b);
-      if(hex.length() == 1) {
+      if (hex.length() == 1) {
         hexString.append('0');
       }
       hexString.append(hex);
