@@ -24,9 +24,7 @@ public class AccountController {
 
   @GetMapping("/list")
   public Callable<ResponseObject> getUserList() {
-    ResponseObject responseObject = new ResponseObject();
-    responseObject.putData(accountService.getUserList());
-    return () -> responseObject;
+    return accountService::getUserList;
   }
 
   @WithoutJwtCallable
