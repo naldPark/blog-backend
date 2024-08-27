@@ -26,6 +26,7 @@ import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.job.FFmpegJob;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -213,7 +214,7 @@ public class StorageService {
   }
 
   public ResponseEntity<Resource> videoVtt(Long videoId) {
-    Storage storage = storageRepository.getById(videoId);
+    Storage storage = storageRepository.getReferenceById(videoId);
     String movieDir = blogProperties.getCommonPath() + "/movie";
     String fileFullPath = movieDir + storage.getVttSrc();
     Path filePath = Paths.get(fileFullPath);
@@ -272,6 +273,7 @@ public class StorageService {
     Path filePath = Paths.get(blogProperties.getCommonPath() + "/movie" + storage.getDownloadSrc());
     try {
       Resource resource = new FileSystemResource(filePath) {
+        @NotNull
         @Override
         public InputStream getInputStream() throws IOException {
           return new FileInputStream(filePath.toFile()) {
@@ -301,7 +303,7 @@ public class StorageService {
   }
 
   public File multipartFileToFile(MultipartFile multipartFile) throws IOException {
-    File file = new File(multipartFile.getOriginalFilename());
+    File file = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
     multipartFile.transferTo(file);
     return file;
   }

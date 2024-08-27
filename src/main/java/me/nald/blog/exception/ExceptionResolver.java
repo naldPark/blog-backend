@@ -63,8 +63,7 @@ public class ExceptionResolver {
     ExceptionBase e;
     if (exception instanceof ExceptionBase) {
       e = (ExceptionBase) exception;
-    } else if (exception instanceof MethodArgumentNotValidException) {
-      MethodArgumentNotValidException ex = (MethodArgumentNotValidException) exception;
+    } else if (exception instanceof MethodArgumentNotValidException ex) {
       String message = ex.getBindingResult().getFieldErrors().stream()
               .map(f -> String.format("%s %s", f.getDefaultMessage(), f.getField()))
               .collect(Collectors.joining(", "));
