@@ -42,6 +42,7 @@ public class AccountController {
     responseObject.putData(vo);
     return () -> responseObject;
   }
+
   @PutMapping(value = "/editPassword")
   public Callable<ResponseObject> editPassword(@RequestBody AccountRequest accountRequest) {
     return () -> accountService.editPassword(accountRequest);

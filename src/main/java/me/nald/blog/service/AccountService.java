@@ -76,7 +76,8 @@ public class AccountService {
     return blogProperties.getPublicKey();
   }
 
-  @Transactional
+  /** exception 발생시에 롤백처리 되지 않고 패스워드 틀림에 따른 증가 저장 */
+  @Transactional(noRollbackFor = Exception.class)
   public ResponseObject getLogin(AccountRequest accountInfo) throws Exception {
     ResponseObject response = new ResponseObject();
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -87,15 +88,12 @@ public class AccountService {
     Optional.ofNullable(accountInfo.getPassword()).orElseThrow(() -> new BadRequestException(log, ResponseCode.PASSWORD_NOT_MATCH));
 
     String decryptedPassword = decrypt(accountInfo.getPassword());
-
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
-
-    System.out.println("userPWD@@@@"+user.getPassword().getHashPassword());
 
     HashMap<String, Object> data = new HashMap<>();
 
     String ipAddr = HttpServletRequestUtil.getRemoteIP(request);
-    boolean isLocal = ipAddr.equals("127.0.0.1") || ipAddr.equals("localhosts");
+    boolean isLocal = ipAddr.equals("127.0.0.1") || ipAddr.equals("localhost");
 
     if (user == null) throw new NotFoundException(log, ResponseCode.USER_NOT_FOUND);
 

@@ -56,7 +56,6 @@ public class StorageController {
   @WithoutJwtCallable
   @GetMapping("/vtt/{videoId}.vtt")
   public ResponseEntity<Resource> videoVtt(@PathVariable Long videoId) {
-    System.out.println("날드 안눙");
     return storageService.videoVtt(videoId);
   }
 
