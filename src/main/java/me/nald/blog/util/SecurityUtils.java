@@ -154,14 +154,13 @@ public class SecurityUtils {
     PrivateKey privateKey = getPrivateKeyFromString(blogProperties.getPrivateKey());
 
     String[] chunks = encryptedPassword.split(":");
-
-    StringBuilder decryptedData = new StringBuilder();
+    /* original password */
+    StringBuilder rowPasswordData = new StringBuilder();
     Arrays.stream(chunks)
             .map(chunk -> decryptRSA(chunk, privateKey))
-            .forEach(decryptedData::append);
+            .forEach(rowPasswordData::append);
 
-    String hashResult = hashPassword(decryptedData.toString());
-    return hashResult;
+    return hashPassword(rowPasswordData.toString());
   }
 
   /**

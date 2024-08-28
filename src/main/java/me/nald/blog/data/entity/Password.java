@@ -6,7 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import static me.nald.blog.util.SecurityUtils.decrypt;
 
 @Embeddable
 @Getter
@@ -18,8 +19,12 @@ public class Password {
     private String hashPassword;
 
     @Builder
-    public Password(String password) {
-        this.hashPassword = new BCryptPasswordEncoder().encode(password);
+    public Password(String password)  {
+      try {
+        this.hashPassword = decrypt(password);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
     }
 
 //    public boolean isMatched(final String rawPassword) {

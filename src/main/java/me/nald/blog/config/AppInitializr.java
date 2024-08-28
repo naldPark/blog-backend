@@ -29,9 +29,8 @@ public class AppInitializr {
             if (accountRepository.findAll().isEmpty()) {
                 /** TODO : privateKey 암호화 **/
                 String initPw = encryptSHA256(blogProperties.getDefaultAccountPassword());
-                Password password = Password.builder()
-                        .password(initPw)
-                        .build();
+                Password password = new Password();
+                password.setHashPassword(initPw);
 
                 Account account = Account.createAccount(
                         blogProperties.getDefaultAccountId(),
