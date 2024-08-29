@@ -1,0 +1,83 @@
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: -1  # 파일 하나의 최대 크기  예; 10MB
+      max-request-size: -1 # 한 번에 최대 업로드 가능 용량 예; 30MB
+  datasource:
+    url: ${DB_HOST}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      maximum-pool-size: 3
+      connection-test-query: SELECT 1
+      maxLifeTime: 3300000
+      connection-timeout: 30000
+      idle-timeout: 600000
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher  #swagger
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: false # 콘솔에 sql문출력
+        format_sql: true
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+          use-new-id-generator-mappings: false
+          default_batch_fetch_size: 1000
+nald:
+  token-expired-time: 2
+  private-key: ${PRIVATE_KEY}
+  public-key: ${PUBLIC_KEY}
+  default-account-id: ${DEFAULT_ACCOUNT_ID}
+  default-account-name: ${DEFAULT_ACCOUNT_NAME}
+  default-account-password: ${DEFAULT_ACCOUNT_PASSWORD}
+  contact-host: ${CONTACT_HOST}
+  contact-email: ${CONTACT_EMAIL}
+  contact-user: ${CONTACT_USER:nald}
+  contact-password: ${CONTACT_PASSWORD}
+  common-path: /nfs
+  ffmpeg-path: /usr/bin
+  tomcat-temp-file-path: /tomcat/temp
+server:
+  port: 8000
+docker:
+  endpoint: ${DOCKER_REPO_ENDPOINT}
+  username: ${DOCKER_REPO_USERNAME}
+  secret-password: ${DOCKER_REPO_SECRET_PASSWORD}
+  password: ${DOCKER_REPO_PASSWORD}
+  email: ${DOCKER_REPO_EMAIL}
+  repository-uri: ${DOCKER_REPO_URI}
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.security: error
+    org.springframework.web: error
+  config: classpath:logback-spring.xml
+
+
+
+
+
+#      # create-drop 테이블 생성하고 종료까지 다함
+#      # create는 모든 테이블 다 드랍하고 새로 만들고
+#      # update는 바뀐 테이블만 update하고
+#      # none은 아무것도 안한다 (테이블은 고대로)
+#    properties:
+#      hibernate:
+#        show_sql: true # 콘솔에 sql문출력
+#        format_sql: true # 콘솔에 출력되는 sql문을 더 예쁘고 보기쉽게 출력
+#        naming:
+#          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+#          # vo변수명 그대로 테이블을 만들어주겠다는거 (이게 default )
+#          # physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+#          # 이걸쓰면 테이블명을 낙타표기법썼을때 언더스코어로 바꿔서 해줌 ( hiThere > hi_there )
+#          use-new-id-generator-mappings: false # JPA의 기본전략을 따라가지 않겠다는거
+#
+#logging.level:
+#  org.hibernate.SQL: debug   # log에서 JPA나 하이버네이트가 생성하는 모든 SQL을 볼 수 있음
+#  org.hibernate.type: trace   # 파라미터까지 콘솔에 나옴

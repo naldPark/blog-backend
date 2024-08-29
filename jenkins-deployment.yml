@@ -1,0 +1,159 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-backend
+  namespace: main
+  labels:
+    app: main-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-backend
+  template:
+    metadata:
+      labels:
+        app: main-backend
+    spec:
+      containers:
+      - name: main-backend
+        image: nas.nald.me:35003/docker/main/backend:__DOCKER_IMG_VER__
+        command:
+          - /bin/sh
+          - /tmp/api/bootstrap.sh
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+          - mountPath: /tmp/api
+            name: api
+          - mountPath: /nfs
+            name: nfs
+          - mountPath: /usr/local/bin/kubectl
+            name: kubectl
+        env:
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DB_HOST
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DB_PASSWORD
+          - name: PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: PRIVATE_KEY
+          - name: PUBLIC_KEY
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: PUBLIC_KEY
+          - name: DEFAULT_ACCOUNT_ID
+            valueFrom:
+              configMapKeyRef:
+                name: main-backend
+                key: DEFAULT_ACCOUNT_ID
+          - name: DEFAULT_ACCOUNT_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: main-backend
+                key: DEFAULT_ACCOUNT_NAME
+          - name: DEFAULT_ACCOUNT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DEFAULT_ACCOUNT_PASSWORD
+          - name: CONTACT_HOST
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: CONTACT_HOST
+          - name: CONTACT_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: CONTACT_EMAIL
+          - name: CONTACT_USER
+            valueFrom:
+              configMapKeyRef:
+                name: main-backend
+                key: CONTACT_USER
+          - name: CONTACT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: CONTACT_PASSWORD
+          - name: DOCKER_REPO_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_ENDPOINT
+          - name: DOCKER_REPO_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_USERNAME
+          - name: DOCKER_REPO_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_PASSWORD
+          - name: DOCKER_REPO_SECRET_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_SECRET_PASSWORD
+          - name: DOCKER_REPO_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_EMAIL
+          - name: DOCKER_REPO_URI
+            valueFrom:
+              secretKeyRef:
+                name: main-backend-secret
+                key: DOCKER_REPO_URI
+      imagePullSecrets:
+        - name: regcred
+        - name: regcred-dns
+      nodeSelector:
+        kubernetes.io/hostname: nald3
+        kubernetes.io/os: linux
+      serviceAccount: blogsa
+      volumes:
+        - hostPath:
+            path: /usr/bin/kubectl
+            type: ""
+          name: kubectl
+        - configMap:
+            defaultMode: 420
+            name: main-backend
+          name: api
+        - name: nfs
+          persistentVolumeClaim:
+            claimName: main-backend-pvc
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-backend
+  namespace: main
+spec:
+  selector:
+    app: main-backend
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
