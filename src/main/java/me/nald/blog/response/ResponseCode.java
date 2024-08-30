@@ -20,10 +20,10 @@ public enum ResponseCode {
 
 
   // HTTP_CODE 401 - Unauthorized
-  NO_AUTH_TOKEN(2001, "No Auth Token", "error_error_unauthorized_002_001"),
+  NO_AUTH_TOKEN(2001, "No Auth Token", "error_unauthorized_002_001"),
   INVALID_AUTH_TOKEN(2002, "Invalid Auth Token", "error_unauthorized_002"),
-  EXPIRED_AUTH_TOKEN(2003, "Expired Auth Token", "error_error_unauthorized_003"),
-  UNKNOWN_AUTH_ERROR(2000, "Unknown Auth Error", "error_error_unauthorized_004"),
+  EXPIRED_AUTH_TOKEN(2003, "Expired Auth Token", "error_unauthorized_003"),
+  UNKNOWN_AUTH_ERROR(2000, "Unknown Auth Error", "error_unauthorized_004"),
 
   // HTTP_CODE 403 - Forbidden
   NOT_ALLOWED(3000, "Not Allowed", "error_forbidden_001"),

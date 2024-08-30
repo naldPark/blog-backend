@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AccountResonseDto {
+public class AccountResponseDto {
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PROTECTED)

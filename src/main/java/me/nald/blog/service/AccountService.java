@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.AccountDtoTest;
 import me.nald.blog.data.dto.AccountRequest;
-import me.nald.blog.data.dto.AccountResonseDto;
+import me.nald.blog.data.dto.AccountResponseDto;
 import me.nald.blog.data.dto.AccountStatusRequestDto;
 import me.nald.blog.data.entity.Account;
 import me.nald.blog.data.entity.AccountLog;
@@ -64,7 +64,7 @@ public class AccountService {
   public ResponseObject getUserList() {
     ResponseObject response = new ResponseObject();
     HashMap<String, Object> data = new HashMap<>();
-    List<AccountResonseDto.UserInfo> list = accountRepository.findAll().stream().map(AccountResonseDto.UserInfo::new).collect(Collectors.toList());
+    List<AccountResponseDto.UserInfo> list = accountRepository.findAll().stream().map(AccountResponseDto.UserInfo::new).collect(Collectors.toList());
     data.put("list", list);
     data.put("total", list.size());
     response.putData(data);
