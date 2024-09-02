@@ -43,25 +43,25 @@ public class AccountController {
     return () -> responseObject;
   }
 
-  @PutMapping(value = "/editPassword")
+  @PutMapping(value = "/password")
   public Callable<ResponseObject> editPassword(@RequestBody AccountRequest accountRequest) {
     return () -> accountService.editPassword(accountRequest);
   }
 
   @PermissionCallable(authority = Authority.SUPER)
-  @PutMapping(value = "/changeStatus")
+  @PutMapping(value = "/status")
   public Callable<ResponseObject> changeStatus( @RequestBody AccountStatusRequestDto accountStatusRequest) {
     return () -> accountService.changeStatus(accountStatusRequest);
   }
 
   @PermissionCallable(authority = Authority.SUPER)
-  @PostMapping("/createUser")
+  @PostMapping("")
   public Callable<ResponseObject> createUser(@Valid @RequestBody AccountRequest accountRequest) {
     return () -> accountService.createUser(accountRequest);
   }
 
   @PermissionCallable(authority = Authority.SUPER)
-  @PutMapping("/editUser")
+  @PutMapping("")
   public Callable<ResponseObject> editUser(@RequestBody AccountRequest accountRequest) {
     return () -> accountService.editUser(accountRequest);
   }
