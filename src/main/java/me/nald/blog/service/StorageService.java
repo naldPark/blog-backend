@@ -14,8 +14,8 @@ import me.nald.blog.data.entity.QStorage;
 import me.nald.blog.data.entity.Storage;
 import me.nald.blog.data.vo.SearchItem;
 import me.nald.blog.data.vo.YN;
-import me.nald.blog.exception.UnauthorizedException;
 import me.nald.blog.exception.NotFoundException;
+import me.nald.blog.exception.UnauthorizedException;
 import me.nald.blog.repository.StorageRepository;
 import me.nald.blog.response.ResponseCode;
 import me.nald.blog.response.ResponseObject;
@@ -30,6 +30,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +49,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static me.nald.blog.util.BooleanBuilderUtils.checkContainCondition;
+import static me.nald.blog.util.BooleanBuilderUtils.checkEqualCondition;
+
 
 @Service
 @Slf4j
@@ -53,10 +59,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StorageService {
 
-  //    @Autowired
-//    EntityManager em;
-  private final JPAQueryFactory queryFactory;
 
+  private final JPAQueryFactory queryFactory;
   private final BlogProperties blogProperties;
   private final StorageRepository storageRepository;
 
@@ -64,22 +68,16 @@ public class StorageService {
     ResponseObject response = new ResponseObject();
     QStorage storage = QStorage.storage;
     BooleanBuilder builder = new BooleanBuilder();
-    if (Objects.nonNull(searchItem.getSearchText()) && !searchItem.getSearchText().isEmpty()) {
-      builder.and(storage.fileName.contains(searchItem.getSearchText()));
-    }
-    if (Objects.nonNull(searchItem.getType()) && !searchItem.getType().isEmpty()) {
-      builder.and(storage.fileType.eq(searchItem.getType()));
-    }
+    checkContainCondition(builder, searchItem.getSearchText(), storage.fileName);
+    checkEqualCondition(builder,searchItem.getType(),storage.fileType);
 
+    Pageable pageable = PageRequest.of(searchItem.getPageNumber(), searchItem.getPageSize(), Sort.by("fileName").ascending());
     JPAQuery<Storage> query = queryFactory
             .selectFrom(storage).distinct()
             .from(storage)
-            .where(builder);
-
-    if (searchItem.getLimit() != 0) {
-      query.offset(searchItem.getOffset());
-      query.limit(searchItem.getLimit());
-    }
+            .where(builder)
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize());
 
     if (Objects.nonNull(searchItem.getSort()) && searchItem.getSort().equals("random")) {
       query.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc());
