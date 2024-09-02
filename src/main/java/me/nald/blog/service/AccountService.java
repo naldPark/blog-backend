@@ -31,6 +31,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static me.nald.blog.util.SecurityUtils.decrypt;
@@ -46,6 +47,12 @@ public class AccountService {
   private final AccountQueryRepository accountQueryRepository;
   private final AccountLogRepository accountLogRepository;
   private final BlogProperties blogProperties;
+
+  private static final Set<String> LOCAL_IPS = Set.of(
+          "127.0.0.1",
+          "localhost",
+          "0:0:0:0:0:0:0:1"
+  );
 
   public List<Account> findMembers() {
     return accountRepository.findAll();
@@ -93,8 +100,8 @@ public class AccountService {
     HashMap<String, Object> data = new HashMap<>();
 
     String ipAddr = HttpServletRequestUtil.getRemoteIP(request);
-    boolean isLocal = ipAddr.equals("127.0.0.1") || ipAddr.equals("localhost");
-
+    boolean isLocal = LOCAL_IPS.stream().anyMatch(ipAddr::contains);
+    
     if (user == null) throw new NotFoundException(log, ResponseCode.USER_NOT_FOUND);
 
     if (user.getLoginFailCnt() > 4) {
