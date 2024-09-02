@@ -23,7 +23,7 @@ public class StorageController {
 
   private final StorageService storageService;
 
-  @GetMapping("/videoList")
+  @GetMapping("/video/list")
   public Callable<ResponseObject> getVideoList(SearchItem searchItem) {
 
     ResponseObject responseObject = new ResponseObject();
@@ -32,7 +32,7 @@ public class StorageController {
   }
 
   // 단 건 비디오 상세정보
-  @GetMapping("/getVideoDetail/{videoId}")
+  @GetMapping("/video/detail/{videoId}")
   public Callable<ResponseObject> getVideoDetail(@PathVariable Long videoId) {
     return () -> storageService.getVideoDetail(videoId);
   }
@@ -60,13 +60,13 @@ public class StorageController {
   }
 
   // 파일 타입 변환
-  @GetMapping("/convertVideoHls/{videoId}")
+  @GetMapping("/convert/{videoId}")
   public void convertVideoHls(@PathVariable Long videoId) {
     storageService.requestConvertVideoHls(videoId);
   }
 
   // 업로드 상태 확인
-  @GetMapping("/getConvertVideoStatus/{videoId}")
+  @GetMapping("/status/{videoId}")
   public Callable<ResponseObject> getConvertVideoStatus(@PathVariable Long videoId) {
     return () -> storageService.getConvertVideoStatus(videoId);
   }

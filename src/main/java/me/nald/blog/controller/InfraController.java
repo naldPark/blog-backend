@@ -15,7 +15,7 @@ import java.util.concurrent.Callable;
 public class InfraController {
     private final InfraService infraService;
 
-    @GetMapping("/diagramList")
+    @GetMapping("/diagram/list")
     public Callable<ResponseObject> getDiagramList() {
         return () -> infraService.getDiagramList();
     }

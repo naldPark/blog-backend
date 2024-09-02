@@ -20,20 +20,20 @@ public class CommonController {
 
 
     @WithoutJwtCallable
-    @PostMapping("/sendMail")
+    @PostMapping("/mail")
     public Callable<ResponseObject> sendMail(@RequestBody ContactRequestDto contactRequest) {
         return () -> commonService.sendMail(contactRequest);
     }
     // 이거는 반복 스팸을 방지하기 위해 힙 메모리에 아이피를 일시적으로 저장하고 5회 이상 반복될 시 차단
 
     @PermissionCallable(authority = Authority.SUPER)
-    @GetMapping("/blogList")
+    @GetMapping("/blog/list")
     public Callable<ResponseObject> getBlogList() {
         return () -> commonService.getBlogList();
     }
 
     @WithoutJwtCallable
-    @GetMapping("/badgeList")
+    @GetMapping("/badge/list")
     public Callable<ResponseObject> getBadgeList() {
         return () -> commonService.getBadgeList();
     }
