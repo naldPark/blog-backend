@@ -189,7 +189,7 @@ public class AccountService {
   @Transactional
   public ResponseObject changeStatus(AccountStatusRequestDto accountStatusRequest) {
 
-    accountStatusRequest.getUserIds().stream().forEach(s -> {
+    accountStatusRequest.getUserIds().forEach(s -> {
       Account user = accountRepository.findByAccountId(s);
       user.setStatus(accountStatusRequest.getStatus());
       accountRepository.save(user);
