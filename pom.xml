@@ -138,14 +138,15 @@
         <dependency>
             <groupId>com.github.gavlyukovskiy</groupId>
             <artifactId>p6spy-spring-boot-starter</artifactId>
-            <version>1.8.0</version>
+            <version>1.9.2</version>
         </dependency>
+
         <!-- 매개변수확인하는기능 끝-->
         <!-- JPA 관련 끝-->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20210307</version>
+            <version>20220320</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -157,8 +158,9 @@
         <dependency>
             <groupId>net.bramp.ffmpeg</groupId>
             <artifactId>ffmpeg</artifactId>
-            <version>0.7.0</version>
+            <version>0.8.0</version>
         </dependency>
+
         <!--동영상 변환 끝 -->
         <!-- 쿠버네티스 -->
         <dependency>
