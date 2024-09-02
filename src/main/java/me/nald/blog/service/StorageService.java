@@ -60,8 +60,8 @@ public class StorageService {
   private final BlogProperties blogProperties;
   private final StorageRepository storageRepository;
 
-  public StorageResponseDto.getStorageList getVideoList(SearchItem searchItem) {
-//        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+  public ResponseObject getVideoList(SearchItem searchItem) {
+    ResponseObject response = new ResponseObject();
     QStorage storage = QStorage.storage;
     BooleanBuilder builder = new BooleanBuilder();
     if (Objects.nonNull(searchItem.getSearchText()) && !searchItem.getSearchText().isEmpty()) {
@@ -89,16 +89,11 @@ public class StorageService {
 
     List<StorageResponseDto.StorageInfo> list = query.fetch().stream().map(StorageResponseDto.StorageInfo::new).collect(Collectors.toList());
 
-    Long totalCount = queryFactory
-            .select(storage.count())
-            .from(storage)
-            .fetchOne();
-
-    return StorageResponseDto.getStorageList.builder()
-            .statusCode(200)
-            .list(list)
-            .total(totalCount)
-            .build();
+    HashMap<String, Object> data = new HashMap<>();
+    data.put("list", list);
+    data.put("total", list.size());
+    response.putData(data);
+    return response;
   }
 
   public ResponseObject getVideoDetail(Long videoId) {

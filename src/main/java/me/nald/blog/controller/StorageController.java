@@ -25,10 +25,7 @@ public class StorageController {
 
   @GetMapping("/video/list")
   public Callable<ResponseObject> getVideoList(SearchItem searchItem) {
-
-    ResponseObject responseObject = new ResponseObject();
-    responseObject.putData(storageService.getVideoList(searchItem));
-    return () -> responseObject;
+    return () -> storageService.getVideoList(searchItem);
   }
 
   // 단 건 비디오 상세정보
@@ -80,10 +77,7 @@ public class StorageController {
 
   // 업로드
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, value = "/uploadLocal")
-  public Callable<ResponseObject> uploadVideo(@RequestPart StorageRequestDto info,
-                                              @RequestPart(value = "file", required = true) MultipartFile file,
-                                              @RequestPart(value = "fileVtt", required = false) MultipartFile fileVtt,
-                                              HttpServletRequest request) {
+  public Callable<ResponseObject> uploadVideo(@RequestPart StorageRequestDto info, @RequestPart(value = "file", required = true) MultipartFile file, @RequestPart(value = "fileVtt", required = false) MultipartFile fileVtt, HttpServletRequest request) {
     info.setFile(file);
 
     info.setFileVtt(fileVtt);
