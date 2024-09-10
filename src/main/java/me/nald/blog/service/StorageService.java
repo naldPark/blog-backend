@@ -409,16 +409,15 @@ public class StorageService {
       response.putData(storageInfo);
       return storageInfo;
     });
-    future.thenAccept(storageInfo -> {
-      convertVideoHls(storageInfo);
-    });
-
-
+    future.thenAccept(this::convertVideoHls);
     return response;
-
-
   }
 
+  @Transactional
+  public ResponseObject deleteVideo(List<Long> seqList){
+    storageRepository.deleteAllById(seqList);
+    return new ResponseObject();
+  }
 
 }
 

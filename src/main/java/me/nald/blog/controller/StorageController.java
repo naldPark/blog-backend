@@ -1,5 +1,7 @@
 package me.nald.blog.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.StorageRequestDto;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 
 @AllArgsConstructor
@@ -84,5 +87,9 @@ public class StorageController {
     return () -> storageService.uploadVideo(info);
   }
 
+  // 삭제
+  public Callable<ResponseObject> deleteVideo(@Valid  @RequestParam("seqList") List<Long> seqList) {
+    return () -> storageService.deleteVideo(seqList);
+  }
 
 }
