@@ -44,6 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
@@ -70,24 +71,36 @@ public class StorageService {
     BooleanBuilder builder = new BooleanBuilder();
     checkContainCondition(builder, searchItem.getSearchText(), storage.fileName);
     checkEqualCondition(builder,searchItem.getType(),storage.fileType);
+    Pageable pageable = (searchItem.getPageNumber() != null && searchItem.getPageSize() != null)
+            ? PageRequest.of(searchItem.getPageNumber(), searchItem.getPageSize(), Sort.by("fileName").ascending())
+            : null;
 
-    Pageable pageable = PageRequest.of(searchItem.getPageNumber(), searchItem.getPageSize(), Sort.by("fileName").ascending());
     JPAQuery<Storage> query = queryFactory
-            .selectFrom(storage).distinct()
+            .selectFrom(storage)
+            .distinct()
             .from(storage)
-            .where(builder)
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize());
+            .where(builder);
 
-    if (Objects.nonNull(searchItem.getSort()) && searchItem.getSort().equals("random")) {
-      query.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc());
-    } else {
-      storage.fileName.asc().nullsLast();
+    // 페이지네이션 처리
+    if (pageable != null) {
+      query.offset(pageable.getOffset())
+              .limit(pageable.getPageSize());
     }
 
-    List<StorageResponseDto.StorageInfo> list = query.fetch().stream().map(StorageResponseDto.StorageInfo::new).collect(Collectors.toList());
+    // 정렬 처리
+    if ("random".equals(searchItem.getSort())) {
+      query.orderBy(Expressions.numberTemplate(Double.class, "function('rand')").asc());
+    } else {
+      query.orderBy(storage.fileName.asc().nullsLast());
+    }
 
-    HashMap<String, Object> data = new HashMap<>();
+    // 결과 리스트 생성
+    List<StorageResponseDto.StorageInfo> list = query.fetch().stream()
+            .map(StorageResponseDto.StorageInfo::new)
+            .collect(Collectors.toList());
+
+    // 응답 데이터 구성
+    Map<String, Object> data = new HashMap<>();
     data.put("list", list);
     data.put("total", list.size());
     response.putData(data);
