@@ -416,6 +416,7 @@ public class StorageService {
   @Transactional
   public ResponseObject deleteVideo(List<Long> seqList){
     storageRepository.deleteAllById(seqList);
+    /** TODO: delete existing files */
     return new ResponseObject();
   }
 
