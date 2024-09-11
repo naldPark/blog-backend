@@ -12,8 +12,8 @@ import me.nald.blog.data.vo.AccountVo;
 import me.nald.blog.exception.InternalServerErrorException;
 import me.nald.blog.exception.UnauthorizedException;
 import me.nald.blog.response.ResponseCode;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;

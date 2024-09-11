@@ -146,6 +146,11 @@
         <!-- 매개변수확인하는기능 끝-->
         <!-- JPA 관련 끝-->
         <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20220320</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
