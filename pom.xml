@@ -78,7 +78,7 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>6.0.0</version>
+            <version>6.3.3</version>
         </dependency>
         <!--비밀번호 암호화 끝-->
         <!-- DB 관련  -->
@@ -97,11 +97,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+<!--        멀티파일 업로드시 톰캣의 임시저장소를 config에 지정하기 위해 설치-->
+
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>1.4</version>
+            <version>1.5</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
@@ -143,11 +146,6 @@
 
         <!-- 매개변수확인하는기능 끝-->
         <!-- JPA 관련 끝-->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20220320</version>
-        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
