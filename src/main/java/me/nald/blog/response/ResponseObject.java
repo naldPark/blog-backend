@@ -1,17 +1,20 @@
 package me.nald.blog.response;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import me.nald.blog.data.vo.PageInfo;
 import me.nald.blog.util.Constants;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class ResponseObject extends HashMap<String, Object> {
+  private final Gson gson = new Gson();
 
   public ResponseObject() {
     super();
@@ -25,46 +28,38 @@ public class ResponseObject extends HashMap<String, Object> {
     this.put("data", map);
   }
 
-  private Map<String, Object> toMap(JSONObject object) {
-    return object.keySet().stream()
+  private Map<String, Object> toMap(JsonObject object) {
+    return object.entrySet().stream()
             .collect(Collectors.toMap(
-                    key -> key,
-                    key -> {
-                      Object value = object.opt(key);
-                      if (value instanceof JSONArray) {
-                        return toList((JSONArray) value);
-                      } else if (value instanceof JSONObject) {
-                        return toMap((JSONObject) value);
-                      } else {
-                        return value;
-                      }
-                    }
+                    Map.Entry::getKey,
+                    entry -> convertJsonElement(entry.getValue())
             ));
   }
+  private List<Object> toList(JsonArray array) {
+    List<Object> list = new ArrayList<>();
+    for (JsonElement element : array) {
+      list.add(convertJsonElement(element));
+    }
+    return list;
+  }
 
-  private List<Object> toList(JSONArray array) {
-    return IntStream.range(0, array.length())
-            .mapToObj(array::opt)
-            .map(value -> {
-              if (value instanceof JSONArray) {
-                return toList((JSONArray) value);
-              } else if (value instanceof JSONObject) {
-                return toMap((JSONObject) value);
-              } else {
-                return value;
-              }
-            })
-            .collect(Collectors.toList());
+  private Object convertJsonElement(JsonElement element) {
+    if (element.isJsonArray()) {
+      return toList(element.getAsJsonArray());
+    } else if (element.isJsonObject()) {
+      return toMap(element.getAsJsonObject());
+    } else {
+      return gson.fromJson(element, Object.class);
+    }
   }
 
   public void putData(Object obj) {
-    if (obj instanceof JSONArray) {
-      this.put("data", toList((JSONArray) obj));
-    } else if (obj instanceof JSONObject) {
-      this.put("data", toMap((JSONObject) obj));
+    if (obj instanceof JsonArray) {
+      this.put("data", toList((JsonArray) obj));
+    } else if (obj instanceof JsonObject) {
+      this.put("data", toMap((JsonObject) obj));
     } else {
       this.put("data", obj);
     }
   }
-
 }

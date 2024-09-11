@@ -2,7 +2,8 @@
 package me.nald.blog.data.vo;
 
 import lombok.*;
-import org.json.JSONObject;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 
 import static me.nald.blog.util.Constants.*;
 
@@ -19,7 +20,7 @@ public class AccountVo {
     private String accountEmail;
 
 
-    public static AccountVo jsonToObj(JSONObject body) {
+    public static AccountVo jsonToObj(JSONObject body) throws JSONException {
         return AccountVo.builder()
                         .accountId(body.getString(USER_ID))
                         .accountName(body.getString(USER_NAME))

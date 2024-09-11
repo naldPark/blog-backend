@@ -1,8 +1,8 @@
 package me.nald.blog.util;
 
 import lombok.extern.slf4j.Slf4j;
-import me.nald.blog.config.BlogProperties;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,15 +15,6 @@ public class FileUtils {
     private FileUtils() {
         throw new IllegalStateException("Utility class");
     }
-
-    private static BlogProperties blogProperties;
-
-    @Autowired
-    public void setBlogProperties(BlogProperties blogProperties) {
-        this.blogProperties = blogProperties;
-    }
-
-
 
     public static void copyFile(String source, String target) throws IOException {
         Path sourcePath = Paths.get(source);
@@ -77,26 +68,36 @@ public class FileUtils {
         return null; // 적절한 접두사를 찾을 수 없는 경우
     }
 
-    // tomcat 임시 temp파일 삭제 로직
-    public static void deleteFilesStartingWith(String filenamePrefix) throws IOException {
-        String directoryPath =  blogProperties.getCommonPath() +blogProperties.getTomcatTempFilePath();
-        File dir = new File(directoryPath);
-        File[] files = dir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                // 파일 이름이 지정된 접두사로 시작하는지 확인
-                if (file.getName().startsWith(filenamePrefix)) {
-                    if (file.delete()) {
-                        System.out.println("삭제된 파일: " + file.getName());
-                    } else {
-                        System.err.println("파일 삭제 실패: " + file.getName());
-                    }
-                }
+    // 임시 파일 삭제 메서드
+    public static void deleteTemporaryFile(MultipartFile multipartFile) {
+        if (multipartFile instanceof DiskFileItem diskFileItem) {
+            String tempFilePath = diskFileItem.getStoreLocation().getPath();
+
+            System.out.println("지울꺼 ????????"+tempFilePath);
+            if (diskFileItem.getStoreLocation().exists() && !diskFileItem.getStoreLocation().delete()) {
+                log.warn("임시 파일 삭제 실패" + tempFilePath);
             }
         } else {
-            System.err.println("지정된 경로에 파일이 존재하지 않습니다: " + directoryPath);
+            log.warn("임시 파일 삭제 실패: DiskFileItem 인스턴스가 아님.");
         }
     }
 
+    public static void  deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteFolder(file); // 폴더 안의 폴더를 재귀적으로 삭제
+                } else {
+                    if (!file.delete()) {
+                        System.out.println("Failed to delete file: " + file.getAbsolutePath());
+                    }
+                }
+            }
+        }
+        if (!folder.delete()) {
+            System.out.println("Failed to delete folder: " + folder.getAbsolutePath());
+        }
+    }
 
 }

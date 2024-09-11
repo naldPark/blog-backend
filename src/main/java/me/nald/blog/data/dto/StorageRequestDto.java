@@ -2,7 +2,6 @@ package me.nald.blog.data.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @Setter
@@ -20,10 +19,10 @@ public class StorageRequestDto {
     private String description;
     private Boolean fileAuth;
     private Boolean fileDownload;
-    @NotBlank
-    private MultipartFile file;
-    private MultipartFile fileCover;
-    private MultipartFile fileVtt;
+//    @NotBlank
+//    private MultipartFile file;
+//    private MultipartFile fileCover;
+//    private MultipartFile fileVtt;
 
 
 }

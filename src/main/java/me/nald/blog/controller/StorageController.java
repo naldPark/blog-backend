@@ -1,6 +1,5 @@
 package me.nald.blog.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import me.nald.blog.annotation.WithoutJwtCallable;
@@ -13,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -77,17 +75,17 @@ public class StorageController {
     return storageService.downloads(videoId);
   }
 
-
-  // 업로드
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, value = "/uploadLocal")
-  public Callable<ResponseObject> uploadVideo(@RequestPart StorageRequestDto info, @RequestPart(value = "file", required = true) MultipartFile file, @RequestPart(value = "fileVtt", required = false) MultipartFile fileVtt, HttpServletRequest request) {
-    info.setFile(file);
+  public Callable<ResponseObject> uploadVideo(
+          @RequestPart StorageRequestDto info,
+          @RequestPart(value = "videoFile") MultipartFile videoFile,
+          @RequestPart(value = "coverFile", required = false) MultipartFile coverFile,
+          @RequestPart(value = "vttFile", required = false) MultipartFile vttFile) {
 
-    info.setFileVtt(fileVtt);
-    return () -> storageService.uploadVideo(info);
+    return () -> storageService.uploadVideo(info, videoFile, coverFile, vttFile);
   }
 
-  // 삭제
+  @DeleteMapping("")
   public Callable<ResponseObject> deleteVideo(@Valid  @RequestParam("seqList") List<Long> seqList) {
     return () -> storageService.deleteVideo(seqList);
   }

@@ -7,7 +7,6 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.nald.blog.config.BlogProperties;
 import me.nald.blog.data.dto.StorageRequestDto;
 import me.nald.blog.data.dto.StorageResponseDto;
 import me.nald.blog.data.entity.QStorage;
@@ -27,6 +26,7 @@ import net.bramp.ffmpeg.builder.FFmpegBuilder;
 import net.bramp.ffmpeg.job.FFmpegJob;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -47,11 +46,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static me.nald.blog.util.BooleanBuilderUtils.checkContainCondition;
 import static me.nald.blog.util.BooleanBuilderUtils.checkEqualCondition;
+import static me.nald.blog.util.CommonUtils.convertKoreanToEnglish;
+import static me.nald.blog.util.FileUtils.deleteFolder;
+import static me.nald.blog.util.FileUtils.deleteTemporaryFile;
 
 
 @Service
@@ -62,8 +63,14 @@ public class StorageService {
 
 
   private final JPAQueryFactory queryFactory;
-  private final BlogProperties blogProperties;
   private final StorageRepository storageRepository;
+
+  @Value("${nald.common-path}")
+  private String commonPath;
+
+  @Value("${nald.ffmpeg-path}")
+  private String ffmpegPath;
+
 
   public ResponseObject getVideoList(SearchItem searchItem) {
     ResponseObject response = new ResponseObject();
@@ -137,17 +144,17 @@ public class StorageService {
       throw new NotFoundException(log, ResponseCode.FILE_ALREADY_EXISTS);
     } else {
       try {
-        String movieDir = blogProperties.getCommonPath() + "/movie";
+        String movieDir = commonPath + "/movie/";
         String fileName = FilenameUtils.getBaseName(storage.getDownloadSrc());
         String inputPath = movieDir + storage.getDownloadSrc();
-        String hlsPath = "/hls/" + fileName + "/";
-
+        String hlsPath = fileName + "/hls/";
+        System.out.println("@@@@@@@@@@@@@@@@@@"+movieDir + hlsPath);
         File folder = new File(movieDir + hlsPath);
         if (!folder.exists()) {
           folder.mkdir();
         }
-        FFmpeg ffmpeg = new FFmpeg(blogProperties.getFfmpegPath() + "/ffmpeg");
-        FFprobe ffprobe = new FFprobe(blogProperties.getFfmpegPath() + "/ffprobe");
+        FFmpeg ffmpeg = new FFmpeg(ffmpegPath + "/ffmpeg");
+        FFprobe ffprobe = new FFprobe(ffmpegPath + "/ffprobe");
 
         FFmpegBuilder builder = new FFmpegBuilder()
                 .overrideOutputFiles(true) //오버라이드
@@ -194,9 +201,9 @@ public class StorageService {
 
   public ResponseEntity<Resource> videoHlsM3U8(String movieName) {
 
-    String movieDir = blogProperties.getCommonPath() + "/movie";
+    String movieDir = commonPath+ "/movie/";
     String fileName = FilenameUtils.getBaseName(movieName);
-    String hlsPath = movieDir + "/hls/" + fileName + "/";
+    String hlsPath = movieDir + fileName + "/hls/";
     String fileFullPath = hlsPath + fileName + ".m3u8";
     Path filePath = Paths.get(fileFullPath);
     Resource resource = new FileSystemResource(filePath) {
@@ -221,10 +228,11 @@ public class StorageService {
 
   public ResponseEntity<Resource> videoVtt(Long videoId) {
     Storage storage = storageRepository.getReferenceById(videoId);
-    String movieDir = blogProperties.getCommonPath() + "/movie";
+    String movieDir = commonPath + "/movie";
     String fileFullPath = movieDir + storage.getVttSrc();
     Path filePath = Paths.get(fileFullPath);
     Resource resource = new FileSystemResource(filePath) {
+      @NotNull
       @Override
       public InputStream getInputStream() throws IOException {
         return new FileInputStream(filePath.toFile()) {
@@ -245,9 +253,9 @@ public class StorageService {
   }
 
   public ResponseEntity<Resource> videoHlsTs(String movieName, String tsName) {
-    String movieDir = blogProperties.getCommonPath() + "/movie";
+    String movieDir = commonPath+ "/movie/";
     String fileName = FilenameUtils.getBaseName(movieName);
-    String hlsPath = movieDir + "/hls/" + fileName + "/";
+    String hlsPath = movieDir + fileName + "/hls/";
     String fileFullPath = hlsPath + tsName + ".ts";
 
     Path filePath = Paths.get(fileFullPath);
@@ -276,7 +284,7 @@ public class StorageService {
     if (storage.getFileDownload().isN()) {
       throw new UnauthorizedException(log, ResponseCode.ACCESS_DENIED);
     }
-    Path filePath = Paths.get(blogProperties.getCommonPath() + "/movie" + storage.getDownloadSrc());
+    Path filePath = Paths.get(commonPath + "/movie" + storage.getDownloadSrc());
     try {
       Resource resource = new FileSystemResource(filePath) {
         @NotNull
@@ -314,27 +322,16 @@ public class StorageService {
     return file;
   }
 
-
   @Transactional
-  public ResponseObject uploadVideo(StorageRequestDto info) throws IOException {
-    String movieDir = blogProperties.getCommonPath() + "/movie";
-    HashMap<String, String> phoneticSymbol = new ObjectMapper()
+  public ResponseObject uploadVideo(StorageRequestDto info, MultipartFile videoFile, MultipartFile coverFile, MultipartFile vttFile) throws IOException {
+    String movieDir =commonPath+ "/movie/";
+    HashMap phoneticSymbol = new ObjectMapper()
             .readValue(new ClassPathResource("phoneticSymbol.json").getInputStream(), HashMap.class);
     ResponseObject response = new ResponseObject();
 
-    /** when filename is Korean, translate to English  */
-    String nameToEng = "";
-    for (String fileChar : info.getFileName().split("")) {
-      if (Pattern.matches("^[0-9a-zA-Z]*$", fileChar)) {
-        nameToEng += fileChar;
-      } else if (phoneticSymbol.get(fileChar) != null) {
-        nameToEng += phoneticSymbol.get(fileChar);
-      }
-      if (nameToEng.length() > 20) break;
-    }
-    String saveFileName = "/" + nameToEng + System.currentTimeMillis() + (int) (Math.random() * 100);
-    String uploadPath = "/upload" + saveFileName;
-    HashMap<String, Object> map = new HashMap<>();
+    // 한글 파일명을 영어로 변환
+    String saveFileName = "/" + convertKoreanToEnglish(info.getFileName(), phoneticSymbol)
+            + System.currentTimeMillis() + (int) (Math.random() * 100);
     CompletableFuture<Storage> future = CompletableFuture.supplyAsync(() -> {
       Storage storageInfo = Storage.createStorage(
               info.getFileName(),
@@ -349,74 +346,69 @@ public class StorageService {
               YN.convert(info.getFileDownload())
       );
       try {
-        if (info.getFileVtt() != null) {
-          FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
-          MultipartFile multipartFileVtt = info.getFileVtt();
-          //TODO 확장자 .vtt하드코딩해놨음;
-          storageInfo.setVttSrc(uploadPath + saveFileName + getMultiFileExt(multipartFileVtt));
-          Path path = Paths.get(movieDir + uploadPath + saveFileName + ".vtt").toAbsolutePath();
-          multipartFileVtt.transferTo(path.toFile());
-          Files.delete(path);
+        if (vttFile != null) {
+          FileUtils.createDirectoriesIfNotExists(movieDir + saveFileName);
+          Path path = Paths.get(movieDir + saveFileName + saveFileName + ".vtt").toAbsolutePath();
+          vttFile.transferTo(path.toFile());
+          storageInfo.setVttSrc(saveFileName + saveFileName + ".vtt");
         }
-        if (info.getFile() != null) {
-          storageInfo.setDownloadSrc(uploadPath + saveFileName + getMultiFileExt(info.getFile()));
-          FileUtils.createDirectoriesIfNotExists(movieDir + uploadPath);
-          try (
-                  FileOutputStream fos = new FileOutputStream(movieDir + storageInfo.getDownloadSrc());
-                  InputStream is = info.getFile().getInputStream();
 
-          ) {
-            int readCount = 0;
-            byte[] buffer = new byte[4096];
-            while ((readCount = is.read(buffer)) != -1) {
-              fos.write(buffer, 0, readCount);
-            }
-          } catch (Exception ex) {
-            throw new RuntimeException("file Save Error");
+        if (videoFile != null) {
+          storageInfo.setDownloadSrc(saveFileName + saveFileName + getMultiFileExt(videoFile));
+          FileUtils.createDirectoriesIfNotExists(movieDir + saveFileName);
+          try (FileOutputStream fos = new FileOutputStream(movieDir + storageInfo.getDownloadSrc());
+               InputStream inputStream = videoFile.getInputStream()) {
+            inputStream.transferTo(fos);
           }
-
-          multipartFileToFile(info.getFile()).delete();
-
-          MultipartFile commonsMultipartFile = info.getFile();
-//                    DiskFileItem diskFileItem = (DiskFileItem) commonsMultipartFile.getFileItem();
-//                    String tempFilePath = diskFileItem.getStoreLocation().getPath();
-//                    String tempFilenamePrefix = extractFilenamePrefix(tempFilePath);
-          // stream으로 나눠받은 tmp파일 모두 삭제
-//                    try {
-//                        FileUtils.deleteFilesStartingWith(tempFilenamePrefix);
-//                        System.out.println("모든 파일 삭제 완료.");
-//                    } catch (IOException e) {
-//                        System.err.println("파일 삭제 중 오류 발생: " + e.getMessage());
-//                    }
+          File tempFile = multipartFileToFile(videoFile);
+          if (tempFile.exists() && !tempFile.delete()) {
+            System.out.println("임시 파일을 삭제하는 데 실패했습니다: " + tempFile.getPath());
+          }
         }
 
-        if (info.getFileCover() != null) {
-          //이거는 s3에 업로드하는 방식으로 변경해야함
-//                    String[] imageInfo = info.getFileCover().split(",");
-//                    String extension = imageInfo[0].replace("data:image/", "").replace(";base64", "");
-//
-//                    storageInfo.setFileCover(uploadPath + saveFileName + "." + extension);
-          File file = new File(movieDir + storageInfo.getFileCover());
-//                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file));
-//                    outputStream.write(data);
-          file.delete();
+        if (coverFile != null) {
+          // S3 업로드 방식으로 변경 필요
+//          var coverFile = new File(movieDir + storageInfo.getFileCover());
         }
+
       } catch (IOException e) {
         e.printStackTrace();
+      } finally {
+        deleteTemporaryFile(videoFile);
+        deleteTemporaryFile(vttFile);
       }
+
       storageInfo.setStatus(Storage.Status.Progressing);
       storageRepository.save(storageInfo);
       response.putData(storageInfo);
       return storageInfo;
     });
+
     future.thenAccept(this::convertVideoHls);
     return response;
   }
 
   @Transactional
   public ResponseObject deleteVideo(List<Long> seqList){
+    List<Storage> deletions = storageRepository.findAllByStorageIdIn(seqList);
+    String deletePath =   commonPath+ "/movie/";
+    /* JAVA에서 폴더를 삭제할때는 안에 있는 파일이 먼저 다 삭제 되어야 함 */
+    deletions.forEach(storage -> {
+      String fileSrc = storage.getFileSrc();
+      if (fileSrc != null) {
+        int slashIndex = fileSrc.indexOf('/');
+        if (slashIndex != -1) {
+          String folderPath = deletePath + fileSrc.substring(0, slashIndex);
+          File folder = new File(folderPath);
+          if (folder.exists()) {
+            deleteFolder(folder);
+          } else {
+            System.out.println("Folder not found: " + folderPath);
+          }
+        }
+      }
+    });
     storageRepository.deleteAllById(seqList);
-    /** TODO: delete existing files */
     return new ResponseObject();
   }
 

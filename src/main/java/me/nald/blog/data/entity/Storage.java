@@ -43,8 +43,7 @@ public class Storage {
     @Column(name = "file_type", nullable = false)
     private String fileType;
 
-    @Lob
-    @Column(name = "file_desc", columnDefinition="LONGTEXT")
+    @Column(name = "file_desc")
     private String description;
 
 //    @Lob
