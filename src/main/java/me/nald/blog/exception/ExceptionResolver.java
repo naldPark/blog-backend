@@ -74,7 +74,7 @@ public class ExceptionResolver {
     }
     response = new ErrorResponse(e);
     LogUtils.errorLog(e.logger, request, e);
-    request.setAttribute(Constants.EXCEPTION, e); // 발생한 Exception 은 로그 적재 시 필요함. (Convert 된 ExceptionBase 로 전달)
+    request.setAttribute(Constants.EXCEPTION, e);
     return response;
   }
 
@@ -95,7 +95,7 @@ public class ExceptionResolver {
     }
     response = new ErrorResponse(e);
     LogUtils.errorLog(e.logger, request, e);
-    request.setAttribute(Constants.EXCEPTION, e); // 발생한 Exception 은 로그 적재 시 필요함. (Convert 된 ExceptionBase 로 전달)
+    request.setAttribute(Constants.EXCEPTION, e);
     return response;
   }
 

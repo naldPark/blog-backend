@@ -39,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -200,12 +201,14 @@ public class StorageService {
   }
 
   public ResponseEntity<Resource> videoHlsM3U8(String movieName) {
-
     String movieDir = commonPath+ "/movie/";
     String fileName = FilenameUtils.getBaseName(movieName);
     String hlsPath = movieDir + fileName + "/hls/";
     String fileFullPath = hlsPath + fileName + ".m3u8";
     Path filePath = Paths.get(fileFullPath);
+    if (Files.notExists(filePath)) {
+      throw new NotFoundException(log, ResponseCode.RESOURCE_NOT_FOUND);
+    }
     Resource resource = new FileSystemResource(filePath) {
       @Override
       public InputStream getInputStream() throws IOException {
@@ -213,7 +216,6 @@ public class StorageService {
           @Override
           public void close() throws IOException {
             super.close();
-//                                Files.delete(zipFilePath);
           }
         };
       }

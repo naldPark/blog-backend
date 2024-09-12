@@ -37,14 +37,14 @@ public class StorageController {
 
   // 스트리밍 최초 정보 로드
   @WithoutJwtCallable
-  @GetMapping("/hls/{fileName}/{fileName}.m3u8")
+  @GetMapping("{fileName}/hls/{fileName}.m3u8")
   public ResponseEntity<Resource> videoHlsM3U8(@PathVariable String fileName) {
     return storageService.videoHlsM3U8(fileName);
   }
 
   // 스트리밍 파일 호출
   @WithoutJwtCallable
-  @GetMapping("/hls/{fileName}/{tsName}.ts")
+  @GetMapping("{fileName}/hls/{tsName}.ts")
   public ResponseEntity<Resource> videoHlsTs(@PathVariable String fileName, @PathVariable String tsName) {
 
     return storageService.videoHlsTs(fileName, tsName);
