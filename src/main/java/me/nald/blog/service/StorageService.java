@@ -287,8 +287,11 @@ public class StorageService {
       throw new UnauthorizedException(log, ResponseCode.ACCESS_DENIED);
     }
     Path filePath = Paths.get(commonPath + "/movie" + storage.getDownloadSrc());
-    try {
+    if (!Files.exists(filePath)) {
+      throw new NotFoundException(log, ResponseCode.RESOURCE_NOT_FOUND);
+    }
       Resource resource = new FileSystemResource(filePath) {
+
         @NotNull
         @Override
         public InputStream getInputStream() throws IOException {
@@ -305,9 +308,6 @@ public class StorageService {
       headers.setContentType(mediaType);
       headers.setContentDisposition(ContentDisposition.builder("attachment").filename(resource.getFilename()).build());
       return ResponseEntity.ok().headers(headers).body(resource);
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT).build();
-    }
   }
 
   private String getMultiFileExt(MultipartFile file) {
