@@ -41,6 +41,7 @@ public class StorageResponseDto {
         String vttSrc;
         String createdDt;
         Boolean downloadable;
+        Boolean fileAuth;
 
         public StorageInfo(Storage storage) {
             SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd");
@@ -49,6 +50,7 @@ public class StorageResponseDto {
             fileSrc = storage.getFileSrc();
             fileSize = storage.getFileSize();
             fileDesc = storage.getDescription();
+            fileAuth= YN.convert(storage.getFileAuth());
             fileType= storage.getFileType();
             fileCover= storage.getFileCover();
             vttSrc = storage.getVttSrc();
