@@ -339,13 +339,13 @@ public class StorageService {
               info.getFileName(),
               info.getFileSize(),
               null,
-              info.getCategory(),
+              info.getFileType(),
               null,
-              info.getDescription(),
+              info.getFileDesc(),
               null,
               null,
               YN.convert(info.getFileAuth()),
-              YN.convert(info.getFileDownload())
+              YN.convert(info.getDownloadable())
       );
       try {
         if (vttFile != null) {

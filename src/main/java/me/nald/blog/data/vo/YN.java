@@ -28,4 +28,8 @@ public enum YN {
     public static YN convert (boolean value) {
         return value ? YN.Y : YN.N;
     }
+
+    public static boolean convert (YN value) {
+        return value.isY();
+    }
 }

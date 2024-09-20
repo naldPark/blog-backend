@@ -2,6 +2,7 @@ package me.nald.blog.data.dto;
 
 import lombok.*;
 import me.nald.blog.data.entity.Storage;
+import me.nald.blog.data.vo.YN;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -39,7 +40,7 @@ public class StorageResponseDto {
         String fileCover;
         String vttSrc;
         String createdDt;
-        String downloadable;
+        Boolean downloadable;
 
         public StorageInfo(Storage storage) {
             SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd");
@@ -50,10 +51,9 @@ public class StorageResponseDto {
             fileDesc = storage.getDescription();
             fileType= storage.getFileType();
             fileCover= storage.getFileCover();
-//            fileCover =  Util.storageImgToString(storage.getFileCover());
             vttSrc = storage.getVttSrc();
             createdDt = sdf.format(storage.getCreatedDt());
-            downloadable = storage.getFileDownload().name();
+            downloadable = YN.convert(storage.getFileDownload());
         }
 
 

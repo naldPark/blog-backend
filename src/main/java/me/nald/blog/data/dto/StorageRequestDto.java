@@ -15,10 +15,10 @@ public class StorageRequestDto {
     @NotBlank
     private Long fileSize;
     @NotBlank
-    private String category;
-    private String description;
+    private String fileType;
+    private String fileDesc;
     private Boolean fileAuth;
-    private Boolean fileDownload;
+    private Boolean downloadable;
 //    @NotBlank
 //    private MultipartFile file;
 //    private MultipartFile fileCover;
