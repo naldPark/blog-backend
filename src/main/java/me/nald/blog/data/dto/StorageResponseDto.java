@@ -45,9 +45,10 @@ public class StorageResponseDto {
 
         public StorageInfo(Storage storage) {
             SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd");
+            String fileSrcPath=storage.getFileSrc();
             storageId = storage.getStorageId();
             fileName = storage.getFileName();
-            fileSrc = storage.getFileSrc();
+            fileSrc = fileSrcPath+ "/hls/"+fileSrcPath+".m3u8";
             fileSize = storage.getFileSize();
             fileDesc = storage.getDescription();
             fileAuth= YN.convert(storage.getFileAuth());

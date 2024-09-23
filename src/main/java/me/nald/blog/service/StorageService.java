@@ -38,14 +38,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -72,6 +70,12 @@ public class StorageService {
   @Value("${nald.ffmpeg-path}")
   private String ffmpegPath;
 
+  private String movieDir;
+
+  @PostConstruct
+  public void init() {
+    this.movieDir = commonPath + "/movie/";
+  }
 
   public ResponseObject getVideoList(SearchItem searchItem) {
     ResponseObject response = new ResponseObject();
@@ -145,11 +149,9 @@ public class StorageService {
       throw new NotFoundException(log, ResponseCode.FILE_ALREADY_EXISTS);
     } else {
       try {
-        String movieDir = commonPath + "/movie/";
         String fileName = FilenameUtils.getBaseName(storage.getDownloadSrc());
         String inputPath = movieDir + storage.getDownloadSrc();
         String hlsPath = fileName + "/hls/";
-        System.out.println("@@@@@@@@@@@@@@@@@@"+movieDir + hlsPath);
         File folder = new File(movieDir + hlsPath);
         if (!folder.exists()) {
           folder.mkdir();
@@ -187,9 +189,8 @@ public class StorageService {
         builder.setVerbosity(FFmpegBuilder.Verbosity.INFO);
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
         FFmpegJob job = executor.createJob(builder);
-        System.out.println("before run job state!!! is " + job.getState());
         job.run();
-        storage.setFileSrc(hlsPath + fileName + ".m3u8");
+        storage.setFileSrc(fileName);
         storage.setStatus(Storage.Status.Converted);
         storageRepository.save(storage);
       } catch (IOException e) {
@@ -201,7 +202,6 @@ public class StorageService {
   }
 
   public ResponseEntity<Resource> videoHlsM3U8(String movieName) {
-    String movieDir = commonPath+ "/movie/";
     String fileName = FilenameUtils.getBaseName(movieName);
     String hlsPath = movieDir + fileName + "/hls/";
     String fileFullPath = hlsPath + fileName + ".m3u8";
@@ -230,7 +230,7 @@ public class StorageService {
 
   public ResponseEntity<Resource> videoVtt(Long videoId) {
     Storage storage = storageRepository.getReferenceById(videoId);
-    String movieDir = commonPath + "/movie";
+
     String fileFullPath = movieDir + storage.getVttSrc();
     Path filePath = Paths.get(fileFullPath);
     Resource resource = new FileSystemResource(filePath) {
@@ -255,7 +255,6 @@ public class StorageService {
   }
 
   public ResponseEntity<Resource> videoHlsTs(String movieName, String tsName) {
-    String movieDir = commonPath+ "/movie/";
     String fileName = FilenameUtils.getBaseName(movieName);
     String hlsPath = movieDir + fileName + "/hls/";
     String fileFullPath = hlsPath + tsName + ".ts";
@@ -398,19 +397,50 @@ public class StorageService {
     deletions.forEach(storage -> {
       String fileSrc = storage.getFileSrc();
       if (fileSrc != null) {
-        int slashIndex = fileSrc.indexOf('/');
-        if (slashIndex != -1) {
-          String folderPath = deletePath + fileSrc.substring(0, slashIndex);
+          String folderPath = deletePath + fileSrc;
           File folder = new File(folderPath);
           if (folder.exists()) {
             deleteFolder(folder);
           } else {
             System.out.println("Folder not found: " + folderPath);
           }
-        }
+
       }
     });
     storageRepository.deleteAllById(seqList);
+    return new ResponseObject();
+  }
+
+
+  @Transactional
+  public ResponseObject editVideo( StorageRequestDto info,MultipartFile coverFile,MultipartFile vttFile) {
+    Optional.ofNullable(info.getStorageId()).orElseThrow(() ->
+            new NotFoundException(log, ResponseCode.RESOURCE_NOT_FOUND));
+    Storage storage = storageRepository.findById(info.getStorageId())
+            .orElseThrow(() -> new NotFoundException(log, ResponseCode.RESOURCE_NOT_FOUND));
+    storage.setFileName(info.getFileName());
+    storage.setFileType(info.getFileType());
+    storage.setDescription(info.getFileDesc());
+    storage.setFileAuth(YN.convert(info.getFileAuth()));
+    storage.setFileDownload(YN.convert(info.getDownloadable()));
+    if (coverFile != null) {
+      System.out.println("커버파일 있음");
+    }
+
+    if (vttFile != null) {
+      try {
+        FileUtils.createDirectoriesIfNotExists(movieDir + storage.getFileSrc());
+        String vttPath = storage.getFileSrc() + "/"+ storage.getFileSrc() + ".vtt";
+        Path path = Paths.get(movieDir+vttPath).toAbsolutePath();
+        vttFile.transferTo(path.toFile());
+        storage.setVttSrc(vttPath);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+
+    }
+
+    storageRepository.save(storage);
     return new ResponseObject();
   }
 

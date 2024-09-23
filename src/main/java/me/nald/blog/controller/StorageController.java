@@ -2,8 +2,10 @@ package me.nald.blog.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import me.nald.blog.annotation.PermissionCallable;
 import me.nald.blog.annotation.WithoutJwtCallable;
 import me.nald.blog.data.dto.StorageRequestDto;
+import me.nald.blog.data.vo.Authority;
 import me.nald.blog.data.vo.SearchItem;
 import me.nald.blog.response.ResponseObject;
 import me.nald.blog.service.StorageService;
@@ -75,6 +77,7 @@ public class StorageController {
     return storageService.downloads(videoId);
   }
 
+
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, value = "/uploadLocal")
   public Callable<ResponseObject> uploadVideo(
           @RequestPart StorageRequestDto info,
@@ -85,9 +88,18 @@ public class StorageController {
     return () -> storageService.uploadVideo(info, videoFile, coverFile, vttFile);
   }
 
+  @PermissionCallable(authority = Authority.SUPER)
   @DeleteMapping("")
   public Callable<ResponseObject> deleteVideo(@Valid  @RequestParam("seqList") List<Long> seqList) {
     return () -> storageService.deleteVideo(seqList);
+  }
+
+  @PermissionCallable(authority = Authority.SUPER)
+  @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,value="")
+  public Callable<ResponseObject> editVideo(@RequestPart StorageRequestDto info,
+                                           @RequestPart(value = "coverFile", required = false) MultipartFile coverFile,
+                                           @RequestPart(value = "vttFile", required = false) MultipartFile vttFile) {
+    return () -> storageService.editVideo(info,coverFile,vttFile);
   }
 
 }

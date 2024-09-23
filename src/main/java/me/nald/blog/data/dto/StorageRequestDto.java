@@ -10,6 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 public class StorageRequestDto {
 
+
+    private Long storageId;
     @NotBlank
     private String fileName;
     @NotBlank
