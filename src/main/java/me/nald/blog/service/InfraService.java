@@ -87,7 +87,8 @@ public class InfraService {
                 "{ key: 20, parent: 3, name: 'Mariadb', icon: 'mariadb', group: 103 }",
                 "{ key: 21, parent: 1, name: 'Nas', icon: 'nas', group: 101 }",
                 "{ key: 22, parent: 1, name: 'Github', icon: 'git', group: 101 }",
-                "{ key: 23, parent: 1, name: 'Helm', icon: 'helm',  group: 101 }"
+                "{ key: 23, parent: 1, name: 'Helm', icon: 'helm',  group: 101 }",
+                "{ key: 24, parent: 2, name: 'React', icon: 'react',  group: 102 }"
         );
         ResponseObject result = new ResponseObject();
         result.putData(stringListToHashMapList(diagramList));
