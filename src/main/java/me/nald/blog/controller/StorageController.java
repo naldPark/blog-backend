@@ -77,7 +77,7 @@ public class StorageController {
     return storageService.downloads(videoId);
   }
 
-
+  @PermissionCallable(authority = Authority.SUPER)
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, value = "/uploadLocal")
   public Callable<ResponseObject> uploadVideo(
           @RequestPart StorageRequestDto info,
@@ -89,9 +89,9 @@ public class StorageController {
   }
 
   @PermissionCallable(authority = Authority.SUPER)
-  @DeleteMapping("")
-  public Callable<ResponseObject> deleteVideo(@Valid  @RequestParam("seqList") List<Long> seqList) {
-    return () -> storageService.deleteVideo(seqList);
+  @DeleteMapping
+  public Callable<ResponseObject> deleteVideos(@Valid @RequestBody List<Long> videoIds) {
+    return () -> storageService.deleteVideo(videoIds);
   }
 
   @PermissionCallable(authority = Authority.SUPER)
