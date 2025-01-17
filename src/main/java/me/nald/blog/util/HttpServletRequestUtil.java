@@ -74,20 +74,24 @@ public class HttpServletRequestUtil {
   public static String getRemoteIP(HttpServletRequest request) {
     String ip = request.getHeader("X-FORWARDED-FOR");
 
+    System.out.println("ip1+"+ip);
+
     //proxy 환경일 경우
     if (ip == null || ip.isEmpty()) {
       ip = request.getHeader("Proxy-Client-IP");
     }
-
+    System.out.println("ip2+"+ip);
     //웹로직 서버일 경우
     if (ip == null || ip.isEmpty()) {
       ip = request.getHeader("WL-Proxy-Client-IP");
     }
 
+    System.out.println("ip3+"+ip);
     if (ip == null || ip.isEmpty()) {
       ip = request.getRemoteAddr();
     }
 
+    System.out.println("ip4+"+ip);
     return ip;
   }
 }
