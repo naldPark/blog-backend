@@ -101,6 +101,7 @@ public class AccountService {
 
     String ipAddr = HttpServletRequestUtil.getRemoteIP(request);
     boolean isLocal = LOCAL_IPS.stream().anyMatch(ipAddr::contains);
+    System.out.println("ipAddr: "+ipAddr);
     
     if (user == null) throw new NotFoundException(log, ResponseCode.USER_NOT_FOUND);
 
