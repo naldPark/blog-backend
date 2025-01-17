@@ -128,12 +128,12 @@ public class AccountService {
     data.put("accountId", user.getAccountId());
     data.put("accountName", user.getAccountName());
 
-    if (!isLocal) {
+//    if (!isLocal) {
       user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
       AccountLog accountLog = AccountLog.createLog(user, ipAddr);
       accountLogRepository.save(accountLog);
       accountRepository.save(user);
-    }
+//    }
     response.putData(data);
     return response;
   }

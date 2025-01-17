@@ -74,7 +74,7 @@ public class HttpServletRequestUtil {
   public static String getRemoteIP(HttpServletRequest request) {
     String ip = request.getHeader("X-FORWARDED-FOR");
 
-    System.out.println("ip1+"+ip);
+//    System.out.println("ip1+"+ip);
 
     //proxy 환경일 경우
     if (ip == null || ip.isEmpty()) {
