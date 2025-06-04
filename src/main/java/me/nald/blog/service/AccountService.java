@@ -98,11 +98,9 @@ public class AccountService {
     Account user = accountRepository.findByAccountId(accountInfo.getAccountId());
 
     HashMap<String, Object> data = new HashMap<>();
-
     String ipAddr = HttpServletRequestUtil.getRemoteIP(request);
     boolean isLocal = LOCAL_IPS.stream().anyMatch(ipAddr::contains);
     System.out.println("ipAddr: "+ipAddr);
-    
     if (user == null) throw new NotFoundException(log, ResponseCode.USER_NOT_FOUND);
 
     if (user.getLoginFailCnt() > 4) {
@@ -128,12 +126,12 @@ public class AccountService {
     data.put("accountId", user.getAccountId());
     data.put("accountName", user.getAccountName());
 
-//    if (!isLocal) {
+    if (!isLocal) {
       user.setRecentLoginDt(new Timestamp(System.currentTimeMillis()));
       AccountLog accountLog = AccountLog.createLog(user, ipAddr);
       accountLogRepository.save(accountLog);
       accountRepository.save(user);
-//    }
+    }
     response.putData(data);
     return response;
   }
